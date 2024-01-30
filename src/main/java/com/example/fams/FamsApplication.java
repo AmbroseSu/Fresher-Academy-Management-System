@@ -1,7 +1,7 @@
 package com.example.fams;
 
+import com.example.fams.entities.FAMS_user;
 import com.example.fams.entities.enums.Role;
-import com.example.fams.entities.User;
 import com.example.fams.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -20,16 +20,16 @@ public class FamsApplication implements CommandLineRunner {
     }
 
     public void run(String... args) {
-        User adminAccount = userRepository.findByRole(Role.ADMIN);
+        FAMS_user adminAccount = userRepository.findByRole(Role.ADMIN);
         if(null == adminAccount){
-            User user = new User();
+            FAMS_user FAMSuser = new FAMS_user();
 
-            user.setEmail("admin@gmail.com");
-            user.setFirstName("admin");
-            user.setSecondName("admin");
-            user.setRole(Role.ADMIN);
-            user.setPassword(new BCryptPasswordEncoder().encode("admin"));
-            userRepository.save(user);
+            FAMSuser.setEmail("admin@gmail.com");
+            FAMSuser.setFirstName("admin");
+            FAMSuser.setSecondName("admin");
+            FAMSuser.setRole(Role.ADMIN);
+            FAMSuser.setPassword(new BCryptPasswordEncoder().encode("admin"));
+            userRepository.save(FAMSuser);
         }
     }
 }

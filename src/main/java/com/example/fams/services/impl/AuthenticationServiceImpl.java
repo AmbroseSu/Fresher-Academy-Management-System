@@ -4,8 +4,8 @@ import com.example.fams.dto.JwtAuthenticationRespone;
 import com.example.fams.dto.RefreshTokenRequest;
 import com.example.fams.dto.SignUpRequest;
 import com.example.fams.dto.SigninRequest;
+import com.example.fams.entities.FAMS_user;
 import com.example.fams.entities.enums.Role;
-import com.example.fams.entities.User;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
 import com.example.fams.services.JWTService;
@@ -28,15 +28,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
-    public User signup(SignUpRequest signUpRequest){
-        User user = new User();
-        user.setEmail(signUpRequest.getEmail());
-        user.setFirstName(signUpRequest.getFirstName());
-        user.setSecondName(signUpRequest.getLastName());
-        user.setRole(Role.USER);
-        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+    public FAMS_user signup(SignUpRequest signUpRequest){
+        FAMS_user FAMSuser = new FAMS_user();
+        FAMSuser.setEmail(signUpRequest.getEmail());
+        FAMSuser.setFirstName(signUpRequest.getFirstName());
+        FAMSuser.setSecondName(signUpRequest.getLastName());
+        FAMSuser.setRole(Role.USER);
+        FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        return userRepository.save(user);
+        return userRepository.save(FAMSuser);
     }
 
     public JwtAuthenticationRespone signin(SigninRequest signinRequest){
@@ -56,9 +56,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest){
         String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
-        if(jwtService.isTokenValid(refreshTokenRequest.getToken(),user)){
-            var jwt = jwtService.generateToken(user);
+        FAMS_user FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
+        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)){
+            var jwt = jwtService.generateToken(FAMSuser);
 
             JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
