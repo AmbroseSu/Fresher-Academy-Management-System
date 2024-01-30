@@ -36,6 +36,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         FAMSuser.setSecondName(signUpRequest.getLastName());
         FAMSuser.setRole(Role.USER);
         FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        FAMSuser.setPhone(signUpRequest.getPhone());
+
 
 
 

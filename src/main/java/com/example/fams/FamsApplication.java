@@ -29,6 +29,7 @@ public class FamsApplication implements CommandLineRunner {
             FAMSuser.setSecondName("admin");
             FAMSuser.setRole(Role.ADMIN);
             FAMSuser.setPassword(new BCryptPasswordEncoder().encode("admin"));
+            FAMSuser.setPhone("0123456789");
             userRepository.save(FAMSuser);
         }
     }
