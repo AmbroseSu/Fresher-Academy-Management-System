@@ -1,9 +1,9 @@
 package com.example.fams.services.impl;
 
-import com.example.fams.dto.JwtAuthenticationRespone;
-import com.example.fams.dto.RefreshTokenRequest;
-import com.example.fams.dto.SignUpRequest;
-import com.example.fams.dto.SigninRequest;
+import com.example.fams.dto.response.JwtAuthenticationRespone;
+import com.example.fams.dto.request.RefreshTokenRequest;
+import com.example.fams.dto.request.SignUpRequest;
+import com.example.fams.dto.request.SigninRequest;
 import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.UserRepository;

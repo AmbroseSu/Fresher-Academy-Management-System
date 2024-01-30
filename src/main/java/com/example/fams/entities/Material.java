@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name="tbl_material")
 public class Material {
 
     @Id

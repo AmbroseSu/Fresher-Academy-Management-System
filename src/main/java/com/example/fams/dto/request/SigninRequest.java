@@ -1,4 +1,4 @@
-package com.example.fams.dto;
+package com.example.fams.dto.request;
 
 import lombok.Data;
 

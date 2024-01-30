@@ -1,4 +1,4 @@
-package com.example.fams.entities;
+package com.example.fams.dto;
 
 import lombok.Builder;
 import lombok.Getter;

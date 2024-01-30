@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name="tbl_syllabus")
 public class Syllabus {
 
     @Id
