@@ -44,6 +44,6 @@ public class Class {
     private Long modifiedDate;
 
     @ManyToMany
-    private List<FAMS_user> FAMSusers;
+    private List<User> FAMSusers;
 
 }

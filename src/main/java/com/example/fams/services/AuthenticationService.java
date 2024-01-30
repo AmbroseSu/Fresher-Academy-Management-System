@@ -4,10 +4,10 @@ import com.example.fams.dto.JwtAuthenticationRespone;
 import com.example.fams.dto.RefreshTokenRequest;
 import com.example.fams.dto.SignUpRequest;
 import com.example.fams.dto.SigninRequest;
-import com.example.fams.entities.FAMS_user;
+import com.example.fams.entities.User;
 
 public interface AuthenticationService {
-    FAMS_user signup(SignUpRequest signUpRequest);
+    User signup(SignUpRequest signUpRequest);
     JwtAuthenticationRespone signin(SigninRequest signinRequest);
     JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest);
 }

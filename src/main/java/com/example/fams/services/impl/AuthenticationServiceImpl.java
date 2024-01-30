@@ -4,7 +4,7 @@ import com.example.fams.dto.JwtAuthenticationRespone;
 import com.example.fams.dto.RefreshTokenRequest;
 import com.example.fams.dto.SignUpRequest;
 import com.example.fams.dto.SigninRequest;
-import com.example.fams.entities.FAMS_user;
+import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
@@ -28,8 +28,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
-    public FAMS_user signup(SignUpRequest signUpRequest){
-        FAMS_user FAMSuser = new FAMS_user();
+    public User signup(SignUpRequest signUpRequest){
+        User FAMSuser = new User();
         FAMSuser.setEmail(signUpRequest.getEmail());
         FAMSuser.setFirstName(signUpRequest.getFirstName());
         FAMSuser.setSecondName(signUpRequest.getLastName());
@@ -56,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest){
         String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
-        FAMS_user FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
+        User FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
         if(jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)){
             var jwt = jwtService.generateToken(FAMSuser);
 
