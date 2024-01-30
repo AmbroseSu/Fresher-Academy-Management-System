@@ -1,14 +1,10 @@
 package com.example.fams.config;
 
-import com.example.fams.entities.MeatadataDTO;
-import com.example.fams.entities.ResponseDTO;
+import com.example.fams.dto.MeatadataDTO;
+import com.example.fams.dto.ResponseDTO;
 import lombok.experimental.UtilityClass;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.awt.print.Pageable;
-import java.util.Collections;
 
 @UtilityClass
 public class ResponseUtil {

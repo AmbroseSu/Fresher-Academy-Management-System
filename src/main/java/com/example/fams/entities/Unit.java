@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
+@Table(name="tbl_unit")
 public class Unit {
 
     @Id

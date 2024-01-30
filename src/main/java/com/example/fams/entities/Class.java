@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name="tbl_class")
 public class Class {
 
     @Id
@@ -44,6 +45,6 @@ public class Class {
     private Long modifiedDate;
 
     @ManyToMany
-    private List<User> FAMSusers;
+    private List<User> users;
 
 }
