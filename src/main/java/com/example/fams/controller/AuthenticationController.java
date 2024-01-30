@@ -4,7 +4,7 @@ import com.example.fams.dto.JwtAuthenticationRespone;
 import com.example.fams.dto.RefreshTokenRequest;
 import com.example.fams.dto.SignUpRequest;
 import com.example.fams.dto.SigninRequest;
-import com.example.fams.entities.User;
+import com.example.fams.entities.FAMS_user;
 import com.example.fams.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<FAMS_user> signup(@RequestBody SignUpRequest signUpRequest){
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 
