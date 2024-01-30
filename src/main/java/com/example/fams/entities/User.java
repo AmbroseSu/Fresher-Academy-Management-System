@@ -4,13 +4,15 @@ import com.example.fams.entities.enums.Role;
 import com.example.fams.validation.ValidEmail;
 import com.example.fams.validation.ValidPhone;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.validation.constraints.NotBlank;
+
+//import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.List;
 

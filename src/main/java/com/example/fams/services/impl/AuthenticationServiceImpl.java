@@ -30,11 +30,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public User signup(SignUpRequest signUpRequest){
         User FAMSuser = new User();
+
         FAMSuser.setEmail(signUpRequest.getEmail());
         FAMSuser.setFirstName(signUpRequest.getFirstName());
         FAMSuser.setSecondName(signUpRequest.getLastName());
         FAMSuser.setRole(Role.USER);
         FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+
+
 
         return userRepository.save(FAMSuser);
     }
