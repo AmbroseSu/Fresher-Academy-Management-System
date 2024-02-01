@@ -11,8 +11,7 @@ import java.util.List;
 public class Class {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name="training_programID")
