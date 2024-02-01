@@ -1,5 +1,6 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
@@ -43,28 +44,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JWTService jwtService;
 
     public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
-    try {
+        try {
+            User FAMSuser = new User();
 
-        User FAMSuser = new User();
-
-        FAMSuser.setEmail(signUpRequest.getEmail());
-        FAMSuser.setFirstName(signUpRequest.getFirstName());
-        FAMSuser.setSecondName(signUpRequest.getLastName());
-        FAMSuser.setRole(Role.USER);
-        FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        FAMSuser.setPhone(signUpRequest.getPhone());
-        return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
-    }catch (ConstraintViolationException e) {
-        Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-        List<String> errorMessages = violations.stream()
-            .map(violation -> String.format("%s %s", violation.getPropertyPath(), violation.getMessage()))
-            .collect(Collectors.toList());
-
-        String detailedErrorMessage = String.join(", ", errorMessages);
-        String userFriendlyMessage = errorMessages.isEmpty() ? "Validation failed" : errorMessages.get(0);
-
-        return ResponseUtil.error( detailedErrorMessage,"Bad request", HttpStatus.BAD_REQUEST);
-    }
+            FAMSuser.setEmail(signUpRequest.getEmail());
+            FAMSuser.setFirstName(signUpRequest.getFirstName());
+            FAMSuser.setSecondName(signUpRequest.getLastName());
+            FAMSuser.setRole(Role.USER);
+            FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            FAMSuser.setPhone(signUpRequest.getPhone());
+            return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
+        }catch (ConstraintViolationException e) {
+            return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
+        }
     }
 
     public JwtAuthenticationRespone signin(SigninRequest signinRequest){
