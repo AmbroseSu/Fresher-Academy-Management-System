@@ -11,7 +11,8 @@ import java.util.List;
 public class Content {
 
     @Id
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name="unitId")
