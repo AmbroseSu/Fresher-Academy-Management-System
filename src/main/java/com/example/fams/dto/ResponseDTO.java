@@ -9,7 +9,7 @@ import java.util.List;
 public class ResponseDTO {
     private Object content;
     private String message;
-    private List<String> errors;
-    private int status;
+    private List<String> details;
+    private int statusCode;
     private MeatadataDTO meatadataDTO;
 }
