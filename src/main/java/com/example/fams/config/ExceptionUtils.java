@@ -2,7 +2,11 @@ package com.example.fams.config;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -36,4 +40,6 @@ public class ExceptionUtils {
     public static List<String> getError(String error) {
         return List.of(error);
     }
+
+
 }

@@ -24,13 +24,8 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest){
-        try {
-            authenticationService.signup(signUpRequest);
-        } catch (Exception e) {
-            return ResponseUtil.error("null gi do", e.getMessage(),HttpStatus.BAD_REQUEST);
-        }
+           return authenticationService.signup(signUpRequest);
 
-        return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 
     @PostMapping("/signin")
