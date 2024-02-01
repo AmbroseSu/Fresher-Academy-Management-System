@@ -45,6 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
         try {
+
             User FAMSuser = new User();
 
             FAMSuser.setEmail(signUpRequest.getEmail());
@@ -66,7 +67,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
         var jwt = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
-
         JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
         jwtAuthenticationRespone.setToken(jwt);

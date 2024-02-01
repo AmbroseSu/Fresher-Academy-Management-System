@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.util.List;
 import java.util.Set;
