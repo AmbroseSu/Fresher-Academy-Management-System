@@ -25,12 +25,12 @@ public class LearningObjectiveController {
         return learningObjectiveService.findAll(page, limit);
     }
 
-    @PostMapping("/create")
+    @PostMapping("admin/learningObjective/create")
     public ResponseEntity<?> createLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
         return learningObjectiveService.save(learningObjective);
     }
 
-    @PutMapping("/update")
+    @PutMapping("admin/learningObjective/update")
     public ResponseEntity<?> updateLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
         return learningObjectiveService.save(learningObjective);
     }
