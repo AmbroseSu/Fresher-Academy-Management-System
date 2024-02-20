@@ -21,7 +21,7 @@ public class ResponseUtil {
     }
 
     public static ResponseEntity<?> getCollection(Object result, HttpStatus status, String response
-    ,int page, int limit, int count) {
+    ,int page, int limit, long count) {
         return new ResponseEntity<>(
                 ResponseDTO.builder()
                         .statusCode(status.value())
@@ -33,7 +33,7 @@ public class ResponseUtil {
         );
     }
 
-    public MeatadataDTO getMeatadata(int page, int limit, int count){
+    public MeatadataDTO getMeatadata(int page, int limit, long count){
         MeatadataDTO result = new MeatadataDTO();
         result.setPage(page);
         result.setTotal(((int) Math.ceil((double) count/limit)));

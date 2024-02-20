@@ -8,10 +8,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name="tbl_content")
-public class Content {
-
-    @Id
-    private Long id;
+public class Content extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name="unitId")
@@ -23,13 +20,5 @@ public class Content {
     private Integer deliveryType;
 
     private Long duration;
-
-    private String createBy;
-
-    private Long createDate;
-
-    private String modifiedBy;
-
-    private Long modifiedDate;
 
 }

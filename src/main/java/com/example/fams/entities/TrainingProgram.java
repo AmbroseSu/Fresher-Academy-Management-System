@@ -8,11 +8,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_trainingProgram")
-public class TrainingProgram {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class TrainingProgram extends BaseEntity{
 
     private String name;
 
@@ -20,15 +16,7 @@ public class TrainingProgram {
 
     private Long duration;
 
-    private Integer status;
-
-    private String createBy;
-
-    private Long createDate;
-
-    private String modifiedBy;
-
-    private Long modifiedDate;
+    private Integer training_status;
 
     @ManyToMany
     private List<Syllabus> syllabuses;
