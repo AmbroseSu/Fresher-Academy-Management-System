@@ -1,40 +1,42 @@
 package com.example.fams.controller;
 
+import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.entities.LearningObjective;
-import com.example.fams.services.LearningObjectiveService;
+import com.example.fams.services.IGenericService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/learningObjective")
+@RequestMapping("/api/v1")
 public class LearningObjectiveController {
     @Autowired
-    private LearningObjectiveService learningObjectiveService;
+    @Qualifier("LearningObjectiveService")
+    private IGenericService<LearningObjectiveDTO> learningObjectiveService;
 
-    @GetMapping
-    public List<LearningObjective> getAllLearningObjectives() {
-        return learningObjectiveService.getAllLearningObjectives();
+    @GetMapping("user/learningObjective/findAllByStatusTrue")
+    public ResponseEntity<?> getAllLearningObjectivesByStatusTrue(@RequestParam int page, @RequestParam int limit) {
+        return learningObjectiveService.findAllByStatusTrue(page, limit);
     }
 
-    @GetMapping("/{code}")
-    public LearningObjective getLearningObjectiveByCode(@PathVariable String code) {
-        return learningObjectiveService.getLearningObjectiveByCode(code);
+    @GetMapping("admin/learningObjective/findAll")
+    public ResponseEntity<?> getAllLearningObjectives(@RequestParam int page, @RequestParam int limit) {
+        return learningObjectiveService.findAll(page, limit);
     }
 
-    @PostMapping
-    public LearningObjective createLearningObjective(@RequestBody LearningObjective learningObjective) {
-        return learningObjectiveService.createLearningObjective(learningObjective);
+    @PostMapping("/create")
+    public ResponseEntity<?> createLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
+        return learningObjectiveService.save(learningObjective);
     }
 
-    @PutMapping("/{code}")
-    public LearningObjective updateLearningObjective(@PathVariable String code, @RequestBody LearningObjective updatedLearningObjective) {
-        return learningObjectiveService.updateLearningObjective(code, updatedLearningObjective);
+    @PutMapping("/update")
+    public ResponseEntity<?> updateLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
+        return learningObjectiveService.save(learningObjective);
     }
 
-    @DeleteMapping("/{code}")
-    public void deleteLearningObjective(@PathVariable String code) {
-        learningObjectiveService.deleteLearningObjective(code);
+    @DeleteMapping("admin/learningObjective/delete/{id}")
+    public ResponseEntity<?> changeStatus(@PathVariable Long id) {
+        return learningObjectiveService.changeStatus(id);
     }
 }

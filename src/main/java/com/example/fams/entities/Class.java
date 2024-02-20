@@ -2,17 +2,14 @@ package com.example.fams.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Setter;
 
 import java.util.List;
 
 @Data
 @Entity
 @Table(name="tbl_class")
-public class Class {
-
-    @Id
-    private String id;
-
+public class Class extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="training_programID")
     private TrainingProgram trainingProgram;
@@ -23,6 +20,7 @@ public class Class {
 
     private Long duration;
 
+    @Setter
     private Integer status;
 
     private String location;
@@ -33,18 +31,16 @@ public class Class {
     @Column(name="end_date")
     private Long endDate;
 
-    private String createBy;
-
-    @Column(name="create_date")
-    private Long createDate;
-
-    @Column(name="modified_by")
-    private String modifiedBy;
-
-    @Column(name="modified_date")
-    private Long modifiedDate;
-
     @ManyToMany
     private List<User> users;
+
+    @Override
+    public Boolean getStatus() {
+        return super.getStatus();
+    }
+
+    public Integer getStatusAsInteger() {
+        return status;
+    }
 
 }
