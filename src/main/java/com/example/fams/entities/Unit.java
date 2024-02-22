@@ -6,11 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name="tbl_unit")
-public class Unit {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Unit extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name="syllabusId")
@@ -19,13 +15,5 @@ public class Unit {
     private String name;
 
     private Integer duration;
-
-    private String createBy;
-
-    private Long createDate;
-
-    private String modifiedBy;
-
-    private Long modifiedDate;
 
 }

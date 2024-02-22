@@ -5,26 +5,27 @@ import com.example.fams.dto.ResponseDTO;
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 
 @UtilityClass
 public class ResponseUtil {
     public static ResponseEntity<ResponseDTO> getObject(Object result, HttpStatus status, String response){
         return new ResponseEntity<>(
                 ResponseDTO.builder()
-                        .status(status.value())
-                        .errors(ExceptionUtils.getResponseString(response))
+                        .details(ExceptionUtils.getResponseString(response))
                         .content(result)
+                        .statusCode(status.value())
                         .build()
                 , status
         );
     }
 
     public static ResponseEntity<?> getCollection(Object result, HttpStatus status, String response
-    ,int page, int limit, int count) {
+    ,int page, int limit, long count) {
         return new ResponseEntity<>(
                 ResponseDTO.builder()
-                        .status(status.value())
-                        .errors(ExceptionUtils.getResponseString(response))
+                        .statusCode(status.value())
+                        .details(ExceptionUtils.getResponseString(response))
                         .content(result)
                         .meatadataDTO(getMeatadata(page,limit,count))
                         .build()
@@ -32,7 +33,7 @@ public class ResponseUtil {
         );
     }
 
-    public MeatadataDTO getMeatadata(int page, int limit, int count){
+    public MeatadataDTO getMeatadata(int page, int limit, long count){
         MeatadataDTO result = new MeatadataDTO();
         result.setPage(page);
         result.setTotal(((int) Math.ceil((double) count/limit)));
@@ -61,13 +62,14 @@ public class ResponseUtil {
     public static ResponseEntity<?> error(String error, String message,HttpStatus status) {
         return new ResponseEntity<> (
                 ResponseDTO.builder()
-                        .status(status.value())
                         .message(message)
-                        .errors(ExceptionUtils.getError(error))
+                        .details(ExceptionUtils.getError(error))
+                        .statusCode(status.value())
                         .build()
                 ,status
         );
     }
+
 
 
 }

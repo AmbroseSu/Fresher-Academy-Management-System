@@ -24,22 +24,27 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
+    private final ApiKeyFilter apiKeyFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request.requestMatchers("/api/v1/**",
+                .authorizeHttpRequests(request -> request.requestMatchers("/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "swagger-resources/**",
                                 "/v3/api-docs/**",
                                 "webjars/**")
                         .permitAll()
-                        .requestMatchers("/api/v1/admin").hasAnyAuthority(Role.ADMIN.name())
-                        .requestMatchers("/api/v1/user").hasAnyAuthority(Role.USER.name())
+                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority(Role.ADMIN.name())
+                        .requestMatchers("/api/v1/user/**").hasAnyAuthority(Role.USER.name(),Role.ADMIN.name())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider()).addFilterBefore(
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(
                         jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                        apiKeyFilter, JwtAuthenticationFilter.class
                 );
                 return http.build();
     }

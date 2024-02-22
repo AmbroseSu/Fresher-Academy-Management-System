@@ -8,11 +8,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_material")
-public class Material {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Material extends BaseEntity{
 
     private String name;
 

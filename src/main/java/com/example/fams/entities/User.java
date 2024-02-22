@@ -1,6 +1,7 @@
 package com.example.fams.entities;
 
 import com.example.fams.entities.enums.Role;
+import com.example.fams.validation.NotBlankOrNull;
 import com.example.fams.validation.ValidEmail;
 import com.example.fams.validation.ValidPhone;
 import jakarta.persistence.*;
@@ -23,10 +24,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank
     private String firstName;
 
-    @NotBlank
     private String secondName;
 
     @ValidEmail

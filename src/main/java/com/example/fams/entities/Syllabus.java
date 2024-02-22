@@ -9,11 +9,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_syllabus")
-public class Syllabus {
-
-    @Id
-    @GeneratedValue
-    private Long id;
+public class Syllabus extends BaseEntity{
 
     private String name;
 
@@ -26,10 +22,6 @@ public class Syllabus {
     private Boolean isApproved;
 
     private Boolean isActive;
-
-    private String createBy;
-
-    private Long createDate;
 
     private String version;
 

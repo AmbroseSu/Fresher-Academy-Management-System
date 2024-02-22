@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
-    private static final String PHONE_PATTERN = "^(\\+\\d{1,3}[- ]?)?\\(?\\d{1,6}\\)?[- ]?\\d{1,15}$";
+    private static final String PHONE_PATTERN = "^0\\d{9,10}$";
     private String nullMessage;
     private String invalidFormatMessage;
     private int nullIntegerValue;
@@ -47,8 +47,7 @@ public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
             int integerValue
     ) {
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode("integerValue")  // Adjust to your actual property name
+        context.buildConstraintViolationWithTemplate(message)// Adjust to your actual property name
                 .addConstraintViolation();
     }
 }

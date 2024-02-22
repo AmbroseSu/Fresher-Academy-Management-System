@@ -49,8 +49,7 @@ public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
             int integerValue
     ) {
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(message)
-                .addPropertyNode("integerValue")  // Adjust to your actual property name
+        context.buildConstraintViolationWithTemplate(message)// Adjust to your actual property name
                 .addConstraintViolation();
     }
 }
