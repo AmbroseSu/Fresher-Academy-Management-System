@@ -12,4 +12,5 @@ public interface IGenericService<T> {
 
     ResponseEntity<?> changeStatus(Long id);
 
+
 }

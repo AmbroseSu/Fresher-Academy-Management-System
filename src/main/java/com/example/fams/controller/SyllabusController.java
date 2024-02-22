@@ -31,7 +31,7 @@ public class SyllabusController {
     public ResponseEntity<?> updateSyllabus(@RequestBody SyllabusDTO syllabus) {
         return syllabusService.save(syllabus);
     }
-    @DeleteMapping("admin/syllabus/delete/{name}")
+    @DeleteMapping("admin/syllabus/delete/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return syllabusService.changeStatus(id);
     }

@@ -8,15 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SyllabusRepository extends JpaRepository<Syllabus, String> {
     List<Syllabus> findByStatusIsTrue();
     Syllabus findById(Long id);
+
+    Optional<Syllabus> findByName(String name);
     Syllabus findByStatusIsTrueAndCode(String code);
     Syllabus findByStatusIsTrueAndId(Long id);
     @Transactional
     @Modifying
-    @Query("UPDATE Syllabus lo SET lo.status = ?1 WHERE lo.code = ?2")
-    Syllabus changeStatus(Boolean status, String code);
+    @Query("UPDATE Syllabus lo SET lo.status = ?1 WHERE lo.id = ?2")
+    Syllabus changeStatus(Boolean status, Long id);
 
 }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SyllabusDTO {
+    private Long id;
+
     private String name;
 
     private String code;
@@ -21,5 +23,7 @@ public class SyllabusDTO {
     private Boolean isActive;
 
     private String version;
+
+    private boolean status;
 
 }

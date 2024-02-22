@@ -71,10 +71,12 @@ public class SyllabusServiceImpl implements IGenericService<SyllabusDTO> {
     public ResponseEntity<?> save(SyllabusDTO syllabusDTO) {
         Syllabus entity = new Syllabus();
         if (syllabusDTO.getName() != null){
-            Optional<Syllabus> oldEntity = syllabusRepository.findById(syllabusDTO.getName());
-            entity = (Syllabus) genericConverter.updateEntity(syllabusDTO, oldEntity);
-        } else {
-            entity = (Syllabus) genericConverter.toEntity(syllabusDTO, Syllabus.class);
+            Optional<Syllabus> oldEntity = syllabusRepository.findByName(syllabusDTO.getName());
+            if (oldEntity.isPresent()) {
+                entity = (Syllabus) genericConverter.updateEntity(syllabusDTO, oldEntity.get());
+            } else {
+                entity = (Syllabus) genericConverter.toEntity(syllabusDTO, Syllabus.class);
+            }
         }
 
         syllabusRepository.save(entity);
