@@ -8,6 +8,9 @@ import com.example.fams.repository.ContentRepository;
 import com.example.fams.services.IGenericService;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,8 @@ public class ContentServiceImpl implements IGenericService<ContentDTO> {
 
   @Override
   public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
-    List<Content> entities = contentRepository.findByStatusIsTrue();
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    List<Content> entities = contentRepository.findByStatusIsTrue(pageable);
     List<ContentDTO> result = new ArrayList<>();
     for (Content entity : entities) {
       ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
@@ -50,7 +54,8 @@ public class ContentServiceImpl implements IGenericService<ContentDTO> {
 
   @Override
   public ResponseEntity<?> findAll(int page, int limit) {
-    List<Content> entities = contentRepository.findAll();
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    Page<Content> entities = contentRepository.findAll(pageable);
     List<ContentDTO> result = new ArrayList<>();
     for (Content entity : entities) {
       ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
