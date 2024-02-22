@@ -65,17 +65,24 @@ public class ClassServiceImpl implements IGenericService<ClassDTO> {
   @Override
   public ResponseEntity<?> save(ClassDTO classDTO) {
     Class entity = new Class();
-    if (classDTO.getId() != null){
-      //Class oldEntity = classRepository.findById(classDTO.getId());
-      Class oldEntity = classRepository.findById(classDTO.getId());
-      entity = (Class) genericConverter.updateEntity(classDTO, oldEntity);
-    } else {
-      entity = (Class) genericConverter.toEntity(classDTO, Class.class);
+
+    if(classDTO.getStartDate() < classDTO.getEndDate()){
+      if (classDTO.getId() != null){
+        //Class oldEntity = classRepository.findById(classDTO.getId());
+        Class oldEntity = classRepository.findById(classDTO.getId());
+        entity = (Class) genericConverter.updateEntity(classDTO, oldEntity);
+      } else {
+        entity = (Class) genericConverter.toEntity(classDTO, Class.class);
+      }
+
+      classRepository.save(entity);
+      ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
+      return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
+    }else{
+      return ResponseUtil.getObject(null, HttpStatus.OK, "Saved false by StartDate > EndDate");
     }
 
-    classRepository.save(entity);
-    ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
-    return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
+
   }
 
   @Override
