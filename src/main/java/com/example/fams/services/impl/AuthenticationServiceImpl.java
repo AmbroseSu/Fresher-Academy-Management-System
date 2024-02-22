@@ -1,5 +1,7 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.ConstraintViolationExceptionHandler;
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -9,17 +11,30 @@ import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
 import com.example.fams.services.JWTService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private final Validator validator;
+
+
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -28,20 +43,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
-    public User signup(SignUpRequest signUpRequest){
-        User FAMSuser = new User();
+    public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
+        try {
 
-        FAMSuser.setEmail(signUpRequest.getEmail());
-        FAMSuser.setFirstName(signUpRequest.getFirstName());
-        FAMSuser.setSecondName(signUpRequest.getLastName());
-        FAMSuser.setRole(Role.USER);
-        FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        FAMSuser.setPhone(signUpRequest.getPhone());
+            User FAMSuser = new User();
 
-
-
-
-        return userRepository.save(FAMSuser);
+            FAMSuser.setEmail(signUpRequest.getEmail());
+            FAMSuser.setFirstName(signUpRequest.getFirstName());
+            FAMSuser.setSecondName(signUpRequest.getLastName());
+            FAMSuser.setRole(Role.USER);
+            FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            FAMSuser.setPhone(signUpRequest.getPhone());
+            return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
+        }catch (ConstraintViolationException e) {
+            return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
+        }
     }
 
     public JwtAuthenticationRespone signin(SigninRequest signinRequest){
@@ -51,7 +67,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
         var jwt = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
-
         JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
         jwtAuthenticationRespone.setToken(jwt);
