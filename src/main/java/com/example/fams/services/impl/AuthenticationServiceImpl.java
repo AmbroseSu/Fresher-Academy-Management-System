@@ -8,14 +8,19 @@ import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
+import com.example.fams.services.EmailService;
 import com.example.fams.services.JWTService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +33,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
+    private final HttpSession httpSession;
+
+    private final EmailService emailService;
+
     public User signup(SignUpRequest signUpRequest){
+
+
         User FAMSuser = new User();
 
         FAMSuser.setEmail(signUpRequest.getEmail());
@@ -37,9 +48,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         FAMSuser.setRole(Role.USER);
         FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         FAMSuser.setPhone(signUpRequest.getPhone());
-
-
-
 
         return userRepository.save(FAMSuser);
     }
@@ -72,5 +80,52 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return jwtAuthenticationRespone;
         }
         return null;
+    }
+
+    public boolean generateAndSendOTP(String userEmail) {
+        // Generate a random OTP
+        String otp = generateResetToken();
+
+        // Store the OTP in the session or database for verification
+        httpSession.setAttribute("otp", otp);
+        httpSession.setAttribute("otpUserEmail", userEmail);
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if(user.isEmpty()){
+            // Send the OTP to the user's email
+            emailService.sendOTPByEmail(userEmail, otp);
+            return  true;}
+        return false;
+    }
+
+    private String generateResetToken() {
+        long expirationMinutes = 5; // Set the expiration time in minutes
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(expirationMinutes);
+
+        // Encode the expiration time and any other necessary information in the token
+        // For simplicity, here we concatenate the token and expiration time
+
+        int otpLength = 6;
+        Random random = new Random();
+        StringBuilder otp = new StringBuilder();
+
+        for (int i = 0; i < otpLength; i++) {
+            otp.append(random.nextInt(10));
+        }
+
+        return otp.toString() + "";
+    }
+
+    public boolean verifyOTP(String enteredOTP) {
+        // Retrieve stored OTP from the HttpSession
+        String storedOTP = (String) httpSession.getAttribute("otp");
+        if(storedOTP == null){
+            return false;
+        }
+        if(enteredOTP.equals(storedOTP)){
+            httpSession.removeAttribute("otp");
+            return true;
+        }
+
+        return false;
     }
 }
