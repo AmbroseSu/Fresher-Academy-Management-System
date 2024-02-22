@@ -10,6 +10,8 @@ import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.services.IGenericService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,8 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
 
     @Override
     public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
-        List<LearningObjective> entities = learningObjectiveRepository.findByStatusIsTrue();
+        Pageable pageable = PageRequest.of(page-1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.findByStatusIsTrue(pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         for (LearningObjective entity : entities) {
             LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
@@ -41,7 +44,7 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
                 "Fetched successfully",
                 page,
                 limit,
-                learningObjectiveRepository.count());
+                learningObjectiveRepository.countByStatusIsTrue());
     }
 
     @Override
@@ -68,7 +71,8 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
 
     @Override
     public ResponseEntity<?> findAll(int page, int limit) {
-        List<LearningObjective> entities = learningObjectiveRepository.findAll();
+        Pageable pageable = PageRequest.of(page-1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.findAllBy(pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         for (LearningObjective entity : entities) {
             LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
