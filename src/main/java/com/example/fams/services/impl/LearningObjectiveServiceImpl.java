@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,10 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
         if (learningObjectiveDTO.getId() != null){
             LearningObjective oldEntity = learningObjectiveRepository.findById(learningObjectiveDTO.getId());
             entity = (LearningObjective) genericConverter.updateEntity(learningObjectiveDTO, oldEntity);
+            if(entity.getStatus() == null) {
+                entity.setStatus(oldEntity.getStatus());
+            }
+
         } else {
             entity = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
         }
