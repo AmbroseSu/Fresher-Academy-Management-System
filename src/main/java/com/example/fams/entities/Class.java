@@ -20,9 +20,6 @@ public class Class extends BaseEntity{
 
     private Long duration;
 
-    @Setter
-    private Integer status;
-
     private String location;
 
     @Column(name="start_date")
@@ -34,13 +31,5 @@ public class Class extends BaseEntity{
     @ManyToMany
     private List<User> users;
 
-    @Override
-    public Boolean getStatus() {
-        return super.getStatus();
-    }
-
-    public Integer getStatusAsInteger() {
-        return status;
-    }
 
 }
