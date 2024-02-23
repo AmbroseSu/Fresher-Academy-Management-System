@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 public class ContentDTO {
 
   private Long id;
-  private Integer deliveryType;
+  private Integer delivery_type;
   private Long duration;
-  private String createBy;
-  private Long createdDate;
-  private String modifiedBy;
-  private Long modifiedDate;
+  private String create_by;
+  private Long created_date;
+  private String modified_by;
+  private Long modified_date;
 }
