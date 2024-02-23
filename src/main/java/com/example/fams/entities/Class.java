@@ -2,7 +2,6 @@ package com.example.fams.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Setter;
 
 import java.util.List;
 
