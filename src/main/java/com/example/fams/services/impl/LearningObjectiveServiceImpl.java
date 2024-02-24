@@ -3,30 +3,24 @@ package com.example.fams.services.impl;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.ResponseDTO;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.LearningObjectiveContent;
-import com.example.fams.entities.Syllabus;
 import com.example.fams.repository.ContentRepository;
 import com.example.fams.repository.LearningObjectiveContentRepository;
 import com.example.fams.repository.LearningObjectiveRepository;
-import com.example.fams.services.IGenericService;
+import com.example.fams.services.ILearningObjectiveService;
 import com.example.fams.services.ServiceUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service("LearningObjectiveService")
-public class LearningObjectiveServiceImpl implements IGenericService<LearningObjectiveDTO> {
+public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
 
     private final LearningObjectiveRepository learningObjectiveRepository;
     private final LearningObjectiveContentRepository learningObjectiveContentRepository;
@@ -137,5 +131,48 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
         }
     }
 
+    @Override
+    public ResponseEntity<?> searchSortFilter(LearningObjectiveDTO learningObjectiveDTO, int page, int limit) {
+        String code = learningObjectiveDTO.getCode();
+        String name = learningObjectiveDTO.getName();
+        Integer type = learningObjectiveDTO.getType();
+        String description = learningObjectiveDTO.getDescription();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.searchSortFilter(code, name, type, description, pageable);
+        List<LearningObjectiveDTO> result = new ArrayList<>();
+        Long count = learningObjectiveRepository.countSearchSortFilter(code, name, type, description);
+        for (LearningObjective entity : entities){
+            LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
+
+    @Override
+    public ResponseEntity<?> searchSortFilterADMIN(LearningObjectiveDTO learningObjectiveDTO, String sortById, int page, int limit) {
+        String code = learningObjectiveDTO.getCode();
+        String name = learningObjectiveDTO.getName();
+        Integer type = learningObjectiveDTO.getType();
+        String description = learningObjectiveDTO.getDescription();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.searchSortFilterADMIN(code, name, type, description, sortById, pageable);
+        List<LearningObjectiveDTO> result = new ArrayList<>();
+        Long count = learningObjectiveRepository.countSearchSortFilter(code, name, type, description);
+        for (LearningObjective entity : entities){
+            LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
 
 }
