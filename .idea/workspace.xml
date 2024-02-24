@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c62c6145-db67-455e-80ad-919287e23fb8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/entities/LearningObjectiveContent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/repository/LearningObjectiveContentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/fams/dto/LearningObjectiveDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/dto/LearningObjectiveDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/fams/entities/Content.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/entities/Content.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/fams/entities/LearningObjective.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/entities/LearningObjective.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/fams/services/impl/LearningObjectiveServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/fams/services/impl/LearningObjectiveServiceImpl.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="SearchFilter_DateFunctions_LearningObjective_Phu_23022024" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitLabMergeRequestFiltersHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPENED&quot;,
+    &quot;assignee&quot;: {
+      &quot;type&quot;: &quot;org.jetbrains.plugins.gitlab.mergerequest.ui.filters.GitLabMergeRequestsFiltersValue.MergeRequestsMemberFilterValue.MergeRequestsAssigneeFilterValue&quot;,
+      &quot;username&quot;: &quot;doanvinhphu&quot;,
+      &quot;fullname&quot;: &quot;Doan Vinh  Phu&quot;
+    }
+  }
+}</component>
+  <component name="GitLabMergeRequestsSettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;first&quot;: &quot;http://git.fa.edu.vn/hcm24_cpl_java_01/nhom_2.git&quot;,
+    &quot;second&quot;: &quot;90fc5403-df2b-45a5-a45b-e37a1ef77e27&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="Use Maven wrapper" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2clNz7tGVaPhT5dNgX8R9VUtnzM" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.FamsApplication.executor": "Run",
+    "extract.method.default.visibility": "private",
+    "git-widget-placeholder": "dev",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Study Stuffs/FPTU/Ky 5/SWP391/TattooPlatform/SWP391_TattooPlatform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="FamsApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="security" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.fams.FamsApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="jdk-17.0.9-corretto-17.0.9-4caba194b151-107bc6b7" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c62c6145-db67-455e-80ad-919287e23fb8" name="Changes" comment="" />
+      <created>1708682465283</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1708682465283</updated>
+      <workItem from="1708682466336" duration="596000" />
+      <workItem from="1708684629362" duration="18000" />
+      <workItem from="1708695802997" duration="2000" />
+      <workItem from="1708698637282" duration="6908000" />
+      <workItem from="1708708571455" duration="5583000" />
+      <workItem from="1708715879391" duration="14350000" />
+      <workItem from="1708730813339" duration="3770000" />
+      <workItem from="1708757131353" duration="16398000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="org.springframework.aop.framework.JdkDynamicAopProxy" memberName="advised" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+</project>
