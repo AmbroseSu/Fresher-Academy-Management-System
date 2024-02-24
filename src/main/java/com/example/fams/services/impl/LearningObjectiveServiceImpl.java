@@ -2,7 +2,10 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.LearningObjectiveDTO;
+import com.example.fams.dto.response.LearningObjectiveResponse;
+import com.example.fams.entities.Content;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.LearningObjectiveContent;
 import com.example.fams.repository.ContentRepository;
@@ -39,10 +42,29 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<LearningObjective> entities = learningObjectiveRepository.findAllByStatusIsTrue(pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
+
+        // ? Với mỗi learningObjective, chuyển nó thành learningObjectiveDTO (chưa có List<ContentDTO> ở trong)
         for (LearningObjective entity : entities) {
-            LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
-            result.add(newDTO);
+            LearningObjectiveDTO newLearningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+
+            // * Lấy list Content từ learningObjectiveId
+            List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(entity.getId());
+
+            // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
+            List<ContentDTO> contentDTOS = new ArrayList<>();
+            for (Content content : contents) {
+                ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
+                contentDTOS.add(newContentDTO);
+            }
+
+            // ! Set list contentDTO sau khi convert ở trên vào learningObjectiveDTO
+            newLearningObjectiveDTO.setContentDTOs(contentDTOS);
+
+            // todo trả về List DTO đã có contentDTOs ở trong
+            result.add(newLearningObjectiveDTO);
         }
+
+
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -53,7 +75,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
 
     @Override
     public ResponseEntity<?> save(LearningObjectiveDTO learningObjectiveDTO) {
-        List<Long> requestContentIds = learningObjectiveDTO.getContentIds();
+        List<ContentDTO> requestContentDTOs = learningObjectiveDTO.getContentDTOs();
 
         LearningObjective entity;
 
@@ -64,7 +86,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             entity = (LearningObjective) genericConverter.updateEntity(learningObjectiveDTO, oldEntity);
             entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
             learningObjectiveContentRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
-            loadLearningObjectiveContentFromListContentId(requestContentIds, entity.getId());
+            loadLearningObjectiveContentFromListContentId(requestContentDTOs, entity.getId());
             learningObjectiveRepository.save(entity);
         }
 
@@ -73,19 +95,28 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             learningObjectiveDTO.setStatus(true);
             entity = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
             learningObjectiveRepository.save(entity);
-            loadLearningObjectiveContentFromListContentId(requestContentIds, entity.getId());
+            loadLearningObjectiveContentFromListContentId(requestContentDTOs, entity.getId());
         }
 
+
         LearningObjectiveDTO result = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+
+        List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(entity.getId());
+        List<ContentDTO> contentDTOS = new ArrayList<>();
+        for (Content content : contents) {
+            ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
+            contentDTOS.add(newContentDTO);
+        }
+        result.setContentDTOs(contentDTOS);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
-    private void loadLearningObjectiveContentFromListContentId(List<Long> requestContentIds, Long learningObjectiveId) {
-        if (requestContentIds != null && !requestContentIds.isEmpty()) {
-            for (Long id : requestContentIds) {
+    private void loadLearningObjectiveContentFromListContentId(List<ContentDTO> requestContentDTOs, Long learningObjectiveId) {
+        if (requestContentDTOs != null && !requestContentDTOs.isEmpty()) {
+            for (ContentDTO contentDTO : requestContentDTOs) {
                 LearningObjectiveContent loc = new LearningObjectiveContent();
                 loc.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
-                loc.setContent(contentRepository.findById(id));
+                loc.setContent(contentRepository.findById(contentDTO.getId()));
                 learningObjectiveContentRepository.save(loc);
             }
         }

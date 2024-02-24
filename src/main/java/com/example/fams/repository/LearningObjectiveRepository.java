@@ -49,7 +49,7 @@ public interface LearningObjectiveRepository extends JpaRepository<LearningObjec
 
 
     @Query("SELECT lo FROM LearningObjective lo " +
-            "WHERE (:code IS NULL OR lo.code = :code) AND lo.status = TRUE " +
+            "WHERE (:code IS NULL OR lo.code = :code) " +
             "AND (:name IS NULL OR lo.name = :name) " +
             "AND (:type IS NULL OR lo.type = :type) " +
             "AND (:description IS NULL OR lo.description = :description)"+
