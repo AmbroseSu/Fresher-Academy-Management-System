@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_learningObjective")
-public class LearningObjective extends BaseEntity{
+public class LearningObjective extends BaseEntity {
 
     private String code;
 
@@ -22,8 +22,7 @@ public class LearningObjective extends BaseEntity{
 
     private String description;
 
-    @ManyToMany(mappedBy="learningObjectives")
-    private List<Content> contents;
-
+    @OneToMany(mappedBy="learningObjective")
+    private List<LearningObjectiveContent> learningObjectiveContents;
 
 }

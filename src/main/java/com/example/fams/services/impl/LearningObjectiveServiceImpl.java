@@ -5,7 +5,10 @@ import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.ResponseDTO;
 import com.example.fams.entities.LearningObjective;
+import com.example.fams.entities.LearningObjectiveContent;
 import com.example.fams.entities.Syllabus;
+import com.example.fams.repository.ContentRepository;
+import com.example.fams.repository.LearningObjectiveContentRepository;
 import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ServiceUtils;
@@ -26,11 +29,15 @@ import java.util.List;
 public class LearningObjectiveServiceImpl implements IGenericService<LearningObjectiveDTO> {
 
     private final LearningObjectiveRepository learningObjectiveRepository;
+    private final LearningObjectiveContentRepository learningObjectiveContentRepository;
+    private final ContentRepository contentRepository;
     private final GenericConverter genericConverter;
 
-    public LearningObjectiveServiceImpl(LearningObjectiveRepository learningObjectiveRepository, GenericConverter genericConverter) {
+    public LearningObjectiveServiceImpl(LearningObjectiveContentRepository learningObjectiveContentRepository, ContentRepository contentRepository, LearningObjectiveRepository learningObjectiveRepository, GenericConverter genericConverter) {
         this.learningObjectiveRepository = learningObjectiveRepository;
+        this.learningObjectiveContentRepository = learningObjectiveContentRepository;
         this.genericConverter = genericConverter;
+        this.contentRepository = contentRepository;
     }
 
     @Override
@@ -52,21 +59,42 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
 
     @Override
     public ResponseEntity<?> save(LearningObjectiveDTO learningObjectiveDTO) {
+        List<Long> requestContentIds = learningObjectiveDTO.getContentIds();
+
         LearningObjective entity;
+
+        // * For update request
         if (learningObjectiveDTO.getId() != null){
             LearningObjective oldEntity = learningObjectiveRepository.findById(learningObjectiveDTO.getId());
             LearningObjective tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
             entity = (LearningObjective) genericConverter.updateEntity(learningObjectiveDTO, oldEntity);
             entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
-
-        } else {
-            learningObjectiveDTO.setStatus(true);
-            entity = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
+            learningObjectiveContentRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
+            loadLearningObjectiveContentFromListContentId(requestContentIds, entity.getId());
+            learningObjectiveRepository.save(entity);
         }
 
-        learningObjectiveRepository.save(entity);
+        // * For create request
+        else {
+            learningObjectiveDTO.setStatus(true);
+            entity = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
+            learningObjectiveRepository.save(entity);
+            loadLearningObjectiveContentFromListContentId(requestContentIds, entity.getId());
+        }
+
         LearningObjectiveDTO result = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
+    }
+
+    private void loadLearningObjectiveContentFromListContentId(List<Long> requestContentIds, Long learningObjectiveId) {
+        if (requestContentIds != null && !requestContentIds.isEmpty()) {
+            for (Long id : requestContentIds) {
+                LearningObjectiveContent loc = new LearningObjectiveContent();
+                loc.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
+                loc.setContent(contentRepository.findById(id));
+                learningObjectiveContentRepository.save(loc);
+            }
+        }
     }
 
     @Override
