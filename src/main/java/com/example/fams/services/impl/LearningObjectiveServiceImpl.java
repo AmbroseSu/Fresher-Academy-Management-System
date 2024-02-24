@@ -8,12 +8,17 @@ import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.services.IGenericService;
+import com.example.fams.services.ServiceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +35,8 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
 
     @Override
     public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
-        List<LearningObjective> entities = learningObjectiveRepository.findByStatusIsTrue();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.findAllByStatusIsTrue(pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         for (LearningObjective entity : entities) {
             LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
@@ -41,16 +47,20 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
                 "Fetched successfully",
                 page,
                 limit,
-                learningObjectiveRepository.count());
+                learningObjectiveRepository.countAllByStatusIsTrue());
     }
 
     @Override
     public ResponseEntity<?> save(LearningObjectiveDTO learningObjectiveDTO) {
-        LearningObjective entity = new LearningObjective();
+        LearningObjective entity;
         if (learningObjectiveDTO.getId() != null){
             LearningObjective oldEntity = learningObjectiveRepository.findById(learningObjectiveDTO.getId());
+            LearningObjective tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
             entity = (LearningObjective) genericConverter.updateEntity(learningObjectiveDTO, oldEntity);
+            entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
+
         } else {
+            learningObjectiveDTO.setStatus(true);
             entity = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
         }
 
@@ -68,7 +78,8 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
 
     @Override
     public ResponseEntity<?> findAll(int page, int limit) {
-        List<LearningObjective> entities = learningObjectiveRepository.findAll();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<LearningObjective> entities = learningObjectiveRepository.findAllByOrderByIdDesc(pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         for (LearningObjective entity : entities) {
             LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
@@ -79,7 +90,7 @@ public class LearningObjectiveServiceImpl implements IGenericService<LearningObj
                 "Fetched successfully",
                 page,
                 limit,
-                learningObjectiveRepository.count());
+                learningObjectiveRepository.countAllByStatusIsTrue());
     }
 
     @Override

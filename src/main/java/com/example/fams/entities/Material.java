@@ -17,4 +17,6 @@ public class Material extends BaseEntity{
     @ManyToMany(mappedBy="materials")
     private List<Syllabus> syllabuses;
 
+
+
 }
