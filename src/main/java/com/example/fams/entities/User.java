@@ -1,11 +1,9 @@
 package com.example.fams.entities;
 
 import com.example.fams.entities.enums.Role;
-import com.example.fams.validation.NotBlankOrNull;
 import com.example.fams.validation.ValidEmail;
 import com.example.fams.validation.ValidPhone;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,7 +49,7 @@ public class User implements UserDetails {
     private Long modifiedDate;
 
     @ManyToMany(mappedBy = "users")
-    private List<Class> classes;
+    private List<Class> aClasses;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

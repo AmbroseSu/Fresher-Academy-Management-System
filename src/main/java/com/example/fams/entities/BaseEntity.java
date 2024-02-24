@@ -16,6 +16,10 @@ public abstract class BaseEntity{
     @Column(name = "status")
     private Boolean status = true;
 
+    public Boolean isStatus() {
+        return status;
+    }
+
 //    @Temporal(TemporalType.DATE) // Specify that only the date part should be stored
     @Column(name = "created_date", updatable = false)
 //    @CreationTimestamp
