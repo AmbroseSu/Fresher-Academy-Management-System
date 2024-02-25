@@ -2,12 +2,19 @@ package com.example.fams.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Date;
 
 @Data
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity{
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable  = false)
@@ -22,8 +29,6 @@ public abstract class BaseEntity{
 
 //    @Temporal(TemporalType.DATE) // Specify that only the date part should be stored
     @Column(name = "created_date", updatable = false)
-//    @CreationTimestamp
-//    @Convert(converter = DateConverter.class) // Use a custom converter
     private Long createdDate;
 
     @Column(name = "create_by")
@@ -32,6 +37,31 @@ public abstract class BaseEntity{
     @Column(name = "modified_by")
     private String modifiedBy;
 
+
+
     @Column(name = "modified_date")
     private Long modifiedDate;
+
+    @PrePersist
+    protected void onCreate() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        createBy = authentication.getName();
+        createdDate = new Date().getTime();
+        modifiedBy = authentication.getName();
+        modifiedDate = new Date().getTime();
+
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        modifiedBy = authentication.getName();
+        modifiedDate = new Date().getTime();
+    }
+
+
+    public void markModified() {
+        this.onUpdate();
+    }
 }
