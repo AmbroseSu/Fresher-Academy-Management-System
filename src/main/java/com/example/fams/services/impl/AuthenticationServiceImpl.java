@@ -73,6 +73,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public JwtAuthenticationRespone signin(SigninRequest signinRequest){
+        // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
+        // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
+        // todo Trả về một object Authentication và đưa vào Security Context để quản lý
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getEmail(),
                 signinRequest.getPassword()));
 
