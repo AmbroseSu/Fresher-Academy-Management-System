@@ -10,30 +10,37 @@ import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
+import com.example.fams.services.EmailService;
 import com.example.fams.services.JWTService;
-import jakarta.validation.ConstraintViolation;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final Validator validator;
+    private static final int OTP_LENGTH = 6;
 
+    private static final long EXPIRATION_MINUTES = 3;
+
+    private final Validator validator;
 
     private final UserRepository userRepository;
 
@@ -43,18 +50,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JWTService jwtService;
 
+    private final HttpSession httpSession;
+
+    private final EmailService emailService;
+
     public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
         try {
 
-            User FAMSuser = new User();
+        User FAMSuser = new User();
 
-            FAMSuser.setEmail(signUpRequest.getEmail());
-            FAMSuser.setFirstName(signUpRequest.getFirstName());
-            FAMSuser.setSecondName(signUpRequest.getLastName());
-            FAMSuser.setRole(Role.USER);
-            FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-            FAMSuser.setPhone(signUpRequest.getPhone());
-            return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
+        FAMSuser.setEmail(signUpRequest.getEmail());
+        FAMSuser.setFirstName(signUpRequest.getFirstName());
+        FAMSuser.setSecondName(signUpRequest.getLastName());
+        FAMSuser.setRole(Role.USER);
+        FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        FAMSuser.setPhone(signUpRequest.getPhone());
+
+        return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
         }catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
         }
@@ -67,6 +79,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
         var jwt = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+
         JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
         jwtAuthenticationRespone.setToken(jwt);
@@ -87,5 +100,47 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return jwtAuthenticationRespone;
         }
         return null;
+    }
+
+    public boolean generateAndSendOTP(String userEmail) {
+
+        try {
+            // Generate a random OTP
+            String otp = generateOTP();
+
+            // Store the OTP in the session or database for verification
+            httpSession.setAttribute("otp", otp);
+            httpSession.setAttribute("otpUserEmail", userEmail);
+            httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+            emailService.sendOTPByEmail(userEmail, otp);
+            return true;
+        } catch (MailException ex) {
+            return false;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private static String generateOTP() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder otp = new StringBuilder();
+
+        for (int i = 0; i < OTP_LENGTH; i++) {
+            otp.append(random.nextInt(10));
+        }
+        return otp.toString();
+    }
+
+    public boolean verifyOTP(String enteredOTP) {
+        String storedOTP = (String) httpSession.getAttribute("otp");
+        LocalDateTime expirationTime = (LocalDateTime) httpSession.getAttribute("expirationTime");
+        if(storedOTP == null){
+            return false;
+        }
+        if(enteredOTP.equals(storedOTP) && LocalDateTime.now().isBefore(expirationTime)){
+            httpSession.removeAttribute("otp");
+            return true;
+        }
+        return false;
     }
 }
