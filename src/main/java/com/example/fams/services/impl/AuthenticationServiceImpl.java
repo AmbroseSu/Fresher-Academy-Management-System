@@ -2,6 +2,7 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.ResponseDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -72,7 +73,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    public JwtAuthenticationRespone signin(SigninRequest signinRequest){
+    public ResponseEntity<?> signin(SigninRequest signinRequest){
         // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
         // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
         // todo Trả về một object Authentication và đưa vào Security Context để quản lý
@@ -87,10 +88,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         jwtAuthenticationRespone.setToken(jwt);
         jwtAuthenticationRespone.setRefreshToken(refreshToken);
-        return jwtAuthenticationRespone;
+        return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
     }
 
-    public JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest){
+    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest){
         String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
         User FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
         if(jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)){
@@ -100,12 +101,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             jwtAuthenticationRespone.setToken(jwt);
             jwtAuthenticationRespone.setRefreshToken(refreshTokenRequest.getToken());
-            return jwtAuthenticationRespone;
+            return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Token sent successfully");
         }
         return null;
     }
 
-    public boolean generateAndSendOTP(String userEmail) {
+    public ResponseEntity<?> generateAndSendOTP(String userEmail) {
 
         try {
             // Generate a random OTP
@@ -116,11 +117,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             httpSession.setAttribute("otpUserEmail", userEmail);
             httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
             emailService.sendOTPByEmail(userEmail, otp);
-            return true;
+            return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
         } catch (MailException ex) {
-            return false;
+            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
-            return false;
+            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -134,16 +135,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return otp.toString();
     }
 
-    public boolean verifyOTP(String enteredOTP) {
+    public ResponseEntity<?> verifyOTP(String enteredOTP) {
         String storedOTP = (String) httpSession.getAttribute("otp");
         LocalDateTime expirationTime = (LocalDateTime) httpSession.getAttribute("expirationTime");
         if(storedOTP == null){
-            return false;
+            ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
         }
-        if(enteredOTP.equals(storedOTP) && LocalDateTime.now().isBefore(expirationTime)){
-            httpSession.removeAttribute("otp");
-            return true;
+        if(enteredOTP.equals(storedOTP)){
+            if (LocalDateTime.now().isBefore(expirationTime)) {
+                httpSession.removeAttribute("otp");
+                httpSession.removeAttribute("otpUserEmail");
+                httpSession.removeAttribute("expirationTime");
+                ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
+            } else {
+                return ResponseUtil.error("Invalid OTP", "OTP Expired", HttpStatus.NOT_ACCEPTABLE);
+            }
         }
-        return false;
+        return ResponseUtil.error("Invalid OTP", "Invalid OTP", HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    public ResponseEntity<?> resetPassword(String email, String newPassword) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            user.get().setPassword(passwordEncoder.encode(newPassword));
+            return ResponseUtil.getObject(userRepository.save(user.get()), HttpStatus.OK, "Password changed successfully");
+        }
+        return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
     }
 }
