@@ -1,7 +1,10 @@
 package com.example.fams.controller;
 
 import com.example.fams.dto.ClassDTO;
+import com.example.fams.dto.LearningObjectiveDTO;
+import com.example.fams.services.IClassService;
 import com.example.fams.services.IGenericService;
+import com.example.fams.services.ILearningObjectiveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class ClassController {
   @Autowired
   @Qualifier("ClassService")
-  private IGenericService<ClassDTO> classService;
+  private IClassService classService;
 
   @GetMapping("user/class/findAllByStatusTrue")
   public ResponseEntity<?> getAllClassByStatusTrue(@RequestParam int page, @RequestParam int limit) {
@@ -20,8 +23,23 @@ public class ClassController {
   }
 
   @GetMapping("admin/class/findAll")
-  public ResponseEntity<?> getAllLearningObjectives(@RequestParam int page, @RequestParam int limit) {
+  public ResponseEntity<?> getAllClasses(@RequestParam int page, @RequestParam int limit) {
     return classService.findAll(page, limit);
+  }
+
+  @GetMapping("user/class/search")
+  public ResponseEntity<?> searchLearningObjective(@RequestBody ClassDTO classDTO,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int limit){
+    return classService.searchSortFilter(classDTO, page, limit);
+  }
+
+  @GetMapping("admin/class/search")
+  public ResponseEntity<?> searchClassADMIN(@RequestBody ClassDTO classDTO,
+      @RequestParam String sortById,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int limit){
+    return classService.searchSortFilterADMIN(classDTO, sortById, page, limit);
   }
 
   @PostMapping("admin/class/create")
@@ -30,7 +48,7 @@ public class ClassController {
   }
 
   @PutMapping("admin/class/update")
-  public ResponseEntity<?> updateLearningObjective(@RequestBody ClassDTO classDTO) {
+  public ResponseEntity<?> updateClass(@RequestBody ClassDTO classDTO) {
     return classService.save(classDTO);
   }
 

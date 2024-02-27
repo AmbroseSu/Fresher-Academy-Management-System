@@ -48,8 +48,10 @@ public class User implements UserDetails {
     private String modifiedBy;
     private Long modifiedDate;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Class> aClasses;
+//    @ManyToMany(mappedBy = "user")
+//    private List<User> user;
+    @OneToMany(mappedBy = "user")
+    private List<ClassUser> classUsers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
