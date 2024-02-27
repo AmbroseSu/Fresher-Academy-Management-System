@@ -18,7 +18,7 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
   List<FamsClass> findAllByOrderByIdDesc(Pageable pageable);
   FamsClass findById(Long id);
   FamsClass findByStatusIsTrueAndId(Long id);
-  FamsClass findByStatusIsTrueAndCode(String code);
+  //FamsClass findByStatusIsTrueAndCode(String code);
   Long countAllByStatusIsTrue();
   @Transactional
   @Modifying

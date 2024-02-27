@@ -44,24 +44,21 @@ public class ClassServiceImpl implements IClassService {
     List<FamsClass> entities = classRepository.findAllByStatusIsTrue(pageable);
     List<ClassDTO> result = new ArrayList<>();
 
-    // ? Với mỗi learningObjective, chuyển nó thành learningObjectiveDTO (chưa có List<ContentDTO> ở trong)
+
     for (FamsClass entity : entities) {
       ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
 
-      // * Lấy list Content từ learningObjectiveId
+
       List<User> users = classUserRepository.findUserByClassId(entity.getId());
 
-      // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
       List<UserDTO> userDTOS = new ArrayList<>();
       for (User user : users) {
         UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
         userDTOS.add(newUserDTO);
       }
 
-      // ! Set list contentDTO sau khi convert ở trên vào learningObjectiveDTO
-      newClassDTO.setUserDTOs(userDTOS);
+      newClassDTO.setUserDTOS(userDTOS);
 
-      // todo trả về List DTO đã có contentDTOs ở trong
       result.add(newClassDTO);
     }
 
@@ -76,7 +73,7 @@ public class ClassServiceImpl implements IClassService {
 
   @Override
   public ResponseEntity<?> save(ClassDTO classDTO) {
-    List<UserDTO> requestUserDTOs = classDTO.getUserDTOs();
+    List<UserDTO> requestUserDTOs = classDTO.getUserDTOS();
 
     FamsClass entity;
 
@@ -109,7 +106,7 @@ public class ClassServiceImpl implements IClassService {
       UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
       userDTOS.add(newUserDTO);
     }
-    result.setUserDTOs(userDTOS);
+    result.setUserDTOS(userDTOS);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 
@@ -127,8 +124,13 @@ public class ClassServiceImpl implements IClassService {
   @Override
   public ResponseEntity<?> findById(Long id) {
     FamsClass entity = classRepository.findByStatusIsTrueAndId(id);
-    ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
-    return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+    if (entity != null) {
+      ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
+      return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+    } else {
+      return ResponseUtil.error("Class not found", "Cannot Find Class", HttpStatus.NOT_FOUND);
+    }
+
   }
 
   @Override
