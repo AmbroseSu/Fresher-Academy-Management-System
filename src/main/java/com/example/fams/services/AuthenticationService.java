@@ -17,4 +17,6 @@ public interface AuthenticationService {
     ResponseEntity<?> generateAndSendOTP(String userEmail);
 
     ResponseEntity<?> verifyOTP(String enteredOTP);
+
+    ResponseEntity<?> resetPassword(String email, String newPassword);
 }

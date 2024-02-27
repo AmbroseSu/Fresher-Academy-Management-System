@@ -2,6 +2,7 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.request.ResetPasswordRequest;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -53,14 +54,19 @@ public class AuthenticationController {
 //        authenticationService.generateAndSendOTP(email);
 //        return ResponseEntity.ok("OTP sent successfully");
 //    }
-    @GetMapping("/sendOTP")
+    @PostMapping("/sendOTP")
     public ResponseEntity<?> sendMailOTP(@RequestParam String email){
         return authenticationService.generateAndSendOTP(email);
     }
 
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     public ResponseEntity<?> validateOTP(@RequestParam String otp){
         return authenticationService.verifyOTP(otp);
+    }
+
+    @PutMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return authenticationService.resetPassword(request.getEmail(), request.getNewPassword());
     }
 
 }

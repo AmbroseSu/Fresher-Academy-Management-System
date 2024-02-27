@@ -152,4 +152,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         return ResponseUtil.error("Invalid OTP", "Invalid OTP", HttpStatus.NOT_ACCEPTABLE);
     }
+
+    public ResponseEntity<?> resetPassword(String email, String newPassword) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            user.get().setPassword(passwordEncoder.encode(newPassword));
+            return ResponseUtil.getObject(userRepository.save(user.get()), HttpStatus.OK, "Password changed successfully");
+        }
+        return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
+    }
 }
