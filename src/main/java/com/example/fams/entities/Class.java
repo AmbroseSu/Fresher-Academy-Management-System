@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_class")
-public class Class extends BaseEntity{
+public class FamsClass extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="training_programID")
     private TrainingProgram trainingProgram;
