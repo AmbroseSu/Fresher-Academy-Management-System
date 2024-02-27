@@ -27,8 +27,10 @@ public class FamsClass extends BaseEntity{
     @Column(name="end_date")
     private Long endDate;
 
-    @ManyToMany
-    private List<User> users;
+//    @ManyToMany
+//    private List<User> users;
 
+    @OneToMany(mappedBy = "famsClass")
+    private List<ClassUser> classUsers;
 
 }
