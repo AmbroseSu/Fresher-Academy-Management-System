@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface AuthenticationService {
     ResponseEntity<?> signup(SignUpRequest signUpRequest);
-    JwtAuthenticationRespone signin(SigninRequest signinRequest);
-    JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest);
+    ResponseEntity<?> signin(SigninRequest signinRequest);
+    ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest);
 
-    boolean generateAndSendOTP(String userEmail);
+    ResponseEntity<?> generateAndSendOTP(String userEmail);
 
-    boolean verifyOTP(String enteredOTP);
+    ResponseEntity<?> verifyOTP(String enteredOTP);
 }
