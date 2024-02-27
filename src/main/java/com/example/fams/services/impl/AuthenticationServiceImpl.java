@@ -2,6 +2,7 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.ResponseDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -72,7 +73,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    public JwtAuthenticationRespone signin(SigninRequest signinRequest){
+    public ResponseEntity<?> signin(SigninRequest signinRequest){
         // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
         // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
         // todo Trả về một object Authentication và đưa vào Security Context để quản lý
