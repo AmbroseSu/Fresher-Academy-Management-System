@@ -3,8 +3,13 @@ package com.example.fams.services.impl;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.MaterialDTO;
+import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.entities.Material;
+import com.example.fams.entities.Syllabus;
+import com.example.fams.entities.SyllabusMaterial;
 import com.example.fams.repository.MaterialRepository;
+import com.example.fams.repository.SyllabusMaterialRepository;
+import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.services.IGenericService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -24,11 +29,15 @@ public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
 
 
     private final MaterialRepository materialRepository;
+    private final SyllabusMaterialRepository syllabusMaterialRepository;
+    private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
 
-    public MaterialServiceImpl(MaterialRepository materialRepository, GenericConverter genericConverter) {
+    public MaterialServiceImpl(MaterialRepository materialRepository,SyllabusMaterialRepository syllabusMaterialRepository,SyllabusRepository syllabusRepository, GenericConverter genericConverter) {
         this.materialRepository = materialRepository;
         this.genericConverter = genericConverter;
+        this.syllabusMaterialRepository = syllabusMaterialRepository;
+        this.syllabusRepository = syllabusRepository;
     }
 
     @Override
@@ -40,13 +49,25 @@ public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
 
     @Override
     public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit);
+        Pageable pageable = PageRequest.of(page-1, limit);
         List<Material> entities = materialRepository.findAllByStatusIsTrue(pageable);
         List<MaterialDTO> result = new ArrayList<>();
 
         for (Material entity : entities) {
-            MaterialDTO dto = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-            result.add(dto);
+            MaterialDTO newMaterialDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+
+
+            List<Syllabus> syllabuses = syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
+
+            List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
+            for (Syllabus syllabus : syllabuses) {
+                SyllabusDTO newSyllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
+                syllabusDTOS.add(newSyllabusDTO);
+            }
+
+            newMaterialDTO.setSyllabusDTOs(syllabusDTOS);
+
+            result.add(newMaterialDTO);
         }
 
         return ResponseUtil.getCollection(result,
@@ -77,26 +98,34 @@ public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
     }
 
     @Override
-    public ResponseEntity<?> save(MaterialDTO material) {
+    public ResponseEntity<?> save(MaterialDTO materialDTO) {
+        List<SyllabusDTO> requestSyllabusDTOs = materialDTO.getSyllabusDTOs();
 
         Material entity = new Material();
-        if (material.getId() != null) {
-            Material oldEntity = materialRepository.findById(material.getId());
+        if (materialDTO.getId() != null) {
+            Material oldEntity = materialRepository.findById(materialDTO.getId());
             Material tempOldEntity = cloneMaterial(oldEntity);
-
-
-            entity = (Material) genericConverter.updateEntity(material, oldEntity);
-
+            entity = (Material) genericConverter.updateEntity(materialDTO, oldEntity);
             entity = fillMissingAttribute(entity, tempOldEntity);
-
-
+            syllabusMaterialRepository.deleteAllByMaterialId(materialDTO.getId());
+            loadSyllabusMaterialFromListSyllabusId(requestSyllabusDTOs,entity.getId());
+            entity.markModified();
+            materialRepository.save(entity);
         } else {
-            material.setStatus(true);
-            entity = (Material) genericConverter.toEntity(material, Material.class);
+            materialDTO.setStatus(true);
+            entity = (Material) genericConverter.toEntity(materialDTO, Material.class);
+            materialRepository.save(entity);
+            loadSyllabusMaterialFromListSyllabusId(requestSyllabusDTOs,entity.getId());
         }
-
-        materialRepository.save(entity);
         MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+
+        List<Syllabus> syllabuses = syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
+        List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
+        for (Syllabus syllabus : syllabuses) {
+            SyllabusDTO newSyllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
+            syllabusDTOS.add(newSyllabusDTO);
+        }
+        result.setSyllabusDTOs(syllabusDTOS);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
 
     }
@@ -156,6 +185,16 @@ public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
             return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
         } else {
             return ResponseUtil.error("Material not found", "Cannot change status of non-existing Material", HttpStatus.NOT_FOUND);
+        }
+    }
+    private void loadSyllabusMaterialFromListSyllabusId(List<SyllabusDTO> requestSyllabusDTOs, Long materialId) {
+        if (requestSyllabusDTOs != null && !requestSyllabusDTOs.isEmpty()) {
+            for (SyllabusDTO syllabusDTO : requestSyllabusDTOs) {
+                SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
+                syllabusMaterial.setMaterial(materialRepository.findById(materialId));
+                syllabusMaterial.setSyllabus(syllabusRepository.findById(syllabusDTO.getId()));
+                syllabusMaterialRepository.save(syllabusMaterial);
+            }
         }
     }
 }
