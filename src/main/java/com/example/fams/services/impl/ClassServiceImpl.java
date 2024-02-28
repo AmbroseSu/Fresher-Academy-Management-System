@@ -51,13 +51,13 @@ public class ClassServiceImpl implements IClassService {
 
       List<User> users = classUserRepository.findUserByClassId(entity.getId());
 
-      List<UserDTO> userDTOS = new ArrayList<>();
+      List<UserDTO> userDTOs = new ArrayList<>();
       for (User user : users) {
         UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
-        userDTOS.add(newUserDTO);
+        userDTOs.add(newUserDTO);
       }
 
-      newClassDTO.setUserDTOS(userDTOS);
+      newClassDTO.setUserDTOs(userDTOs);
 
       result.add(newClassDTO);
     }
@@ -73,7 +73,7 @@ public class ClassServiceImpl implements IClassService {
 
   @Override
   public ResponseEntity<?> save(ClassDTO classDTO) {
-    List<UserDTO> requestUserDTOs = classDTO.getUserDTOS();
+    List<UserDTO> requestUserDTOs = classDTO.getUserDTOs();
 
     FamsClass entity;
 
@@ -106,7 +106,7 @@ public class ClassServiceImpl implements IClassService {
       UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
       userDTOS.add(newUserDTO);
     }
-    result.setUserDTOS(userDTOS);
+    result.setUserDTOs(userDTOS);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 
