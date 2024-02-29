@@ -2,10 +2,8 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.MaterialDTO;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Material;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.SyllabusMaterial;
@@ -13,7 +11,6 @@ import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.repository.MaterialRepository;
 import com.example.fams.repository.SyllabusMaterialRepository;
 import com.example.fams.repository.SyllabusRepository;
-import com.example.fams.services.IGenericService;
 import com.example.fams.services.IMaterialService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.domain.PageRequest;

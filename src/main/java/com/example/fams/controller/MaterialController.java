@@ -1,8 +1,6 @@
 package com.example.fams.controller;
 
-import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.MaterialDTO;
-import com.example.fams.services.IGenericService;
 import com.example.fams.services.IMaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
