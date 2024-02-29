@@ -2,6 +2,7 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.request.ResetPasswordRequest;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -39,8 +40,13 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtAuthenticationRespone> signin (@RequestBody SigninRequest signinRequest){
-        return ResponseEntity.ok(authenticationService.signin(signinRequest));
+    public ResponseEntity<?> signin (@RequestBody SigninRequest signinRequest){
+        return authenticationService.signin(signinRequest);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh (@RequestBody RefreshTokenRequest refreshTokenRequest){
+        return authenticationService.refreshToken(refreshTokenRequest);
     }
 
 //    @PostMapping("/sendOTP")
@@ -48,24 +54,19 @@ public class AuthenticationController {
 //        authenticationService.generateAndSendOTP(email);
 //        return ResponseEntity.ok("OTP sent successfully");
 //    }
-    @GetMapping("/sendOTP")
+    @PostMapping("/sendOTP")
     public ResponseEntity<?> sendMailOTP(@RequestParam String email){
-        if (authenticationService.generateAndSendOTP(email))
-            return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
-        else
-            return ResponseUtil.error("Error", "Cannot send OTP", HttpStatus.BAD_REQUEST);
+        return authenticationService.generateAndSendOTP(email);
     }
 
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     public ResponseEntity<?> validateOTP(@RequestParam String otp){
-        if (authenticationService.verifyOTP(otp))
-            return ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
-        else
-            return ResponseUtil.error("Invalid OTP", "Invalid OTP", HttpStatus.NOT_ACCEPTABLE);
+        return authenticationService.verifyOTP(otp);
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<JwtAuthenticationRespone> refresh (@RequestBody RefreshTokenRequest refreshTokenRequest){
-        return ResponseEntity.ok(authenticationService.refreshToken(refreshTokenRequest));
+    @PutMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return authenticationService.resetPassword(request.getEmail(), request.getNewPassword());
     }
+
 }
