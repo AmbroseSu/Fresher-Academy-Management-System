@@ -2,10 +2,8 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
-import com.example.fams.entities.LearningObjectiveContent;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.TrainingProgram;
 import com.example.fams.entities.TrainingProgramSyllabus;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service("TrainingProgramService")
 public class TrainingProgramServiceImpl implements ITrainingProgramService {

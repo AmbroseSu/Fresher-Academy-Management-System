@@ -2,10 +2,12 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.SyllabusDTO;
+import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.repository.SyllabusRepository;
-import com.example.fams.services.IGenericService;
+import com.example.fams.services.ISyllabusService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service("SyllabusService")
-public class SyllabusServiceImpl implements IGenericService<SyllabusDTO> {
+public class SyllabusServiceImpl implements ISyllabusService {
 
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
@@ -97,5 +99,56 @@ public class SyllabusServiceImpl implements IGenericService<SyllabusDTO> {
         } else {
             return ResponseUtil.error("Syllabus not found", "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
         }
+    }
+
+
+    @Override
+    public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, int page, int limit) {
+        String name = syllabusDTO.getName();
+        String code = syllabusDTO.getCode();
+        Long timeAllocation = syllabusDTO.getTimeAllocation();
+        String description = syllabusDTO.getDescription();
+        Boolean isApproved = syllabusDTO.getIsApproved();
+        Boolean isActive = syllabusDTO.getIsActive();
+        String version = syllabusDTO.getVersion();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, pageable);
+        List<SyllabusDTO> result = new ArrayList<>();
+        Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
+        for (Syllabus entity : entities){
+            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
+
+    @Override
+    public ResponseEntity<?> searchSortFilterADMIN(SyllabusDTO syllabusDTO, String sortById, int page, int limit) {
+        String name = syllabusDTO.getName();
+        String code = syllabusDTO.getCode();
+        Long timeAllocation = syllabusDTO.getTimeAllocation();
+        String description = syllabusDTO.getDescription();
+        Boolean isApproved = syllabusDTO.getIsApproved();
+        Boolean isActive = syllabusDTO.getIsActive();
+        String version = syllabusDTO.getVersion();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Syllabus> entities = syllabusRepository.searchSortFilterADMIN(name, code, timeAllocation, description, isApproved, isActive, version, sortById, pageable);
+        List<SyllabusDTO> result = new ArrayList<>();
+        Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
+        for (Syllabus entity : entities){
+            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
     }
 }

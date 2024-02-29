@@ -1,7 +1,9 @@
 package com.example.fams.controller;
 
 import com.example.fams.dto.SyllabusDTO;
+import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.services.IGenericService;
+import com.example.fams.services.ISyllabusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,7 @@ public class SyllabusController {
 
     @Autowired
     @Qualifier("SyllabusService")
-    private IGenericService<SyllabusDTO> syllabusService;
+    private ISyllabusService syllabusService;
 
     @GetMapping("user/syllabus/findAllByStatusTrue")
     public ResponseEntity<?> getAllSyllabusByStatusTrue(@RequestParam int page, @RequestParam int limit) {
@@ -23,6 +25,19 @@ public class SyllabusController {
     @GetMapping("admin/syllabus/findAll")
     public ResponseEntity<?> getAllSyllabus(@RequestParam int page, @RequestParam int limit) {
         return syllabusService.findAll(page, limit);
+    }
+    @GetMapping("user/syllabus/search")
+    public ResponseEntity<?> searchSyllabus(@RequestBody SyllabusDTO syllabusDTO,
+                                                   @RequestParam(defaultValue = "1") int page,
+                                                   @RequestParam(defaultValue = "10") int limit){
+        return syllabusService.searchSortFilter(syllabusDTO, page, limit);
+    }
+    @GetMapping("admin/syllabus/search")
+    public ResponseEntity<?> searchSyllabusADMIN(@RequestBody SyllabusDTO syllabusDTO,
+                                                        @RequestParam String sortById,
+                                                        @RequestParam(defaultValue = "1") int page,
+                                                        @RequestParam(defaultValue = "10") int limit){
+        return syllabusService.searchSortFilterADMIN(syllabusDTO, sortById, page, limit);
     }
 
     @PostMapping("admin/syllabus/create")
