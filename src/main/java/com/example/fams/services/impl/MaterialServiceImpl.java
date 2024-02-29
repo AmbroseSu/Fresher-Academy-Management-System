@@ -33,7 +33,6 @@ public class MaterialServiceImpl implements IMaterialService {
     private final SyllabusMaterialRepository syllabusMaterialRepository;
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
-    private final LearningObjectiveRepository learningObjectiveRepository;
 
     public MaterialServiceImpl(MaterialRepository materialRepository,SyllabusMaterialRepository syllabusMaterialRepository,SyllabusRepository syllabusRepository, GenericConverter genericConverter,
                                LearningObjectiveRepository learningObjectiveRepository) {
@@ -41,7 +40,6 @@ public class MaterialServiceImpl implements IMaterialService {
         this.genericConverter = genericConverter;
         this.syllabusMaterialRepository = syllabusMaterialRepository;
         this.syllabusRepository = syllabusRepository;
-        this.learningObjectiveRepository = learningObjectiveRepository;
     }
 
     @Override
