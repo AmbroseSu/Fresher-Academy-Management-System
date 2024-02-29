@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service("MaterialService")
 public class MaterialServiceImpl implements IMaterialService {
@@ -194,7 +195,7 @@ public class MaterialServiceImpl implements IMaterialService {
             for (SyllabusDTO syllabusDTO : requestSyllabusDTOs) {
                 SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
                 syllabusMaterial.setMaterial(materialRepository.findById(materialId));
-                syllabusMaterial.setSyllabus(syllabusRepository.findById(syllabusDTO.getId()));
+                syllabusMaterial.setSyllabus(syllabusRepository.findOneById(syllabusDTO.getId()));
                 syllabusMaterialRepository.save(syllabusMaterial);
             }
         }
