@@ -2,15 +2,19 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.MaterialDTO;
 import com.example.fams.dto.SyllabusDTO;
+import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Material;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.SyllabusMaterial;
+import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.repository.MaterialRepository;
 import com.example.fams.repository.SyllabusMaterialRepository;
 import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.services.IGenericService;
+import com.example.fams.services.IMaterialService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,19 +29,22 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service("MaterialService")
-public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
+public class MaterialServiceImpl implements IMaterialService {
 
 
     private final MaterialRepository materialRepository;
     private final SyllabusMaterialRepository syllabusMaterialRepository;
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
+    private final LearningObjectiveRepository learningObjectiveRepository;
 
-    public MaterialServiceImpl(MaterialRepository materialRepository,SyllabusMaterialRepository syllabusMaterialRepository,SyllabusRepository syllabusRepository, GenericConverter genericConverter) {
+    public MaterialServiceImpl(MaterialRepository materialRepository,SyllabusMaterialRepository syllabusMaterialRepository,SyllabusRepository syllabusRepository, GenericConverter genericConverter,
+                               LearningObjectiveRepository learningObjectiveRepository) {
         this.materialRepository = materialRepository;
         this.genericConverter = genericConverter;
         this.syllabusMaterialRepository = syllabusMaterialRepository;
         this.syllabusRepository = syllabusRepository;
+        this.learningObjectiveRepository = learningObjectiveRepository;
     }
 
     @Override
@@ -196,5 +203,43 @@ public class MaterialServiceImpl implements IGenericService<MaterialDTO> {
                 syllabusMaterialRepository.save(syllabusMaterial);
             }
         }
+    }
+    @Override
+    public ResponseEntity<?> searchSortFilter(MaterialDTO materialDTO, int page, int limit) {
+        String name = materialDTO.getName();
+        String description = materialDTO.getDescription();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Material> entities = materialRepository.searchSortFilter(name,description, pageable);
+        List<MaterialDTO> result = new ArrayList<>();
+        Long count = materialRepository.countSearchSortFilter(name,description);
+        for (Material entity : entities){
+            MaterialDTO newDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
+    @Override
+    public ResponseEntity<?> searchSortFilterADMIN(MaterialDTO materialDTO, String sortById, int page, int limit) {
+        String name = materialDTO.getName();
+        String description = materialDTO.getDescription();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Material> entities = materialRepository.searchSortFilterADMIN(name, description, sortById, pageable);
+        List<MaterialDTO> result = new ArrayList<>();
+        Long count = materialRepository.countSearchSortFilter(name,description);
+        for (Material entity : entities){
+            MaterialDTO newDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+            result.add(newDTO);
+        }
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
     }
 }
