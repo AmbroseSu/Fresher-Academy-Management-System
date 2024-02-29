@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SyllabusDTO {
     private Long id;
-
     private String name;
 
     private String code;
@@ -24,6 +23,5 @@ public class SyllabusDTO {
 
     private String version;
 
-    private boolean status;
-
+    private Boolean status;
 }
