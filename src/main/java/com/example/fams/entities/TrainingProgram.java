@@ -18,7 +18,7 @@ public class TrainingProgram extends BaseEntity{
 
     private Integer training_status;
 
-    @ManyToMany
-    private List<Syllabus> syllabuses;
+    @OneToMany(mappedBy="trainingProgram")
+    private List<TrainingProgramSyllabus> trainingProgramSyllabuses;
 
 }
