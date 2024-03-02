@@ -27,8 +27,13 @@ public class ClassController {
     return classService.findAll(page, limit);
   }
 
+  @GetMapping("user/class/findById/{id}")
+  public ResponseEntity<?> getByClassId(@PathVariable Long id) {
+    return classService.findById(id);
+  }
+
   @GetMapping("user/class/search")
-  public ResponseEntity<?> searchLearningObjective(@RequestBody ClassDTO classDTO,
+  public ResponseEntity<?> searchClass(@RequestBody ClassDTO classDTO,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int limit){
     return classService.searchSortFilter(classDTO, page, limit);
@@ -43,7 +48,7 @@ public class ClassController {
   }
 
   @PostMapping("admin/class/create")
-  public ResponseEntity<?> createLearningObjective(@RequestBody ClassDTO classDTO) {
+  public ResponseEntity<?> createClass(@RequestBody ClassDTO classDTO) {
     return classService.save(classDTO);
   }
 

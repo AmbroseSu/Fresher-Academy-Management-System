@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name="tbl_syllabus")
 public class Syllabus extends BaseEntity{
+    private Long id;
 
     private String name;
 
@@ -25,13 +26,14 @@ public class Syllabus extends BaseEntity{
 
     private String version;
 
-    @ManyToMany
-    private List<Material> materials;
+    @OneToMany(mappedBy="syllabus")
+    private List<SyllabusMaterial> syllabusMaterial;
 
     @ManyToMany
     private List<LearningObjective> learningObjectives;
 
-    @ManyToMany(mappedBy="syllabuses")
-    private List<TrainingProgram> trainingPrograms;
+    @OneToMany(mappedBy = "syllabus")
+    private List<TrainingProgramSyllabus> trainingProgramSyllabuses;
+
 
 }

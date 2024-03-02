@@ -4,17 +4,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MaterialDTO {
-
+public class SyllabusDTO {
     private Long id;
-    private Boolean status;
     private String name;
 
+    private String code;
+
+    private Long timeAllocation;
+
     private String description;
-    private List<SyllabusDTO> syllabusDTOs;
+
+    private Boolean isApproved;
+
+    private Boolean isActive;
+
+    private String version;
+
+    private Boolean status;
 }
