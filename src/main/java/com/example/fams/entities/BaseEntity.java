@@ -50,7 +50,7 @@ public abstract class BaseEntity{
         createdDate = new Date().getTime();
         modifiedBy = authentication.getName();
         modifiedDate = new Date().getTime();
-
+        status = true;
     }
 
     @PreUpdate

@@ -23,6 +23,13 @@ public class GlobalExceptionHandler {
         return ResponseUtil.error(ExceptionUtils.getErrors(ex), "Bad request", HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        String errorMessage = ex.getMessage();
+        return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
+    }
+
     // ! Lộc add thêm vào ngày 01/02/2024
 //    @ExceptionHandler(ConstraintViolationException.class)
 //    @ResponseStatus(HttpStatus.BAD_REQUEST)
