@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,7 +32,7 @@ public class MaterialController {
     }
 
     @PostMapping("admin/material/create")
-    public ResponseEntity<?> createMaterial(@RequestBody MaterialDTO materialDTO){
+    public ResponseEntity<?> createMaterial(@Valid @RequestBody MaterialDTO materialDTO){
         return materialService.save(materialDTO);
     }
 
