@@ -71,7 +71,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
         } catch (Exception ex) {
-            return ResponseUtil.error("Error", "Error creating new user", HttpStatus.NOT_ACCEPTABLE);
+            return ResponseUtil.error("Error", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
@@ -89,12 +89,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
-            jwtAuthenticationRespone.setUser((UserDTO) genericConverter.toDTO(user, UserDTO.class));
+            jwtAuthenticationRespone.setUserDTO((UserDTO) genericConverter.toDTO(user, UserDTO.class));
             jwtAuthenticationRespone.setToken(jwt);
             jwtAuthenticationRespone.setRefreshToken(refreshToken);
             return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
         } catch (Exception ex) {
-            return ResponseUtil.error("Cannot sign in", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+            return ResponseUtil.error("Error", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
@@ -117,7 +117,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
 
-        try {
+//        try {
             // Generate a random OTP
             String otp = generateOTP();
 
@@ -127,11 +127,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
             emailService.sendOTPByEmail(userEmail, otp);
             return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
-        } catch (MailException ex) {
-            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
-            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+//        } catch (MailException ex) {
+//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
+//        } catch (Exception ex) {
+//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
     }
 
     private static String generateOTP() {

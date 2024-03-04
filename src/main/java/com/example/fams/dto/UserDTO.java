@@ -3,6 +3,8 @@ package com.example.fams.dto;
 import java.util.List;
 
 import com.example.fams.entities.enums.Role;
+import com.example.fams.validation.ValidEmail;
+import com.example.fams.validation.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +20,11 @@ public class UserDTO {
 
   private String secondName;
 
+  @ValidEmail
   @NotBlank(message = "Email must not be blank")
   private String email;
 
+  @ValidPhone
   @NotBlank(message = "Phone must not be blank")
   private String phone;
 
