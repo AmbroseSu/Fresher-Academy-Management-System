@@ -115,7 +115,7 @@ public class ClassServiceImpl implements IClassService {
       for (UserDTO userDTO : requestUserDTOs) {
         ClassUser clu = new ClassUser();
         clu.setFamsClass(classRepository.findById(classId));
-        clu.setUser(userRepository.findById(userDTO.getId()));
+        clu.setUser(userRepository.findById(userDTO.getId()).get());
         classUserRepository.save(clu);
       }
     }

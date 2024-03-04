@@ -2,7 +2,9 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
-import com.example.fams.dto.ResponseDTO;
+import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.UpsertUserDTO;
+import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
@@ -31,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.Random;
 
 @Service
@@ -45,6 +48,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepository userRepository;
 
+    private final GenericConverter genericConverter;
+
     private final PasswordEncoder passwordEncoder;
 
     private final AuthenticationManager authenticationManager;
@@ -55,32 +60,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final EmailService emailService;
 
-    public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
+    public ResponseEntity<?> signup(User user) {
         try {
+            // check if user already exists
+            if (userRepository.existsByEmail(user.getEmail())) {
+                return ResponseUtil.error("Email is already in use","Sign up failed", HttpStatus.BAD_REQUEST);
+            }
 
-        User FAMSuser = new User();
+        user.setRole(Role.USER);
+            user.setUuid(UUID.randomUUID().toString());
+            UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
+            userRepository.save(user);
 
-        FAMSuser.setEmail(signUpRequest.getEmail());
-        FAMSuser.setFirstName(signUpRequest.getFirstName());
-        FAMSuser.setSecondName(signUpRequest.getLastName());
-        FAMSuser.setRole(Role.USER);
-        FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        FAMSuser.setPhone(signUpRequest.getPhone());
-
-        return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
-        }catch (ConstraintViolationException e) {
+            return ResponseUtil.getObject(result, HttpStatus.CREATED, "ok");
+        } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
         }
     }
 
-    public ResponseEntity<?> signin(SigninRequest signinRequest){
+    public ResponseEntity<?> signin(SigninRequest signinRequest) {
         // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
         // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
         // todo Trả về một object Authentication và đưa vào Security Context để quản lý
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getEmail(),
                 signinRequest.getPassword()));
 
-        var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
+        var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
         var jwt = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
 
@@ -91,10 +96,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
     }
 
-    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest){
+    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest) {
         String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
         User FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
-        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)){
+        if (jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)) {
             var jwt = jwtService.generateToken(FAMSuser);
 
             JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();

@@ -20,18 +20,18 @@ public class FamsApplication implements CommandLineRunner {
     }
 
     public void run(String... args) {
-        User adminAccount = userRepository.findByRole(Role.ADMIN);
-        if(null == adminAccount){
-            User FAMSuser = new User();
-
-            FAMSuser.setEmail("admin@gmail.com");
-            FAMSuser.setFirstName("admin");
-            FAMSuser.setSecondName("admin");
-            FAMSuser.setRole(Role.ADMIN);
-            FAMSuser.setPassword(new BCryptPasswordEncoder().encode("admin"));
-            FAMSuser.setPhone("0123456789");
-            userRepository.save(FAMSuser);
-        }
+//        User adminAccount = userRepository.findByRole(Role.ADMIN);
+//        if(null == adminAccount){
+//            User FAMSuser = new User();
+//
+//            FAMSuser.setEmail("admin@gmail.com");
+//            FAMSuser.setFirstName("admin");
+//            FAMSuser.setLastName("admin");
+//            FAMSuser.setRole(Role.ADMIN);
+//            FAMSuser.setPassword(new BCryptPasswordEncoder().encode("admin"));
+//            FAMSuser.setPhone("0123456789");
+//            userRepository.save(FAMSuser);
+//        }
     }
 }
 ;
