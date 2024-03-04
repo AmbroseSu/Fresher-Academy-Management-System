@@ -27,6 +27,7 @@ public class User implements UserDetails {
     private String secondName;
 
     @ValidEmail
+    @Column(unique = true)
     private String email;
     private String password;
     private Role role;
