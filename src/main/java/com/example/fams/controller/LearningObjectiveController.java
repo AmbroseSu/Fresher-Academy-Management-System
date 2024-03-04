@@ -4,6 +4,7 @@ import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ILearningObjectiveService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ public class LearningObjectiveController {
     }
 
     @PostMapping("admin/learningObjective/create")
-    public ResponseEntity<?> createLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
+    public ResponseEntity<?> createLearningObjective(@Valid @RequestBody LearningObjectiveDTO learningObjective) {
         return learningObjectiveService.save(learningObjective);
     }
 

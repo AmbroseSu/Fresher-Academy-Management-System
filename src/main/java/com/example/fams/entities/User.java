@@ -18,38 +18,29 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tbl_user")
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class User extends BaseEntity implements UserDetails {
+
     private String firstName;
 
-    private String secondName;
+    private String lastName;
 
     @ValidEmail
     private String email;
     private String password;
     private Role role;
 
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "com.example.fams.validation.CustomerUUIDGenerator"
-    )
+    @Column(name = "uuid", nullable = false, unique = true)
     private String uuid;
 
     @ValidPhone
     private String phone;
     private Long dob;
     private Boolean gender;
-    private Integer status;
-    private String createBy;
-    private Long createDate;
-    private String modifiedBy;
-    private Long modifiedDate;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Class> aClasses;
+//    @ManyToMany(mappedBy = "user")
+//    private List<User> user;
+    @OneToMany(mappedBy = "user")
+    private List<ClassUser> classUsers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

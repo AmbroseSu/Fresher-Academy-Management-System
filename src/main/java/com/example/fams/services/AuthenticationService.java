@@ -7,8 +7,13 @@ import com.example.fams.dto.request.SigninRequest;
 import com.example.fams.entities.User;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
 public interface AuthenticationService {
-    ResponseEntity<?> signup(SignUpRequest signUpRequest);
-    JwtAuthenticationRespone signin(SigninRequest signinRequest);
-    JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest);
+    ResponseEntity<?> signup(User user);
+    ResponseEntity<?> signin(SigninRequest signinRequest);
+    ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest);
+    ResponseEntity<?> generateAndSendOTP(String userEmail);
+    ResponseEntity<?> verifyOTP(String enteredOTP);
+    ResponseEntity<?> resetPassword(String email, String newPassword);
 }

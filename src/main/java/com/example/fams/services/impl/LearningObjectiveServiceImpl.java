@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service("LearningObjectiveService")
@@ -87,6 +88,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
             learningObjectiveContentRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
             loadLearningObjectiveContentFromListContentId(requestContentDTOs, entity.getId());
+            entity.markModified();
             learningObjectiveRepository.save(entity);
         }
 

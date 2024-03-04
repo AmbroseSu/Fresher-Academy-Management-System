@@ -1,5 +1,6 @@
 package com.example.fams.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,8 @@ public class ClassDTO {
   private String name;
   private String code;
   private Long duration;
-  private Integer status;
+  private Boolean status;
   private Long startDate;
   private Long endDate;
+  private List<UserDTO> userDTOs;
 }

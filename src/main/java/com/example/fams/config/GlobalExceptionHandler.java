@@ -17,11 +17,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
-        StringBuilder errorMessage = new StringBuilder("");
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            errorMessage.append(error.getDefaultMessage()).append("; ");
-        });
-        return ResponseUtil.error(String.valueOf(errorMessage),"Bad request",HttpStatus.BAD_REQUEST);
+        List<String> errorMessages = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.toList());
+        return ResponseUtil.error(ExceptionUtils.getErrors(ex), "Bad request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        String errorMessage = ex.getMessage();
+        return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
     }
 
     // ! Lộc add thêm vào ngày 01/02/2024

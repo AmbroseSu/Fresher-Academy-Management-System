@@ -14,8 +14,8 @@ public class Material extends BaseEntity{
 
     private String description;
 
-    @ManyToMany(mappedBy="materials")
-    private List<Syllabus> syllabuses;
+    @OneToMany(mappedBy="material")
+    private List<SyllabusMaterial> syllabusMaterial;
 
 
 

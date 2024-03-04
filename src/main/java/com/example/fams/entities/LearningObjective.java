@@ -25,4 +25,6 @@ public class LearningObjective extends BaseEntity {
     @OneToMany(mappedBy="learningObjective")
     private List<LearningObjectiveContent> learningObjectiveContents;
 
+
+
 }

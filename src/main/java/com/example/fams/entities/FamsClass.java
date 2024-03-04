@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="tbl_class")
-public class Class extends BaseEntity{
+public class FamsClass extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="training_programID")
     private TrainingProgram trainingProgram;
@@ -27,8 +27,10 @@ public class Class extends BaseEntity{
     @Column(name="end_date")
     private Long endDate;
 
-    @ManyToMany
-    private List<User> users;
+//    @ManyToMany
+//    private List<User> users;
 
+    @OneToMany(mappedBy = "famsClass")
+    private List<ClassUser> classUsers;
 
 }
