@@ -20,5 +20,12 @@ public class TrainingProgram extends BaseEntity{
 
     @OneToMany(mappedBy="trainingProgram")
     private List<TrainingProgramSyllabus> trainingProgramSyllabuses;
+//    @Override
+//    public String toString() {
+//        return "TrainingProgram{" +
+//                "id=" + super.getId() +
+//                // Include only necessary fields, avoid calling toString() on collections or related entities
+//                '}';
+//    }
 
 }

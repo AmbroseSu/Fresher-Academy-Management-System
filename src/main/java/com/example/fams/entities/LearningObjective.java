@@ -25,6 +25,15 @@ public class LearningObjective extends BaseEntity {
     @OneToMany(mappedBy="learningObjective", fetch = FetchType.EAGER)
     private List<LearningObjectiveContent> learningObjectiveContents;
 
+    @OneToMany(mappedBy = "learningObjective")
+    private List<SyllabusObjective> syllabusObjectives;
 
+    @Override
+    public String toString() {
+        return "LearningObjective{" +
+                "id=" + super.getId() +
+                // Include only necessary fields, avoid calling toString() on collections or related entities
+                '}';
+    }
 
 }
