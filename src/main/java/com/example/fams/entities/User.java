@@ -18,6 +18,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tbl_user")
+
 public class User extends BaseEntity implements UserDetails {
 
     private String firstName;
@@ -69,6 +70,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return super.isStatus();
     }
 }

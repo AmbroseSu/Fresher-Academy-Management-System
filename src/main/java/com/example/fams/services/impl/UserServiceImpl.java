@@ -4,7 +4,7 @@ import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
-import com.example.fams.entities.Class;
+import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.Content;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.User;
@@ -164,9 +164,11 @@ public class UserServiceImpl implements UserService {
                 return ResponseUtil.error("Update failed", "User not found", HttpStatus.NOT_FOUND);
             }
             User user = user1.get();
+            User tempOldUser = ServiceUtils.cloneFromEntity(user);
             // Apply updates efficiently using a converter, handling potential missing fields
             user = (User) genericConverter.updateEntity(upsertUserDTO, user);
-            user = ServiceUtils.fillMissingAttribute(user, userRepository.getById(user.getId()));
+//            user = ServiceUtils.fillMissingAttribute(user, userRepository.findByEmail(user.getEmail()).get());
+            user = ServiceUtils.fillMissingAttribute(user, tempOldUser);
 
             // Save the user and handle potential errors
             user = userRepository.save(user);
@@ -178,7 +180,7 @@ public class UserServiceImpl implements UserService {
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
         } catch (Exception e) { // Handle other potential exceptions
-            return ResponseUtil.error("Something wrong", "Update failed", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseUtil.error(e.getMessage(), "Update failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -190,6 +192,7 @@ public class UserServiceImpl implements UserService {
         }
         User newUser = user.get();
         newUser.setStatus(!newUser.getStatus());
+        newUser.isEnabled();
         userRepository.save(newUser);
         return ResponseUtil.getObject(genericConverter.toDTO(newUser,UserDTO.class), HttpStatus.OK, "Change status successful");
     }

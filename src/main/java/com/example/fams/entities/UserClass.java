@@ -15,6 +15,6 @@ public class UserClass {
 
     @ManyToOne
     @JoinColumn(name = "classId")
-    private Class aClass;
+    private FamsClass aClass;
 
 }
