@@ -4,17 +4,16 @@ import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.LearningObjectiveDTO;
+import com.example.fams.dto.UnitDTO;
 import com.example.fams.entities.Content;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.LearningObjectiveContent;
+import com.example.fams.entities.Unit;
 import com.example.fams.repository.ContentLearningObjectiveRepository;
 import com.example.fams.repository.ContentRepository;
-import com.example.fams.repository.LearningObjectiveContentRepository;
 import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.services.IContentService;
-import com.example.fams.services.IGenericService;
 import com.example.fams.services.ServiceUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -142,6 +141,20 @@ public class ContentServiceImpl implements IContentService {
     List<ContentDTO> result = new ArrayList<>();
     for (Content entity : entities) {
       ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
+      if(entity.getUnit() != null){
+        Unit unit = contentRepository.findUnitByUnitId(entity.getUnit().getId());
+        List<LearningObjective> learningObjective = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
+        UnitDTO unitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
+        List<LearningObjectiveDTO> learningObjectiveDTOs = new ArrayList<>();
+        for(LearningObjective lo : learningObjective){
+          LearningObjectiveDTO learningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(lo, LearningObjectiveDTO.class);
+          learningObjectiveDTOs.add(learningObjectiveDTO);
+        }
+        newDTO.setUnitDTO(unitDTO);
+        newDTO.setLearningObjectiveDTOS(learningObjectiveDTOs);
+      }
+
+
       result.add(newDTO);
     }
     return ResponseUtil.getCollection(result,

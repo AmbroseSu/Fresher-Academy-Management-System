@@ -28,45 +28,45 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
   // ? Search by fields filter
   @Query("SELECT cl FROM FamsClass cl " +
       "WHERE (:code IS NULL OR cl.code = :code) AND cl.status = TRUE " +
-      "AND (:name IS NULL OR cl.name = :name) " +
+      "AND (:name IS NULL OR cl.name = :name) " /*+
       "AND (:duration IS NULL OR cl.duration = :duration) " +
       "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)" )
+      "AND (:endDate IS NULL OR cl.endDate = :endDate)"*/ )
   List<FamsClass> searchSortFilter(@Param("code") String code,
       @Param("name") String name,
-      @Param("duration") Long duration,
+      /*@Param("duration") Long duration,
       @Param("startDate") Long startDate,
-      @Param("endDate") Long endDate,
+      @Param("endDate") Long endDate,*/
       Pageable pageable);
 
   @Query("SELECT COUNT(cl) FROM FamsClass cl " +
       "WHERE (:code IS NULL OR cl.code = :code) AND cl.status = TRUE " +
-      "AND (:name IS NULL OR cl.name = :name) " +
+      "AND (:name IS NULL OR cl.name = :name) " /*+
       "AND (:duration IS NULL OR cl.duration = :duration) " +
       "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)" )
+      "AND (:endDate IS NULL OR cl.endDate = :endDate)"*/ )
   Long countSearchSortFilter(String code,
-      String name,
+      String name/*,
       Long duration,
       Long startDate,
-      Long endDate);
+      Long endDate*/);
 
 
   @Query("SELECT cl FROM FamsClass cl " +
       "WHERE (:code IS NULL OR cl.code = :code) " +
       "AND (:name IS NULL OR cl.name = :name) " +
-      "AND (:duration IS NULL OR cl.duration = :duration) " +
+      /*"AND (:duration IS NULL OR cl.duration = :duration) " +
       "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)"+
+      "AND (:endDate IS NULL OR cl.endDate = :endDate)"+*/
       "ORDER BY  " +
       "CASE WHEN :sortById ='iDESC' THEN cl.id  END DESC ," +
       "CASE WHEN :sortById ='iASC' THEN cl.id  END ASC ,"+
       "cl.id desc")
   List<FamsClass> searchSortFilterADMIN(@Param("code") String code,
       @Param("name") String name,
-      @Param("duration") Long duration,
+      /*@Param("duration") Long duration,
       @Param("startDate") Long startDate,
-      @Param("endDate") Long endDate,
+      @Param("endDate") Long endDate,*/
       @Param("sortById") String sortById,
       Pageable pageable);
 

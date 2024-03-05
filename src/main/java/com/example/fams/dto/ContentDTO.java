@@ -1,5 +1,8 @@
 package com.example.fams.dto;
 
+import com.example.fams.entities.Unit;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,13 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ContentDTO {
 
+
   private Long id;
+  private UnitDTO unitDTO;
+  @NotNull
   private Integer deliveryType;
+  @NotNull
   private Long duration;
-  private String createBy;
+  @NotNull
   private Boolean status;
-  private Long createdDate;
-  private String modifiedBy;
-  private Long modifiedDate;
   private List<LearningObjectiveDTO> learningObjectiveDTOS;
 }
