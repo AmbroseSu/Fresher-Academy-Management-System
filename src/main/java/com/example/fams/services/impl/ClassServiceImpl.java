@@ -140,6 +140,14 @@ public class ClassServiceImpl implements IClassService {
     List<ClassDTO> result = new ArrayList<>();
     for (FamsClass entity : entities) {
       ClassDTO newDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
+      List<User> users = classUserRepository.findUserByClassId(entity.getId());
+      List<UserDTO> userDTOs = new ArrayList<>();
+      for(User us : users){
+        UserDTO userDTO = (UserDTO) genericConverter.toDTO(us,UserDTO.class);
+        userDTOs.add(userDTO);
+      }
+      newDTO.setUserDTOs(userDTOs);
+
       result.add(newDTO);
     }
     return ResponseUtil.getCollection(result,
@@ -170,13 +178,13 @@ public class ClassServiceImpl implements IClassService {
   public ResponseEntity<?> searchSortFilter(ClassDTO classDTO, int page, int limit) {
     String code = classDTO.getCode();
     String name = classDTO.getName();
-    Long duration = classDTO.getDuration();
-    Long startDate = classDTO.getStartDate();
-    Long endDate = classDTO.getEndDate();
+//    Long duration = classDTO.getDuration();
+//    Long startDate = classDTO.getStartDate();
+//    Long endDate = classDTO.getEndDate();
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<FamsClass> entities = classRepository.searchSortFilter(code, name, duration, startDate, endDate, pageable);
+    List<FamsClass> entities = classRepository.searchSortFilter(code, name, /*duration, startDate, endDate,*/ pageable);
     List<ClassDTO> result = new ArrayList<>();
-    Long count = classRepository.countSearchSortFilter(code, name, duration, startDate, endDate);
+    Long count = classRepository.countSearchSortFilter(code, name/*, duration, startDate, endDate*/);
     for (FamsClass entity : entities){
       ClassDTO newDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
       result.add(newDTO);
@@ -193,13 +201,13 @@ public class ClassServiceImpl implements IClassService {
   public ResponseEntity<?> searchSortFilterADMIN(ClassDTO classDTO, String sortById, int page, int limit) {
     String code = classDTO.getCode();
     String name = classDTO.getName();
-    Long duration = classDTO.getDuration();
-    Long startDate = classDTO.getStartDate();
-    Long endDate = classDTO.getEndDate();
+//    Long duration = classDTO.getDuration();
+//    Long startDate = classDTO.getStartDate();
+//    Long endDate = classDTO.getEndDate();
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<FamsClass> entities = classRepository.searchSortFilterADMIN(code, name, duration, startDate, endDate, sortById, pageable);
+    List<FamsClass> entities = classRepository.searchSortFilterADMIN(code, name/*, duration, startDate, endDate*/, sortById, pageable);
     List<ClassDTO> result = new ArrayList<>();
-    Long count = classRepository.countSearchSortFilter(code, name, duration, startDate, endDate);
+    Long count = classRepository.countSearchSortFilter(code, name/*, duration, startDate, endDate*/);
     for (FamsClass entity : entities){
       ClassDTO newDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
       result.add(newDTO);

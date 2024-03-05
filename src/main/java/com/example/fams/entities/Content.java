@@ -18,7 +18,7 @@ public class Content extends BaseEntity {
 
     private Long duration;
 
-    @OneToMany(mappedBy="content")
+    @OneToMany(mappedBy="content", fetch = FetchType.EAGER)
     private List<LearningObjectiveContent> learningObjectiveContents;
 
 }

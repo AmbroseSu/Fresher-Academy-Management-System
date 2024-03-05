@@ -81,7 +81,9 @@ public class UnitServiceImpl implements IUnitService {
     public ResponseEntity<?> save(UnitDTO unitDTO) {
         Unit unit;
         List<ContentDTO> requestContentDTOs = unitDTO.getContentDTOs();
-        validateContentIds(unitDTO.getContentDTOs());
+        if (unitDTO.getContentDTOs() != null){
+            validateContentIds(unitDTO.getContentDTOs());
+        }
         // * For update request
         if (unitDTO.getId() != null){
             Unit oldEntity = unitRepository.findById(unitDTO.getId());

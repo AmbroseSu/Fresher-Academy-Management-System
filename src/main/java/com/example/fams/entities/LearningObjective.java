@@ -22,7 +22,7 @@ public class LearningObjective extends BaseEntity {
 
     private String description;
 
-    @OneToMany(mappedBy="learningObjective")
+    @OneToMany(mappedBy="learningObjective", fetch = FetchType.EAGER)
     private List<LearningObjectiveContent> learningObjectiveContents;
 
 
