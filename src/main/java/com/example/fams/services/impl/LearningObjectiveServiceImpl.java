@@ -4,10 +4,12 @@ import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.LearningObjectiveDTO;
+import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.LearningObjectiveResponse;
 import com.example.fams.entities.Content;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.LearningObjectiveContent;
+import com.example.fams.entities.User;
 import com.example.fams.repository.ContentRepository;
 import com.example.fams.repository.LearningObjectiveContentRepository;
 import com.example.fams.repository.LearningObjectiveRepository;
@@ -138,6 +140,13 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         List<LearningObjectiveDTO> result = new ArrayList<>();
         for (LearningObjective entity : entities) {
             LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+            List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(entity.getId());
+            List<ContentDTO> contentDTOs = new ArrayList<>();
+            for(Content co : contents){
+                ContentDTO contentDTO = (ContentDTO) genericConverter.toDTO(co,ContentDTO.class);
+                contentDTOs.add(contentDTO);
+            }
+            newDTO.setContentDTOs(contentDTOs);
             result.add(newDTO);
         }
         return ResponseUtil.getCollection(result,
