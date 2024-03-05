@@ -106,13 +106,29 @@ public class MaterialServiceImpl implements IMaterialService {
 
         Material entity = new Material();
         if (materialDTO.getId() != null) {
+
+            // Xử lí Update các giá trị cũ
+
+            // Lấy Entity cũ ra
             Material oldEntity = materialRepository.findById(materialDTO.getId());
+            // Clone cái cũ thành 1 thg entity khác
             Material tempOldEntity = cloneMaterial(oldEntity);
+            // Update entity cũ bằng DTO nhập vào
             entity = (Material) genericConverter.updateEntity(materialDTO, oldEntity);
+            // Thêm nhg attribute còn thiếu từ entity cũ vào entity mới
             entity = fillMissingAttribute(entity, tempOldEntity);
+
+            // Xử lí quan hệ
+
+            // Xóa quan hệ cũ trong bảng phụ
             syllabusMaterialRepository.deleteAllByMaterialId(materialDTO.getId());
+            // Update quan hệ mới từ DTO
             loadSyllabusMaterialFromListSyllabusId(requestSyllabusDTOs,entity.getId());
+
+            // Đánh dấu là đã fix
             entity.markModified();
+
+            // Save
             materialRepository.save(entity);
         } else {
             materialDTO.setStatus(true);

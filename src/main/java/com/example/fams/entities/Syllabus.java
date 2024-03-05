@@ -29,8 +29,8 @@ public class Syllabus extends BaseEntity{
     @OneToMany(mappedBy="syllabus")
     private List<SyllabusMaterial> syllabusMaterial;
 
-    @ManyToMany
-    private List<LearningObjective> learningObjectives;
+    @OneToMany(mappedBy = "syllabus")
+    private List<SyllabusObjective> syllabusObjectives;
 
     @OneToMany(mappedBy = "syllabus")
     private List<TrainingProgramSyllabus> trainingProgramSyllabuses;

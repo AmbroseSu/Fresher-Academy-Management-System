@@ -1,5 +1,6 @@
 package com.example.fams.repository;
 
+import com.example.fams.entities.Material;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.SyllabusMaterial;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,9 @@ public interface SyllabusMaterialRepository extends JpaRepository<SyllabusMateri
             "WHERE sm.material.id = :materialId")
 
     List<Syllabus> findSyllabusesByMaterialId(Long materialId);
+
+    @Query("SELECT m FROM Material m " +
+            "JOIN SyllabusMaterial sm ON m.id = sm.material.id " +
+            "WHERE sm.syllabus.id = :syllabusId")
+    List<Material> findMaterialBySyllabusesId(Long syllabusId);
 }
