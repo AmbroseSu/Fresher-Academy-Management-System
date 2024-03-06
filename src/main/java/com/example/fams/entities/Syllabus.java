@@ -33,7 +33,7 @@ public class Syllabus extends BaseEntity{
     private List<SyllabusObjective> syllabusObjectives;
 
     @OneToMany(mappedBy = "syllabus")
-    private List<TrainingProgramSyllabus> trainingProgramSyllabuses;
+    private List<SyllabusTrainingProgram> syllabusTrainingPrograms;
 
 
 }

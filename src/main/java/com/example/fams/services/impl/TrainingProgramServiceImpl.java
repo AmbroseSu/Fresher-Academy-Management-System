@@ -5,9 +5,11 @@ import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.entities.Syllabus;
+import com.example.fams.entities.SyllabusTrainingProgram;
 import com.example.fams.entities.TrainingProgram;
-import com.example.fams.entities.TrainingProgramSyllabus;
+
 import com.example.fams.repository.SyllabusRepository;
+import com.example.fams.repository.SyllabusTrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramSyllabusRepository;
 import com.example.fams.services.ITrainingProgramService;
@@ -31,7 +33,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     private SyllabusRepository syllabusRepository;
 
     @Autowired
-    private TrainingProgramSyllabusRepository trainingProgramSyllabusRepository;
+    private SyllabusTrainingProgramRepository syllabusTrainingProgramRepository;
 
     @Autowired
     private GenericConverter genericConverter;
@@ -121,7 +123,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 // Fill missing attributes in the updated entity
                 entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
                 // Delete existing associations between training program and syllabus
-                trainingProgramSyllabusRepository.deleteAllByTrainingProgramId(trainingProgramDTO.getId());
+                syllabusTrainingProgramRepository.deleteAllByTrainingProgramId(trainingProgramDTO.getId());
                 // Load new associations between training program and syllabus
                 loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusDTOs, entity.getId());
                 // Mark the entity as modified
@@ -137,7 +139,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
            TrainingProgramDTO result = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
 
-           List<Syllabus> syllabusList = trainingProgramSyllabusRepository.findSyllabusByTrainingProgramId(entity.getId());
+           List<Syllabus> syllabusList = syllabusTrainingProgramRepository.findSyllabusByTrainingProgramId(entity.getId());
            List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
             for (Syllabus syllabus: syllabusList
                  ) {
@@ -161,10 +163,10 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     private void loadTrainingProgramSyllabusFromListSyllabus(List<SyllabusDTO> requestyllabusDTOs, Long trainingProgramId) {
         if (requestyllabusDTOs != null && !requestyllabusDTOs.isEmpty()) {
             for (SyllabusDTO syllabusDTO : requestyllabusDTOs) {
-                TrainingProgramSyllabus loc = new TrainingProgramSyllabus();
+                SyllabusTrainingProgram loc = new SyllabusTrainingProgram();
                 loc.setTrainingProgram(trainingProgramRepository.findOneById(trainingProgramId));
                 loc.setSyllabus(syllabusRepository.findOneById(syllabusDTO.getId()));
-                trainingProgramSyllabusRepository.save(loc);
+                syllabusTrainingProgramRepository.save(loc);
             }
         }
     }
