@@ -113,16 +113,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
 
-        try {
+//        try {
             // Generate a random OTP
-            String otp = generateOTP();
+        String otp = generateOTP();
 
-            // Store the OTP in the session or database for verification
-            httpSession.setAttribute("otp", otp);
-            httpSession.setAttribute("otpUserEmail", userEmail);
-            httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
-            emailService.sendOTPByEmail(userEmail, otp);
-            return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
+        // Store the OTP in the session or database for verification
+        httpSession.setAttribute("otp", otp);
+        httpSession.setAttribute("otpUserEmail", userEmail);
+        httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+        emailService.sendOTPByEmail(userEmail, otp);
+        return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
 //        } catch (MailException ex) {
 //            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
 //        } catch (Exception ex) {
