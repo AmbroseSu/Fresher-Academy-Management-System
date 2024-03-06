@@ -4,19 +4,8 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ClassDTO;
-import com.example.fams.dto.ContentDTO;
-import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.UserDTO;
-import com.example.fams.entities.Content;
-import com.example.fams.entities.FamsClass;
-import com.example.fams.entities.ClassUser;
-import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.LearningObjectiveContent;
-import com.example.fams.entities.User;
-import com.example.fams.repository.ClassRepository;
-import com.example.fams.repository.ClassUserRepository;
-import com.example.fams.repository.UserClassRepository;
-import com.example.fams.repository.UserRepository;
+import com.example.fams.entities.*;
+import com.example.fams.repository.*;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.ServiceUtils;
 import org.springframework.data.domain.PageRequest;
@@ -35,14 +24,16 @@ public class ClassServiceImpl implements IClassService {
   private final UserClassRepository userClassRepository;
   private final ClassUserRepository classUserRepository;
   private final UserRepository userRepository;
+  private final TrainingProgramRepository trainingProgramRepository;
   private final GenericConverter genericConverter;
 
   public ClassServiceImpl(ClassRepository classRepository, UserClassRepository userClassRepository,
-      ClassUserRepository classUserRepository, UserRepository userRepository, GenericConverter genericConverter) {
+                          ClassUserRepository classUserRepository, UserRepository userRepository, TrainingProgramRepository trainingProgramRepository, GenericConverter genericConverter) {
     this.classRepository = classRepository;
     this.userClassRepository = userClassRepository;
     this.classUserRepository = classUserRepository;
     this.userRepository = userRepository;
+    this.trainingProgramRepository = trainingProgramRepository;
     this.genericConverter = genericConverter;
   }
 
@@ -68,11 +59,15 @@ public class ClassServiceImpl implements IClassService {
   public ResponseEntity<?> save(ClassDTO classDTO) {
     ServiceUtils.errors.clear();
     List<Long> requestUserIds = classDTO.getUserIds();
+    Long requestTrainingProgramId = classDTO.getTrainingProgramId();
     FamsClass entity;
 
     // * Validate requestDTO ( if left null, then can be updated later )
     if (requestUserIds != null){
       ServiceUtils.validateUserIds(requestUserIds, userRepository);
+    }
+    if (requestTrainingProgramId != null){
+      ServiceUtils.validateTrainingProgramIds(List.of(requestTrainingProgramId), trainingProgramRepository);
     }
     if (!ServiceUtils.errors.isEmpty()) {
       throw new CustomValidationException(ServiceUtils.errors);
@@ -82,7 +77,7 @@ public class ClassServiceImpl implements IClassService {
     if (classDTO.getId() != null){
       FamsClass oldEntity = classRepository.findById(classDTO.getId());
       FamsClass tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-      entity = convertDtoToEntity(classDTO);
+      entity = convertDtoToEntity(classDTO, trainingProgramRepository);
       ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
       classUserRepository.deleteAllByFamsClassId(classDTO.getId());
       loadClassUserFromListUserId(requestUserIds, entity.getId());
@@ -180,9 +175,6 @@ public class ClassServiceImpl implements IClassService {
   public ResponseEntity<?> searchSortFilterADMIN(ClassDTO classDTO, String sortById, int page, int limit) {
     String code = classDTO.getCode();
     String name = classDTO.getName();
-//    Long duration = classDTO.getDuration();
-//    Long startDate = classDTO.getStartDate();
-//    Long endDate = classDTO.getEndDate();
     Pageable pageable = PageRequest.of(page - 1, limit);
     List<FamsClass> entities = classRepository.searchSortFilterADMIN(code, name, sortById,  pageable);
     List<ClassDTO> result = new ArrayList<>();
@@ -209,7 +201,6 @@ public class ClassServiceImpl implements IClassService {
             .map(User::getId)
             .toList();
 
-
         newClassDTO.setUserIds(userIds);
 
       }
@@ -217,12 +208,15 @@ public class ClassServiceImpl implements IClassService {
     }
   }
 
-  public FamsClass convertDtoToEntity(ClassDTO classDTO) {
+  public FamsClass convertDtoToEntity(ClassDTO classDTO, TrainingProgramRepository trainingProgramRepository) {
     FamsClass famsClass = new FamsClass();
     famsClass.setId(classDTO.getId());
     famsClass.setName(classDTO.getName());
     famsClass.setCode(classDTO.getCode());
     famsClass.setStatus(classDTO.getStatus());
+
+    TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
+    famsClass.setTrainingProgram(trainingProgram);
 
     return famsClass;
   }

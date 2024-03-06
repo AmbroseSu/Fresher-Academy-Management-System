@@ -152,10 +152,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         List<LearningObjective> entities = learningObjectiveRepository.searchSortFilter(code, name, type, description, pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         Long count = learningObjectiveRepository.countSearchSortFilter(code, name, type, description);
-        for (LearningObjective entity : entities){
-            LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
-            result.add(newDTO);
-        }
+        convertListLoToListLoDTO(entities,result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -174,10 +171,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         List<LearningObjective> entities = learningObjectiveRepository.searchSortFilterADMIN(code, name, type, description, sortById, pageable);
         List<LearningObjectiveDTO> result = new ArrayList<>();
         Long count = learningObjectiveRepository.countSearchSortFilter(code, name, type, description);
-        for (LearningObjective entity : entities){
-            LearningObjectiveDTO newDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
-            result.add(newDTO);
-        }
+        convertListLoToListLoDTO(entities,result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -191,21 +185,22 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             LearningObjectiveDTO newLoDTO = (LearningObjectiveDTO) genericConverter.toDTO(lo, LearningObjectiveDTO.class);
             List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(lo.getId());
             List<Syllabus> syllabus = syllabusObjectiveRepository.findSyllabusByLearningObjectiveId(lo.getId());
-            if (contents == null || syllabus == null){
-                if (contents == null) newLoDTO.setContentIds(null);
-                if (syllabus == null) newLoDTO.setSyllabusIds(null);
-            }
+
+            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+
+            if (contents == null) newLoDTO.setContentIds(null);
             else {
-                // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
                 List<Long> contentIds = contents.stream()
                         .map(Content::getId)
                         .toList();
+                newLoDTO.setContentIds(contentIds);
+            }
 
+            if (syllabus == null) newLoDTO.setSyllabusIds(null);
+            else {
                 List<Long> syllabusIds = syllabus.stream()
                         .map(Syllabus::getId)
                         .toList();
-
-                newLoDTO.setContentIds(contentIds);
                 newLoDTO.setSyllabusIds(syllabusIds);
             }
             result.add(newLoDTO);

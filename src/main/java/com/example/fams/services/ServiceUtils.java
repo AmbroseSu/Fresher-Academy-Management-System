@@ -1,10 +1,6 @@
 package com.example.fams.services;
 
-import com.example.fams.repository.ContentRepository;
-import com.example.fams.repository.LearningObjectiveRepository;
-import com.example.fams.repository.SyllabusRepository;
-import com.example.fams.repository.UnitRepository;
-import com.example.fams.repository.UserRepository;
+import com.example.fams.repository.*;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -100,6 +96,14 @@ public class ServiceUtils {
         for (Long userId : userIds) {
             if (userRepository.findById(userId) == null) {
                 errors.add("User with id " + userId + " does not exist");
+            }
+        }
+    }
+
+    public static void validateTrainingProgramIds(List<Long> trainingProgramIds, TrainingProgramRepository trainingProgramRepository) {
+        for (Long trainingProgramId : trainingProgramIds) {
+            if (trainingProgramRepository.findById(trainingProgramId) == null) {
+                errors.add("Training Program with id " + trainingProgramId + " does not exist");
             }
         }
     }
