@@ -21,4 +21,5 @@ public class ClassDTO {
 //  private Long startDate;
 //  private Long endDate;
   private List<Long> userIds;
+  private Long trainingProgramId;
 }

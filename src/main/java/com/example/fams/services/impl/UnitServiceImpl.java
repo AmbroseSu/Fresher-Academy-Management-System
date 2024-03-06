@@ -209,17 +209,20 @@ public class UnitServiceImpl implements IUnitService {
             UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
             // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
             List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
+
+            // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
+
             if (contents == null) newUnitDTO.setContentIds(null);
-            if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
             else {
-                // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
                 List<Long> contentIds = contents.stream()
                         .map(Content::getId)
                         .toList();
-                Syllabus syllabus = unitRepository.findSyllabusBySyllabusId(unit.getSyllabus().getId());
                 newUnitDTO.setContentIds(contentIds);
-                newUnitDTO.setSyllabusId(syllabus.getId());
             }
+
+            if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
+            else newUnitDTO.setSyllabusId(unit.getSyllabus().getId());
+
             // todo trả về List DTO đã có contentIds và SyllabusId ở trong
             result.add(newUnitDTO);
         }
