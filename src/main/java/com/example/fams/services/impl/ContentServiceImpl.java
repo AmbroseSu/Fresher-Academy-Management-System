@@ -80,7 +80,7 @@ public class ContentServiceImpl implements IContentService {
     if (contentDTO.getId() != null){
       Content oldEntity = contentRepository.findById(contentDTO.getId());
       Content tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-      entity = convertDtoToEntity(contentDTO, unitRepository, learningObjectiveContentRepository);
+      entity = convertDtoToEntity(contentDTO, unitRepository);
       entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
       contentLearningObjectiveRepository.deleteAllByContentId(contentDTO.getId());
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
@@ -204,7 +204,7 @@ public class ContentServiceImpl implements IContentService {
     }
   }
 
-  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository, LearningObjectiveContentRepository learningObjectiveContentRepository) {
+  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
     Content content = new Content();
     content.setId(contentDTO.getId());
     content.setDeliveryType(contentDTO.getDeliveryType());
@@ -214,14 +214,6 @@ public class ContentServiceImpl implements IContentService {
     // Fetch the Unit using the provided unitId
     Unit unit = unitRepository.findById(contentDTO.getUnitId());
     content.setUnit(unit);
-
-    // Fetch the LearningObjectiveContent objects using the provided learningObjectiveIds
-    List<LearningObjectiveContent> learningObjectiveContents = new ArrayList<>();
-    for (Long id : contentDTO.getLearningObjectiveIds()) {
-      LearningObjectiveContent learningObjectiveContent = learningObjectiveContentRepository.findById(id);
-      learningObjectiveContents.add(learningObjectiveContent);
-    }
-    content.setLearningObjectiveContents(learningObjectiveContents);
 
     return content;
   }

@@ -19,7 +19,7 @@ public interface LearningObjectiveContentRepository extends JpaRepository<Learni
     Integer deleteAllByLearningObjectiveId(Long learningObjectiveId);
 
     @Query("SELECT loc FROM LearningObjectiveContent loc WHERE loc.learningObjective.id = :learningObjectiveId AND loc.content.id = :contentId")
-    LearningObjectiveContent findLearningObjectiveContentsByLearningObjectiveIdAndContentId(Long learningObjectiveId, Long contentId);
+    LearningObjectiveContent findLearningObjectiveContentByLearningObjectiveIdAndContentId(Long learningObjectiveId, Long contentId);
 
     @Query("SELECT c FROM Content c " +
             "JOIN LearningObjectiveContent loc ON c.id = loc.content.id " +
