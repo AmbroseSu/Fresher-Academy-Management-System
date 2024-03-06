@@ -27,4 +27,11 @@ public interface SyllabusObjectiveRepository extends JpaRepository<SyllabusObjec
             "JOIN SyllabusObjective loc ON s.id = loc.learningObjective.id " +
             "WHERE loc.syllabus.id = :syllabusId")
     List<LearningObjective> findLearningObjectiveBySyllabusId(Long syllabusId);
+
+
+    @Query("Select so from SyllabusObjective so where so.syllabus.id =: id")
+    List<SyllabusObjective> findAllLearingObjectiveBySyllabusId(Long id);
+
+
+
 }

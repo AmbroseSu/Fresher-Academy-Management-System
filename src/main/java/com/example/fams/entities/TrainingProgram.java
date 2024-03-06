@@ -19,7 +19,7 @@ public class TrainingProgram extends BaseEntity{
     private Integer training_status;
 
     @OneToMany(mappedBy="trainingProgram")
-    private List<TrainingProgramSyllabus> trainingProgramSyllabuses;
+    private List<SyllabusTrainingProgram> syllabusTrainingPrograms;
 //    @Override
 //    public String toString() {
 //        return "TrainingProgram{" +

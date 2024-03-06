@@ -26,4 +26,14 @@ public interface SyllabusMaterialRepository extends JpaRepository<SyllabusMateri
             "JOIN SyllabusMaterial sm ON m.id = sm.material.id " +
             "WHERE sm.syllabus.id = :syllabusId")
     List<Material> findMaterialBySyllabusesId(Long syllabusId);
+
+
+    @Query("SELECT sm FROM SyllabusMaterial sm WHERE sm.syllabus.id = :syllabusId")
+    List<SyllabusMaterial> findAllMaterialBySyllabusId(Long syllabusId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM SyllabusMaterial sm WHERE sm.syllabus.id = :syllabusId")
+    void deleteAllMaterialBySyllabusId(Long syllabusId);
+
 }
