@@ -3,6 +3,8 @@ package com.example.fams.repository;
 import com.example.fams.entities.Content;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.LearningObjective;
+import com.example.fams.entities.Syllabus;
+import com.example.fams.entities.Unit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,4 +61,6 @@ public interface ContentRepository extends JpaRepository<Content, String> {
       @Param("sortById") String sortById,
       Pageable pageable);
 
+  @Query("SELECT c.unit FROM Content c WHERE c.unit.id = :unitId")
+  Unit findUnitByUnitId(@Param("unitId") Long unitId);
 }

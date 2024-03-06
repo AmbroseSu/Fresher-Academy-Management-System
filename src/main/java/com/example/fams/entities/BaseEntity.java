@@ -45,10 +45,16 @@ public abstract class BaseEntity{
     @PrePersist
     protected void onCreate() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            createBy = "Anonymous";
+            modifiedBy = "Anonymous";
+        }
+        else {
+            createBy = authentication.getName();
+            modifiedBy = authentication.getName();
+        }
 
-        createBy = authentication.getName();
         createdDate = new Date().getTime();
-        modifiedBy = authentication.getName();
         modifiedDate = new Date().getTime();
         status = true;
     }

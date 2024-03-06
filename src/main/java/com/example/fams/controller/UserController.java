@@ -1,17 +1,46 @@
 package com.example.fams.controller;
 
+import com.example.fams.dto.LearningObjectiveDTO;
+import com.example.fams.dto.UpsertUserDTO;
+import com.example.fams.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class UserController {
-    @GetMapping
-    public ResponseEntity<String> sayHello(){
-        return ResponseEntity.ok("Hi User");
+    @Autowired
+    UserService userService;
+
+//    ****ADMIN****
+    @GetMapping("/admin/user/")
+    public ResponseEntity<?> getAllActiveUser(@RequestParam int page, @RequestParam int limit){
+        return userService.findAllByStatusTrue(page, limit);
     }
+    @GetMapping("/admin/user/all")
+    public ResponseEntity<?> getAllUser(@RequestParam int page, @RequestParam int limit){
+        return userService.findAll(page, limit);
+    }
+
+    @DeleteMapping("/admin/user/delete/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        return userService.changeStatus(id);
+    }
+//    *************
+
+//    ****USER****
+    @GetMapping("/user/{uuid}")
+    public ResponseEntity<?> getInfo(@PathVariable String uuid) {
+        return userService.findByUuid(uuid);
+    }
+
+    @PutMapping("user/update")
+    public ResponseEntity<?> updateLearningObjective(@RequestBody UpsertUserDTO upsertUserDTO) {
+        return userService.save(upsertUserDTO);
+    }
+
+//    *************
 }

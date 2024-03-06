@@ -9,6 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.UUID;
+
 @SpringBootApplication
 public class FamsApplication implements CommandLineRunner {
 
@@ -26,10 +28,12 @@ public class FamsApplication implements CommandLineRunner {
 
             FAMSuser.setEmail("admin@gmail.com");
             FAMSuser.setFirstName("admin");
-            FAMSuser.setSecondName("admin");
+            FAMSuser.setLastName("admin");
             FAMSuser.setRole(Role.ADMIN);
+            FAMSuser.setUuid(UUID.randomUUID().toString());
             FAMSuser.setPassword(new BCryptPasswordEncoder().encode("admin"));
             FAMSuser.setPhone("0123456789");
+            FAMSuser.setStatus(true);
             userRepository.save(FAMSuser);
         }
     }

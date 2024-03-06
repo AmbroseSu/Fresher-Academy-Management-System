@@ -3,6 +3,7 @@ package com.example.fams.services.impl;
 import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
@@ -28,8 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +48,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepository userRepository;
 
+    private final GenericConverter genericConverter;
+
     private final PasswordEncoder passwordEncoder;
 
     private final AuthenticationManager authenticationManager;
@@ -53,71 +60,60 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final EmailService emailService;
 
-    private final GenericConverter genericConverter;
-
-    public ResponseEntity<?> signup(SignUpRequest signUpRequest)  {
+    public ResponseEntity<?> signup(User user) {
         try {
+            // check if user already exists
+            if (userRepository.existsByEmail(user.getEmail())) {
+                return ResponseUtil.error("Email is already in use","Sign up failed", HttpStatus.BAD_REQUEST);
+            }
 
-            User FAMSuser = new User();
+        user.setRole(Role.USER);
+            user.setUuid(UUID.randomUUID().toString());
+            UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
+            userRepository.save(user);
 
-            FAMSuser.setEmail(signUpRequest.getEmail());
-            FAMSuser.setFirstName(signUpRequest.getFirstName());
-            FAMSuser.setSecondName(signUpRequest.getLastName());
-            FAMSuser.setRole(Role.USER);
-            FAMSuser.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-            FAMSuser.setPhone(signUpRequest.getPhone());
-
-            return ResponseUtil.getObject(userRepository.save(FAMSuser), HttpStatus.CREATED, "ok");
+            return ResponseUtil.getObject(result, HttpStatus.CREATED, "ok");
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
-        } catch (Exception ex) {
-            return ResponseUtil.error("Error", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
-    public ResponseEntity<?> signin(SigninRequest signinRequest){
-        try {
-            // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
-            // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
-            // todo Trả về một object Authentication và đưa vào Security Context để quản lý
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getEmail(),
-                    signinRequest.getPassword()));
+    public ResponseEntity<?> signin(SigninRequest signinRequest) {
+        // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
+        // ? Với UsernamePasswordAuthenticationToken là class implements từ Authentication, đại diện cho 1 authentication object
+        // todo Trả về một object Authentication và đưa vào Security Context để quản lý
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getEmail(),
+                signinRequest.getPassword()));
 
-            var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(()-> new IllegalArgumentException("Invalid email or password"));
-            var jwt = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+        var user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+        var jwt = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
+
+        JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
+
+        jwtAuthenticationRespone.setToken(jwt);
+        jwtAuthenticationRespone.setRefreshToken(refreshToken);
+        return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
+    }
+
+    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
+        User FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
+        if (jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)) {
+            var jwt = jwtService.generateToken(FAMSuser);
 
             JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
-            jwtAuthenticationRespone.setUserDTO((UserDTO) genericConverter.toDTO(user, UserDTO.class));
             jwtAuthenticationRespone.setToken(jwt);
-            jwtAuthenticationRespone.setRefreshToken(refreshToken);
-            return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
-        } catch (Exception ex) {
-            return ResponseUtil.error("Error", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+            jwtAuthenticationRespone.setRefreshToken(refreshTokenRequest.getToken());
+            return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Token sent successfully");
         }
-    }
-
-    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest){
-        try {
-            String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
-            User FAMSuser = userRepository.findByEmail(userEmail).orElseThrow();
-            if(jwtService.isTokenValid(refreshTokenRequest.getToken(), FAMSuser)){
-                var jwt = jwtService.generateToken(FAMSuser);
-                JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
-                jwtAuthenticationRespone.setToken(jwt);
-                jwtAuthenticationRespone.setRefreshToken(refreshTokenRequest.getToken());
-                return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Token sent successfully");
-            }
-            return ResponseUtil.error("Error", "Invalid token", HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception ex) {
-            return ResponseUtil.error("Error", ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-        }
+        return null;
     }
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
 
-//        try {
+        try {
             // Generate a random OTP
             String otp = generateOTP();
 
@@ -164,16 +160,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public ResponseEntity<?> resetPassword(String email, String newPassword) {
-        try {
-            Optional<User> user = userRepository.findByEmail(email);
-            if (user.isPresent()) {
-                user.get().setPassword(passwordEncoder.encode(newPassword));
-                return ResponseUtil.getObject(userRepository.save(user.get()), HttpStatus.OK, "Password changed successfully");
-            }
-            return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
-
-        } catch (Exception ex) {
-            return ResponseUtil.error("Error", "Cannot reset password", HttpStatus.BAD_REQUEST);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            user.get().setPassword(passwordEncoder.encode(newPassword));
+            return ResponseUtil.getObject(userRepository.save(user.get()), HttpStatus.OK, "Password changed successfully");
         }
+        return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
     }
 }
