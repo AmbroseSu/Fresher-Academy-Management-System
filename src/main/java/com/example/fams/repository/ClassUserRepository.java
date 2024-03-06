@@ -12,9 +12,14 @@ public interface ClassUserRepository extends JpaRepository<ClassUser, String> {
   @Modifying
   @Transactional
   Integer deleteAllByFamsClassId(Long classId);
+  ClassUser findById(Long id);
 
+  @Query("SELECT clu FROM User u " +
+      "JOIN ClassUser clu ON u.id = clu.user.id " +
+      "WHERE clu.famsClass.id = :classId AND clu.user.id = :userId")
+  ClassUser findByClassIdAndUserId(Long classId, Long userId);
   @Query("SELECT u FROM User u " +
       "JOIN ClassUser clu ON u.id = clu.user.id " +
-      "WHERE clu.famsClass.id = :classId")
+      "WHERE clu.famsClass.id = :classId ")
   List<User> findUserByClassId(Long classId);
 }

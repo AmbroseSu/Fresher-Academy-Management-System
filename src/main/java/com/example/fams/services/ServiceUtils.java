@@ -4,6 +4,7 @@ import com.example.fams.repository.ContentRepository;
 import com.example.fams.repository.LearningObjectiveRepository;
 import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.repository.UnitRepository;
+import com.example.fams.repository.UserRepository;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -67,6 +68,8 @@ public class ServiceUtils {
         }
     }
 
+
+
     public static void validateLearningObjectiveIds(List<Long> learningObjectiveIds, LearningObjectiveRepository learningObjectiveRepository) {
         for (Long learningObjectiveId : learningObjectiveIds) {
             if (learningObjectiveRepository.findById(learningObjectiveId) == null) {
@@ -74,6 +77,8 @@ public class ServiceUtils {
             }
         }
     }
+
+
 
     public static void validateSyllabusIds(List<Long> syllabusIds, SyllabusRepository syllabusRepository) {
         for (Long syllabusId : syllabusIds) {
@@ -83,6 +88,7 @@ public class ServiceUtils {
         }
     }
 
+
     public static void validateUnitIds(List<Long> unitIds, UnitRepository unitRepository) {
         for (Long unitId : unitIds) {
             if (unitRepository.findById(unitId) == null) {
@@ -90,5 +96,11 @@ public class ServiceUtils {
             }
         }
     }
-
+    public static void validateUserIds(List<Long> userIds, UserRepository userRepository) {
+        for (Long userId : userIds) {
+            if (userRepository.findById(userId) == null) {
+                errors.add("User with id " + userId + " does not exist");
+            }
+        }
+    }
 }
