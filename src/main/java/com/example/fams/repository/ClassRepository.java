@@ -1,5 +1,6 @@
 package com.example.fams.repository;
 
+import com.example.fams.entities.Content;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.LearningObjective;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface ClassRepository extends JpaRepository<FamsClass, String> {
   List<FamsClass> findAllByStatusIsTrue(Pageable pageable);
   List<FamsClass> findAllByOrderByIdDesc(Pageable pageable);
+  List<FamsClass> findAllBy(Pageable pageable);
   FamsClass findById(Long id);
   FamsClass findByStatusIsTrueAndId(Long id);
   //FamsClass findByStatusIsTrueAndCode(String code);
