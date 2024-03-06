@@ -11,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Repository
-public interface SyllabusMaterialRepository extends JpaRepository<SyllabusMaterial, Long> {
+public interface SyllabusMaterialRepository extends JpaRepository<SyllabusMaterial, String> {
+    SyllabusMaterial findById(Long id);
     @Modifying
     @Transactional
     Integer deleteAllByMaterialId(Long materialId);
+
 
     @Query("SELECT s FROM Syllabus s " +
             "JOIN SyllabusMaterial sm ON s.id = sm.syllabus.id " +

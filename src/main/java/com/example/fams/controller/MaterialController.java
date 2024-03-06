@@ -26,7 +26,7 @@ public class MaterialController {
         return  materialService.findAll(page, limit);
     }
     @GetMapping("admin/material/findById/{id}")
-    public ResponseEntity<?> getAllMaterial(@PathVariable("id") Long id){
+    public ResponseEntity<?> getById(@PathVariable("id") Long id){
 
         return  materialService.findById(id);
     }
@@ -37,7 +37,7 @@ public class MaterialController {
     }
 
     @PutMapping("admin/material/update")
-    public ResponseEntity<?> updateMaterial(@RequestBody MaterialDTO materialDTO){
+    public ResponseEntity<?> updateMaterial(@Valid @RequestBody MaterialDTO materialDTO){
         return materialService.save(materialDTO);
     }
 

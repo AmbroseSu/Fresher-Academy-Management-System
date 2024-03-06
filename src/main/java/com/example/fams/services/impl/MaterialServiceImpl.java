@@ -1,17 +1,15 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.MaterialDTO;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.entities.Material;
-import com.example.fams.entities.Syllabus;
-import com.example.fams.entities.SyllabusMaterial;
-import com.example.fams.repository.LearningObjectiveRepository;
-import com.example.fams.repository.MaterialRepository;
-import com.example.fams.repository.SyllabusMaterialRepository;
-import com.example.fams.repository.SyllabusRepository;
+import com.example.fams.entities.*;
+import com.example.fams.repository.*;
 import com.example.fams.services.IMaterialService;
+import com.example.fams.services.ServiceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,9 +43,13 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     public ResponseEntity<?> findById(Long id) {
-        Material entity = materialRepository.findByStatusIsTrueAndId(id);
-        MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-        return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        Material entity=materialRepository.findByStatusIsTrueAndId(id);
+        if (entity!= null) {
+            MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+            return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        }else {
+            return ResponseUtil.error("Material not found", "Cannot Find Material", HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
@@ -55,24 +57,7 @@ public class MaterialServiceImpl implements IMaterialService {
         Pageable pageable = PageRequest.of(page-1, limit);
         List<Material> entities = materialRepository.findAllByStatusIsTrue(pageable);
         List<MaterialDTO> result = new ArrayList<>();
-
-        for (Material entity : entities) {
-            MaterialDTO newMaterialDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-
-
-            List<Syllabus> syllabuses = syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
-
-            List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
-            for (Syllabus syllabus : syllabuses) {
-                SyllabusDTO newSyllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
-                syllabusDTOS.add(newSyllabusDTO);
-            }
-
-            newMaterialDTO.setSyllabusDTOs(syllabusDTOS);
-
-            result.add(newMaterialDTO);
-        }
-
+        convertListMaterialToMaterialDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -86,12 +71,7 @@ public class MaterialServiceImpl implements IMaterialService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<Material> entities = materialRepository.findAllByOrderByIdDesc(pageable);
         List<MaterialDTO> result = new ArrayList<>();
-
-        for (Material entity : entities) {
-            MaterialDTO dto = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-            result.add(dto);
-        }
-
+        convertListMaterialToMaterialDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -102,116 +82,67 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     public ResponseEntity<?> save(MaterialDTO materialDTO) {
-        List<SyllabusDTO> requestSyllabusDTOs = materialDTO.getSyllabusDTOs();
+        ServiceUtils.errors.clear();
+        List<Long> requestSyllabusIds = materialDTO.getSyllabusIds();
+        Material entity;
 
-        Material entity = new Material();
-        if (materialDTO.getId() != null) {
+        // * Validate requestDTO ( if left null, then can be updated later )
+        if (requestSyllabusIds != null){
+            ServiceUtils.validateSyllabusIds(requestSyllabusIds, syllabusRepository);
+        }
+        if (!ServiceUtils.errors.isEmpty()) {
+            throw new CustomValidationException(ServiceUtils.errors);
+        }
 
-            // Xử lí Update các giá trị cũ
-
-            // Lấy Entity cũ ra
+        // * For update request
+        if (materialDTO.getId() != null){
             Material oldEntity = materialRepository.findById(materialDTO.getId());
-            // Clone cái cũ thành 1 thg entity khác
-            Material tempOldEntity = cloneMaterial(oldEntity);
-            // Update entity cũ bằng DTO nhập vào
-            entity = (Material) genericConverter.updateEntity(materialDTO, oldEntity);
-            // Thêm nhg attribute còn thiếu từ entity cũ vào entity mới
-            entity = fillMissingAttribute(entity, tempOldEntity);
-
-            // Xử lí quan hệ
-
-            // Xóa quan hệ cũ trong bảng phụ
+            Material tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
+            entity = convertDtoToEntity(materialDTO,  syllabusMaterialRepository);
+            entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
             syllabusMaterialRepository.deleteAllByMaterialId(materialDTO.getId());
-            // Update quan hệ mới từ DTO
-            loadSyllabusMaterialFromListSyllabusId(requestSyllabusDTOs,entity.getId());
-
-            // Đánh dấu là đã fix
+            loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
             entity.markModified();
-
-            // Save
             materialRepository.save(entity);
-        } else {
+        }
+
+        // * For create request
+        else {
             materialDTO.setStatus(true);
             entity = (Material) genericConverter.toEntity(materialDTO, Material.class);
             materialRepository.save(entity);
-            loadSyllabusMaterialFromListSyllabusId(requestSyllabusDTOs,entity.getId());
+            loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
         }
+
+
         MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-
-        List<Syllabus> syllabuses = syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
-        List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
-        for (Syllabus syllabus : syllabuses) {
-            SyllabusDTO newSyllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
-            syllabusDTOS.add(newSyllabusDTO);
-        }
-        result.setSyllabusDTOs(syllabusDTOS);
+        result.setSyllabusIds(requestSyllabusIds);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
-
     }
 
-    private Material fillMissingAttribute(Material entity, Material tempOldEntity) {
-        List<Field> allFields = new ArrayList<>();
-        Class<?> currentClass = entity.getClass();
-        try {
 
-
-// Traverse class hierarchy to collect fields from all superclasses
-            while (currentClass != null) {
-                Field[] declaredFields = currentClass.getDeclaredFields();
-                allFields.addAll(Arrays.asList(declaredFields));
-                currentClass = currentClass.getSuperclass();
-            }
-
-            // Iterate over all fields
-            for (Field field : allFields) {
-                field.setAccessible(true); // Enable access to private fields if any
-
-                try {
-                    Object newValue = field.get(entity); // Get the value of the field for the newEntity
-                    if (newValue == null) {
-                        // If the value is null, get the corresponding value from oldEntity
-                        Object oldValue = field.get(tempOldEntity);
-                        field.set(entity, oldValue); // Set the value of the field for the newEntity
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-            return entity;
-        } catch (Exception e) {
-            throw e;
-        }
-
-    }
-
-    private Material cloneMaterial(Material material) {
-        Material clone = new Material();
-        try {
-            BeanUtils.copyProperties(clone, material);
-
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace(); // Handle the exception appropriately
-        }
-        return clone;
-    }
 
     @Override
     public ResponseEntity<?> changeStatus(Long id) {
         Material entity = materialRepository.findById(id);
         if (entity != null) {
-            entity.setStatus(!entity.getStatus());
+            if (entity.getStatus()) {
+                entity.setStatus(false);
+            } else {
+                entity.setStatus(true);
+            }
             materialRepository.save(entity);
             return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
         } else {
             return ResponseUtil.error("Material not found", "Cannot change status of non-existing Material", HttpStatus.NOT_FOUND);
         }
     }
-    private void loadSyllabusMaterialFromListSyllabusId(List<SyllabusDTO> requestSyllabusDTOs, Long materialId) {
-        if (requestSyllabusDTOs != null && !requestSyllabusDTOs.isEmpty()) {
-            for (SyllabusDTO syllabusDTO : requestSyllabusDTOs) {
+    private void loadSyllabusMaterialFromListSyllabusId(List<Long> requestSyllabusIds, Long materialId) {
+        if (requestSyllabusIds != null && !requestSyllabusIds.isEmpty()) {
+            for (Long syllabusId : requestSyllabusIds) {
                 SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
                 syllabusMaterial.setMaterial(materialRepository.findById(materialId));
-                syllabusMaterial.setSyllabus(syllabusRepository.findOneById(syllabusDTO.getId()));
+                syllabusMaterial.setSyllabus(syllabusRepository.findOneById(syllabusId));
                 syllabusMaterialRepository.save(syllabusMaterial);
             }
         }
@@ -224,10 +155,7 @@ public class MaterialServiceImpl implements IMaterialService {
         List<Material> entities = materialRepository.searchSortFilter(name,description, pageable);
         List<MaterialDTO> result = new ArrayList<>();
         Long count = materialRepository.countSearchSortFilter(name,description);
-        for (Material entity : entities){
-            MaterialDTO newDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-            result.add(newDTO);
-        }
+        convertListMaterialToMaterialDTO(entities,result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -243,15 +171,44 @@ public class MaterialServiceImpl implements IMaterialService {
         List<Material> entities = materialRepository.searchSortFilterADMIN(name, description, sortById, pageable);
         List<MaterialDTO> result = new ArrayList<>();
         Long count = materialRepository.countSearchSortFilter(name,description);
-        for (Material entity : entities){
-            MaterialDTO newDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-            result.add(newDTO);
-        }
+        convertListMaterialToMaterialDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
+
                 page,
                 limit,
                 count);
+    }
+    private void convertListMaterialToMaterialDTO(List<Material> entities,List<MaterialDTO> result){
+        for (Material entity : entities){
+            MaterialDTO newMaterialDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+            List<Syllabus> syllabuses= syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
+            if (syllabuses==null){
+                newMaterialDTO.setSyllabusIds(null);
+            }
+            else {
+                List<Long> SyllabusIds = syllabuses.stream().map(Syllabus::getId).toList();
+            newMaterialDTO.setSyllabusIds(SyllabusIds);}
+            result.add(newMaterialDTO);
+        }
+    }
+
+    public Material convertDtoToEntity(MaterialDTO contentDTO , SyllabusMaterialRepository syllabusMaterialRepository) {
+        Material material = new Material();
+        material.setId(contentDTO.getId());
+        material.setName(contentDTO.getName());
+        material.setDescription(contentDTO.getDescription());
+        material.setStatus(contentDTO.getStatus());
+
+        // Fetch the SyllabusMaterial objects using the provided syllabusIds
+        List<SyllabusMaterial> syllabusMaterials = new ArrayList<>();
+        for (Long id : contentDTO.getSyllabusIds()) {
+            SyllabusMaterial syllabusMaterial = syllabusMaterialRepository.findById(id);
+            syllabusMaterials.add(syllabusMaterial);
+        }
+        material.setSyllabusMaterial(syllabusMaterials);
+
+        return material;
     }
 }
