@@ -21,4 +21,11 @@ public class Content extends BaseEntity {
     @OneToMany(mappedBy="content")
     private List<LearningObjectiveContent> learningObjectiveContents;
 
+    @Override
+    public String toString() {
+        return "Content{" +
+            "id=" + super.getId() +
+            // Include only necessary fields, avoid calling toString() on collections or related entities
+            '}';
+    }
 }

@@ -186,9 +186,9 @@ public class ContentServiceImpl implements IContentService {
     for (Content content : entities){
       ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
       List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(content.getId());
-      if (learningObjectives == null || content.getUnit() == null){
+      if (learningObjectives == null /*|| content.getUnit() == null*/){
         if (learningObjectives == null) newContentDTO.setLearningObjectiveIds(null);
-        if (content.getUnit() == null) newContentDTO.setUnitId(null);
+        //if (content.getUnit() == null) newContentDTO.setUnitId(null);
       }
       else {
         // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
@@ -196,9 +196,9 @@ public class ContentServiceImpl implements IContentService {
                 .map(LearningObjective::getId)
                 .toList();
 
-        Unit unit = contentRepository.findUnitByUnitId(content.getUnit().getId());
+        //Unit unit = contentRepository.findUnitByUnitId(content.getUnit().getId());
         newContentDTO.setLearningObjectiveIds(learningObjectiveIds);
-        newContentDTO.setUnitId(unit.getId());
+        //newContentDTO.setUnitId(unit.getId());
       }
       result.add(newContentDTO);
     }
