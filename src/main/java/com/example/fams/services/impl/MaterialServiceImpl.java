@@ -3,26 +3,23 @@ package com.example.fams.services.impl;
 import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.ContentDTO;
+
 import com.example.fams.dto.MaterialDTO;
-import com.example.fams.dto.SyllabusDTO;
+
 import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.IMaterialService;
 import com.example.fams.services.ServiceUtils;
-import org.apache.commons.beanutils.BeanUtils;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service("MaterialService")
 public class MaterialServiceImpl implements IMaterialService {
@@ -126,11 +123,7 @@ public class MaterialServiceImpl implements IMaterialService {
     public ResponseEntity<?> changeStatus(Long id) {
         Material entity = materialRepository.findById(id);
         if (entity != null) {
-            if (entity.getStatus()) {
-                entity.setStatus(false);
-            } else {
-                entity.setStatus(true);
-            }
+            entity.setStatus(!entity.getStatus());
             materialRepository.save(entity);
             return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
         } else {
