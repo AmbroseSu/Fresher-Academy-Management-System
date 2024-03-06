@@ -95,7 +95,7 @@ public class MaterialServiceImpl implements IMaterialService {
         if (materialDTO.getId() != null){
             Material oldEntity = materialRepository.findById(materialDTO.getId());
             Material tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-            entity = convertDtoToEntity(materialDTO,  syllabusMaterialRepository);
+            entity = convertDtoToEntity(materialDTO);
             entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
             syllabusMaterialRepository.deleteAllByMaterialId(materialDTO.getId());
             loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
@@ -187,21 +187,12 @@ public class MaterialServiceImpl implements IMaterialService {
         }
     }
 
-    public Material convertDtoToEntity(MaterialDTO contentDTO , SyllabusMaterialRepository syllabusMaterialRepository) {
+    public Material convertDtoToEntity(MaterialDTO contentDTO) {
         Material material = new Material();
         material.setId(contentDTO.getId());
         material.setName(contentDTO.getName());
         material.setDescription(contentDTO.getDescription());
         material.setStatus(contentDTO.getStatus());
-
-        // Fetch the SyllabusMaterial objects using the provided syllabusIds
-        List<SyllabusMaterial> syllabusMaterials = new ArrayList<>();
-        for (Long id : contentDTO.getSyllabusIds()) {
-            SyllabusMaterial syllabusMaterial = syllabusMaterialRepository.findById(id);
-            syllabusMaterials.add(syllabusMaterial);
-        }
-        material.setSyllabusMaterial(syllabusMaterials);
-
         return material;
     }
 }
