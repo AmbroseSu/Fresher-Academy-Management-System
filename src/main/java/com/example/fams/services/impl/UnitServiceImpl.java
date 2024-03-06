@@ -1,21 +1,20 @@
 package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
-import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.UnitDTO;
 import com.example.fams.entities.Content;
-import com.example.fams.entities.LearningObjective;
+import com.example.fams.entities.LearningObjectiveContent;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.Unit;
 import com.example.fams.repository.ContentRepository;
+import com.example.fams.repository.LearningObjectiveContentRepository;
+import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.repository.UnitRepository;
-import com.example.fams.services.IGenericService;
 import com.example.fams.services.IUnitService;
 import com.example.fams.services.ServiceUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,14 +30,15 @@ public class UnitServiceImpl implements IUnitService {
 
     private final UnitRepository unitRepository;
     private final ContentRepository contentRepository;
+    private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
 
-    public UnitServiceImpl(UnitRepository unitRepository, ContentRepository contentRepository, GenericConverter genericConverter) {
+    public UnitServiceImpl(UnitRepository unitRepository, ContentRepository contentRepository, SyllabusRepository syllabusRepository, GenericConverter genericConverter) {
         this.unitRepository = unitRepository;
         this.contentRepository = contentRepository;
+        this.syllabusRepository = syllabusRepository;
         this.genericConverter = genericConverter;
     }
-
 
     @Override
     public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
@@ -46,52 +46,41 @@ public class UnitServiceImpl implements IUnitService {
         List<Unit> units = unitRepository.findByStatusIsTrue(pageable);
         List<UnitDTO> result = new ArrayList<>();
         // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusDTO và List<ContentDTO> ở trong)
-        for (Unit unit : units) {
-            UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-
-            // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
-            List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
-//            Syllabus syllabus = unitRepository.findSyllabusBySyllabusId(unit.getSyllabus().getId());
-
-            // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
-            List<ContentDTO> contentDTOS = new ArrayList<>();
-            for (Content content : contents) {
-                ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
-                contentDTOS.add(newContentDTO);
-            }
-//            SyllabusDTO syllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
-
-            // ! Set list contentDTO và syllabusDTO sau khi convert ở trên vào unitDTO
-            newUnitDTO.setContentDTOs(contentDTOS);
-//            newUnitDTO.setSyllabusDTO(syllabusDTO);
-
-            // todo trả về List DTO đã có contentDTOs ở trong
-            result.add(newUnitDTO);
-        }
+        convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
                 page,
                 limit,
                 unitRepository.count());
-
     }
 
     @Override
     public ResponseEntity<?> save(UnitDTO unitDTO) {
+        ServiceUtils.errors.clear();
         Unit unit;
-        List<ContentDTO> requestContentDTOs = unitDTO.getContentDTOs();
-        if (unitDTO.getContentDTOs() != null){
-            validateContentIds(unitDTO.getContentDTOs());
+        List<Long> requestContentIds = unitDTO.getContentIds();
+        Long requestSyllabusId = unitDTO.getSyllabusId();
+
+        // * Validate requestDTO ( if left null, then can be updated later )
+        if (requestContentIds != null){
+            ServiceUtils.validateContentIds(requestContentIds, contentRepository);
         }
+        if (requestSyllabusId != null){
+            ServiceUtils.validateSyllabusIds(List.of(requestSyllabusId), syllabusRepository);
+        }
+        if (!ServiceUtils.errors.isEmpty()) {
+            throw new CustomValidationException(ServiceUtils.errors);
+        }
+
         // * For update request
         if (unitDTO.getId() != null){
             Unit oldEntity = unitRepository.findById(unitDTO.getId());
             Unit tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-            unit = (Unit) genericConverter.updateEntity(unitDTO, oldEntity);
+            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
             ServiceUtils.fillMissingAttribute(unit, tempOldEntity);
             unitRepository.deleteAllContentInUnitByUnitId(unitDTO.getId());
-            loadContentsFromListContentIds(requestContentDTOs, unit.getId());
+            loadContentsFromListContentIds(requestContentIds, unit.getId());
             unit.markModified();
             unitRepository.save(unit);
         }
@@ -101,21 +90,15 @@ public class UnitServiceImpl implements IUnitService {
             unitDTO.setStatus(true);
             unit = (Unit) genericConverter.toEntity(unitDTO, Unit.class);
             unitRepository.save(unit);
-            loadContentsFromListContentIds(requestContentDTOs, unit.getId());
+            loadContentsFromListContentIds(requestContentIds, unit.getId());
         }
-
 
         UnitDTO result = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
 
-        List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
-        List<ContentDTO> contentDTOs = new ArrayList<>();
-        for (Content content : contents) {
-            ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
-            contentDTOs.add(newContentDTO);
-        }
-        result.setContentDTOs(contentDTOs);
+        // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
+        result.setContentIds(requestContentIds);
+        result.setSyllabusId(requestSyllabusId);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
-
     }
 
     @Override
@@ -128,37 +111,49 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     public ResponseEntity<?> findAll(int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<Unit> units = unitRepository.findAll(pageable);
+        List<Unit> units = unitRepository.findAllBy(pageable);
         List<UnitDTO> result = new ArrayList<>();
-        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusDTO và List<ContentDTO> ở trong)
-        for (Unit unit : units) {
-            UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-
-            // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
-            List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
-//            Syllabus syllabus = unitRepository.findSyllabusBySyllabusId(unit.getSyllabus().getId());
-
-            // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
-            List<ContentDTO> contentDTOS = new ArrayList<>();
-            for (Content content : contents) {
-                ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
-                contentDTOS.add(newContentDTO);
-            }
-//            SyllabusDTO syllabusDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
-
-            // ! Set list contentDTO và syllabusDTO sau khi convert ở trên vào unitDTO
-            newUnitDTO.setContentDTOs(contentDTOS);
-//            newUnitDTO.setSyllabusDTO(syllabusDTO);
-
-            // todo trả về List DTO đã có contentDTOs ở trong
-            result.add(newUnitDTO);
-        }
+        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusId và List contentIds ở trong)
+        convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
                 page,
                 limit,
                 unitRepository.count());
+    }
+
+    public ResponseEntity<?> searchSortFilter(UnitDTO unitDTO, int page, int limit) {
+        String name = unitDTO.getName();
+        Integer duration = unitDTO.getDuration();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Unit> units = unitRepository.searchSortFilter(name, duration, pageable);
+        List<UnitDTO> result = new ArrayList<>();
+        Long count = unitRepository.countSearchSortFilter(name, duration);
+        convertListUnitToListUnitDTO(units, result);
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
+
+    @Override
+    public ResponseEntity<?> searchSortFilterADMIN(UnitDTO unitDTO, String sortById, int page, int limit) {
+        String name = unitDTO.getName();
+        Integer duration = unitDTO.getDuration();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Unit> units = unitRepository.searchSortFilterADMIN(name, duration, sortById, pageable);
+        List<UnitDTO> result = new ArrayList<>();
+        Long count = unitRepository.countSearchSortFilter(name, duration);
+        convertListUnitToListUnitDTO(units, result);
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
     }
 
     @Override
@@ -177,62 +172,57 @@ public class UnitServiceImpl implements IUnitService {
         }
     }
 
-    private void loadContentsFromListContentIds(List<ContentDTO> requestContentDTOs, Long unitId) {
-        if (requestContentDTOs != null && !requestContentDTOs.isEmpty()) {
-            for (ContentDTO contentDTO : requestContentDTOs) {
-                Content content = contentRepository.findById(contentDTO.getId());
+    private void loadContentsFromListContentIds(List<Long> requestContentIds, Long unitId) {
+        if (requestContentIds != null && !requestContentIds.isEmpty()) {
+            for (Long contentId : requestContentIds) {
+                Content content = contentRepository.findById(contentId);
                 content.setUnit(unitRepository.findById(unitId));
                 contentRepository.save(content);
             }
         }
     }
-    private void validateContentIds(List<ContentDTO> contentDTOs) {
-        List<String> errors = new ArrayList<>();
-        for (ContentDTO contentDTO : contentDTOs) {
-            if (contentRepository.findById(contentDTO.getId()) == null) {
-                errors.add("Content with id " + contentDTO.getId() + " does not exist");
-            }
+
+    public Unit convertDtoToEntity(UnitDTO unitDTO, SyllabusRepository syllabusRepository, ContentRepository contentRepository) {
+        Unit unit = new Unit();
+        unit.setId(unitDTO.getId());
+        unit.setName(unitDTO.getName());
+        unit.setDuration(unitDTO.getDuration());
+        unit.setStatus(unitDTO.getStatus());
+
+        // Fetch the Syllabus using the provided syllabusId
+        Syllabus syllabus = syllabusRepository.findOneById(unitDTO.getSyllabusId());
+        unit.setSyllabus(syllabus);
+
+        // Fetch the Content objects using the provided contentIds
+        List<Content> contents = new ArrayList<>();
+        for (Long id : unitDTO.getContentIds()) {
+            Content content = contentRepository.findById(id);
+            contents.add(content);
         }
-        if (!errors.isEmpty()) {
-            throw new RuntimeException(String.join(", ", errors));
-        }
-    }
-    public ResponseEntity<?> searchSortFilter(UnitDTO unitDTO, int page, int limit) {
-        String name = unitDTO.getName();
-        Integer duration = unitDTO.getDuration();
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Unit> units = unitRepository.searchSortFilter(name, duration, pageable);
-        List<UnitDTO> result = new ArrayList<>();
-        Long count = unitRepository.countSearchSortFilter(name, duration);
-        for (Unit unit : units){
-            UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-            result.add(newUnitDTO);
-        }
-        return ResponseUtil.getCollection(result,
-                HttpStatus.OK,
-                "Fetched successfully",
-                page,
-                limit,
-                count);
+        unit.setContents(contents);
+
+        return unit;
     }
 
-    @Override
-    public ResponseEntity<?> searchSortFilterADMIN(UnitDTO unitDTO, String sortById, int page, int limit) {
-        String name = unitDTO.getName();
-        Integer duration = unitDTO.getDuration();
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Unit> units = unitRepository.searchSortFilterADMIN(name, duration, sortById, pageable);
-        List<UnitDTO> result = new ArrayList<>();
-        Long count = unitRepository.countSearchSortFilter(name, duration);
-        for (Unit unit : units){
+    private void convertListUnitToListUnitDTO(List<Unit> units, List<UnitDTO> result) {
+        for (Unit unit : units) {
             UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
+            // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
+            List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
+            if (contents == null) newUnitDTO.setContentIds(null);
+            if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
+            else {
+                // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
+                List<Long> contentIds = contents.stream()
+                        .map(Content::getId)
+                        .toList();
+                Syllabus syllabus = unitRepository.findSyllabusBySyllabusId(unit.getSyllabus().getId());
+                newUnitDTO.setContentIds(contentIds);
+                newUnitDTO.setSyllabusId(syllabus.getId());
+            }
+            // todo trả về List DTO đã có contentIds và SyllabusId ở trong
             result.add(newUnitDTO);
         }
-        return ResponseUtil.getCollection(result,
-                HttpStatus.OK,
-                "Fetched successfully",
-                page,
-                limit,
-                count);
     }
 }
+

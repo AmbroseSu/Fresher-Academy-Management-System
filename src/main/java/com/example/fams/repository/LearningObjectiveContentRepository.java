@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface LearningObjectiveContentRepository extends JpaRepository<LearningObjectiveContent, Long> {
+public interface LearningObjectiveContentRepository extends JpaRepository<LearningObjectiveContent, String> {
+
+    LearningObjectiveContent findById(Long id);
     @Modifying
     @Transactional
     Integer deleteAllByLearningObjectiveId(Long learningObjectiveId);

@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public interface UnitRepository extends JpaRepository<Unit, String> {
     List<Unit> findByStatusIsTrue(Pageable pageable);
-    Page<Unit> findAll(Pageable pageable);
+    List<Unit> findAllBy(Pageable pageable);
     Unit findById(Long id);
     Unit findByStatusIsTrueAndId(Long id);
 

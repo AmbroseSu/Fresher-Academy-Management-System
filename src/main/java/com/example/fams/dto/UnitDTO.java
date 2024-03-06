@@ -15,7 +15,7 @@ public class UnitDTO {
 
     private Long id;
 
-    private SyllabusDTO syllabusDTO;
+    private Long syllabusId;
 
     @NotBlank(message = "Name must not be blank")
     private String name;
@@ -25,5 +25,5 @@ public class UnitDTO {
 
     private Boolean status;
 
-    private List<ContentDTO> contentDTOs;
+    private List<Long> contentIds;
 }
