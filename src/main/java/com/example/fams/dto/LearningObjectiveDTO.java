@@ -30,5 +30,6 @@ public class LearningObjectiveDTO {
 
     private Boolean status;
 
-    private List<ContentDTO> contentDTOs;
+    private List<Long> contentIds;
+    private List<Long> syllabusIds;
 }
