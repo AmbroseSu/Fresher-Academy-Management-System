@@ -115,4 +115,12 @@ public class ServiceUtils {
             }
         }
     }
+
+    public static void validateClassIds(List<Long> classIds, ClassRepository classRepository) {
+        for (Long classId : classIds) {
+            if (classRepository.findById(classId) == null) {
+                errors.add("Class with id " + classId + " does not exist");
+            }
+        }
+    }
 }

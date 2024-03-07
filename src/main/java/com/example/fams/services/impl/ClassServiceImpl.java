@@ -96,8 +96,7 @@ public class ClassServiceImpl implements IClassService {
     }
 
 
-    ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
-    result.setUserIds(requestUserIds);
+    ClassDTO result = convertClassToClassDTO(entity);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 

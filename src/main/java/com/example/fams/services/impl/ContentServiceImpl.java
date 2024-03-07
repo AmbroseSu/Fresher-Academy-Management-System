@@ -98,9 +98,7 @@ public class ContentServiceImpl implements IContentService {
     }
 
 
-    ContentDTO result = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-    result.setUnitId(requestUnitId);
-    result.setLearningObjectiveIds(requestLearningObjectiveIds);
+    ContentDTO result = convertContentToContentDTO(entity);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 

@@ -131,9 +131,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusIds, entity.getId());
             }
 
-           TrainingProgramDTO result = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
-
-            result.setSyllabusIds(requestSyllabusIds);
+           TrainingProgramDTO result = convertTpToTpDTO(entity);
 
             // Return a success response with the saved entity
             return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");

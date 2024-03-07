@@ -93,11 +93,7 @@ public class UnitServiceImpl implements IUnitService {
             loadContentsFromListContentIds(requestContentIds, unit.getId());
         }
 
-        UnitDTO result = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-
-        // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
-        result.setContentIds(requestContentIds);
-        result.setSyllabusId(requestSyllabusId);
+        UnitDTO result = convertUnitToUnitDTO(unit);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 

@@ -141,11 +141,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
             loadListTrainingProgramFromSyllabusId(requestTrainingProgramIds, entity.getId());
             loadListMaterialFromSyllabusId(requestMaterialIds, entity.getId());
         }
-        SyllabusDTO result = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-        result.setLearningObjectiveIds(requestLearningObjectiveIds);
-        result.setTrainingProgramIds(requestTrainingProgramIds);
-        result.setMaterialIds(requestMaterialIds);
-        result.setUnitIds(unitIds);
+        SyllabusDTO result = convertSyllabusToSyllabusDTO(entity);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
