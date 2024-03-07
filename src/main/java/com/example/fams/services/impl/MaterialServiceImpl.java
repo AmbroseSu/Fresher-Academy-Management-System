@@ -112,8 +112,7 @@ public class MaterialServiceImpl implements IMaterialService {
         }
 
 
-        MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-        result.setSyllabusIds(requestSyllabusIds);
+        MaterialDTO result = convertMaterialToMaterialDTO(entity);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 

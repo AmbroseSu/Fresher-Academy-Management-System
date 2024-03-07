@@ -1,13 +1,12 @@
 package com.example.fams.services.impl;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
 import com.example.fams.entities.*;
-import com.example.fams.repository.TrainingProgramRepository;
-import com.example.fams.repository.UserClassRepository;
-import com.example.fams.repository.UserRepository;
+import com.example.fams.repository.*;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ServiceUtils;
 import com.example.fams.services.UserService;
@@ -32,8 +31,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserClassRepository userClassRepository;
+    private final ClassUserRepository classUserRepository;
     private final GenericConverter genericConverter;
+    private final ClassRepository classRepository;
 
 
     @Override
@@ -116,31 +116,44 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> save(UpsertUserDTO upsertUserDTO) {
+    public ResponseEntity<?> save(UserDTO userDTO) {
         try {
+            ServiceUtils.errors.clear();
+            List<Long> requestClassIds = userDTO.getClassIds();
+//            User user;
+
+            if (requestClassIds != null) {
+                ServiceUtils.validateClassIds(requestClassIds, classRepository);
+            }
+            if (!ServiceUtils.errors.isEmpty()) {
+                throw new CustomValidationException(ServiceUtils.errors);
+            }
+
             // Cannot create a new user with this method
             // For create request, use the signup method in AuthenticationService
-            if (upsertUserDTO.getEmail() == null) {
+            if (userDTO.getEmail() == null) {
                 return ResponseUtil.error("Update failed", "Email is required", HttpStatus.BAD_REQUEST);
             }
 
             // * For update request (if applicable)
-            Optional<User> user1 = userRepository.findByEmail(upsertUserDTO.getEmail());
+            Optional<User> user1 = userRepository.findByEmail(userDTO.getEmail());
             if (user1.isEmpty()) {
                 return ResponseUtil.error("Update failed", "User not found", HttpStatus.NOT_FOUND);
             }
             User user = user1.get();
             User tempOldUser = ServiceUtils.cloneFromEntity(user);
             // Apply updates efficiently using a converter, handling potential missing fields
-            user = (User) genericConverter.updateEntity(upsertUserDTO, user);
-//            user = ServiceUtils.fillMissingAttribute(user, userRepository.findByEmail(user.getEmail()).get());
+            user = convertDtoToEntity(userDTO);
             user = ServiceUtils.fillMissingAttribute(user, tempOldUser);
-
+            classUserRepository.deleteAllByUserId(user.getId());
+            loadClassUserFromListClassId(requestClassIds, user.getId());
+            user.markModified();
             // Save the user and handle potential errors
             user = userRepository.save(user);
 
+
             // Prepare the response with user information (filter sensitive data if needed)
-            UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
+            UserDTO result = convertUserToUserDTO(user);
 
             return ResponseUtil.getObject(result, HttpStatus.OK, "Update successful");
         } catch (ConstraintViolationException e) {
@@ -172,7 +185,7 @@ public class UserServiceImpl implements UserService {
 
     private UserDTO convertUserToUserDTO(User entity) {
         UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
-        List<FamsClass> classes = userClassRepository.findClassesByUserId(entity.getId());
+        List<FamsClass> classes = classUserRepository.findClassByUserId(entity.getId());
         if (entity.getClassUsers() == null){
             newUserDTO.setClassIds(null);
         }
@@ -188,17 +201,36 @@ public class UserServiceImpl implements UserService {
         return newUserDTO;
     }
 
-    public FamsClass convertDtoToEntity(ClassDTO classDTO, TrainingProgramRepository trainingProgramRepository) {
-        FamsClass famsClass = new FamsClass();
-        famsClass.setId(classDTO.getId());
-        famsClass.setName(classDTO.getName());
-        famsClass.setCode(classDTO.getCode());
-        famsClass.setStatus(classDTO.getStatus());
+    public User convertDtoToEntity(UserDTO userDTO) {
+        User user = new User();
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setEmail(userDTO.getEmail());
+        user.setRole(userDTO.getRole());
+        user.setPhone(userDTO.getPhone());
+        user.setDob(userDTO.getDob());
+        user.setGender(userDTO.getGender());
+        user.setStatus(userDTO.getStatus());
 
-        TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
-        famsClass.setTrainingProgram(trainingProgram);
+        return user;
+    }
 
-        return famsClass;
+    private void loadClassUserFromListClassId(List<Long> requestClassIds, Long userId) {
+        if (requestClassIds != null && !requestClassIds.isEmpty()) {
+            User user = userRepository.findById(userId);
+            if (user != null) {
+                for (Long requestClassId: requestClassIds) {
+                    FamsClass famsClass = classRepository.findById(requestClassId);
+                    if (famsClass != null) {
+                        ClassUser classUser = new ClassUser();
+                        classUser.setFamsClass(famsClass);
+                        classUser.setUser(user);
+                        classUserRepository.save(classUser);
+                    }
+                }
+            }
+
+        }
     }
 
 }
