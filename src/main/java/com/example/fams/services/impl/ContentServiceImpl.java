@@ -222,10 +222,14 @@ public class ContentServiceImpl implements IContentService {
   private void loadContentLearningObjectiveFromListLearningObjectiveId(List<Long> requestLearningObjectiveIds, Long contentId) {
     if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {
       for (Long learningObjectiveId : requestLearningObjectiveIds) {
-        LearningObjectiveContent clo = new LearningObjectiveContent();
-        clo.setContent(contentRepository.findById(contentId));
-        clo.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
-        contentLearningObjectiveRepository.save(clo);
+        LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
+        Content content = contentRepository.findById(contentId);
+        if (learningObjective != null && content != null) {
+          LearningObjectiveContent clo = new LearningObjectiveContent();
+          clo.setContent(content);
+          clo.setLearningObjective(learningObjective);
+          learningObjectiveContentRepository.save(clo);
+        }
       }
     }
   }
