@@ -222,10 +222,14 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
     private void loadContentLearningObjectiveFromListContentId(List<Long> requestContentIds, Long learningObjectiveId) {
         if (requestContentIds != null && !requestContentIds.isEmpty()) {
             for (Long contentId : requestContentIds) {
-                LearningObjectiveContent clo = new LearningObjectiveContent();
-                clo.setContent(contentRepository.findById(contentId));
-                clo.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
-                learningObjectiveContentRepository.save(clo);
+                Content content = contentRepository.findById(contentId);
+                LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
+                if (content != null && learningObjective != null) {
+                    LearningObjectiveContent clo = new LearningObjectiveContent();
+                    clo.setContent(content);
+                    clo.setLearningObjective(learningObjective);
+                    learningObjectiveContentRepository.save(clo);
+                }
             }
         }
     }
@@ -233,10 +237,14 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
     private void loadSyllabusObjectiveFromListSyllabusId(List<Long> requestSyllabusIds, Long learningObjectiveId) {
         if (requestSyllabusIds != null && !requestSyllabusIds.isEmpty()) {
             for (Long syllabusId : requestSyllabusIds) {
-                SyllabusObjective so = new SyllabusObjective();
-                so.setSyllabus(syllabusRepository.findById(syllabusId).get());
-                so.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
-                syllabusObjectiveRepository.save(so);
+                Syllabus syllabus = syllabusRepository.findById(syllabusId).get();
+                LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
+                if (syllabus != null && learningObjective != null) {
+                    SyllabusObjective so = new SyllabusObjective();
+                    so.setSyllabus(syllabus);
+                    so.setLearningObjective(learningObjective);
+                    syllabusObjectiveRepository.save(so);
+                }
             }
         }
     }

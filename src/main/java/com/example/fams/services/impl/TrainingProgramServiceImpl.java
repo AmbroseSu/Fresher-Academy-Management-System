@@ -11,7 +11,6 @@ import com.example.fams.entities.TrainingProgram;
 import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.repository.SyllabusTrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramRepository;
-import com.example.fams.repository.TrainingProgramSyllabusRepository;
 import com.example.fams.services.ITrainingProgramService;
 import com.example.fams.services.ServiceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
