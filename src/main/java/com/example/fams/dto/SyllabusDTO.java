@@ -36,6 +36,8 @@ public class SyllabusDTO {
     private String version;
 
     private Boolean status;
+
+    private List<Long> unitIds;
     private List<Long> learningObjectiveIds;
     private List<Long> materialIds;
     private List<Long> trainingProgramIds;

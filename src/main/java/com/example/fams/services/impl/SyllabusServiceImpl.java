@@ -1,11 +1,13 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
 import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
+import com.example.fams.services.ServiceUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,10 +33,9 @@ public class SyllabusServiceImpl implements ISyllabusService {
     private final SyllabusTrainingProgramRepository syllabusTrainingProgramRepository;
     private final MaterialRepository materialRepository;
     private final SyllabusMaterialRepository syllabusMaterialRepository;
+    private final UnitRepository unitRepository;
 
-    private final TrainingProgramSyllabusRepository trainingProgramSyllabusRepository;
-
-    public SyllabusServiceImpl(SyllabusRepository syllabusRepository, SyllabusObjectiveRepository syllabusObjectiveRepository, GenericConverter genericConverter, TrainingProgramRepository trainingProgramRepository, LearningObjectiveRepository learningObjectiveRepository, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository, MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, TrainingProgramSyllabusRepository trainingProgramSyllabusRepository) {
+    public SyllabusServiceImpl(SyllabusRepository syllabusRepository, SyllabusObjectiveRepository syllabusObjectiveRepository, GenericConverter genericConverter, TrainingProgramRepository trainingProgramRepository, LearningObjectiveRepository learningObjectiveRepository, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository, MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, UnitRepository unitRepository) {
         this.syllabusRepository = syllabusRepository;
         this.syllabusObjectiveRepository = syllabusObjectiveRepository;
         this.genericConverter = genericConverter;
@@ -43,7 +44,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         this.syllabusTrainingProgramRepository = syllabusTrainingProgramRepository;
         this.materialRepository = materialRepository;
         this.syllabusMaterialRepository = syllabusMaterialRepository;
-        this.trainingProgramSyllabusRepository = trainingProgramSyllabusRepository;
+        this.unitRepository = unitRepository;
     }
 
     @Override
@@ -58,10 +59,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<Syllabus> entities = syllabusRepository.findAllByStatusIsTrue(pageable);
         List<SyllabusDTO> result = new ArrayList<>();
-        for (Syllabus entity : entities) {
-            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-            result.add(newDTO);
-        }
+        convertListSyllabusToListSyllabusDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -75,10 +73,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         Page<Syllabus> entities = syllabusRepository.findAll(pageable);
         List<SyllabusDTO> result = new ArrayList<>();
-        for (Syllabus entity : entities) {
-            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-            result.add(newDTO);
-        }
+        convertListSyllabusToListSyllabusDTO(entities.getContent(), result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -89,15 +84,32 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
     @Override
     public ResponseEntity<?> save(SyllabusDTO syllabusDTO) {
-        List<Long> requestLearningObjecttiveIds = syllabusDTO.getLearningObjectiveIds();
+        ServiceUtils.errors.clear();
+        List<Long> unitIds = syllabusDTO.getUnitIds();
+        List<Long> requestLearningObjectiveIds = syllabusDTO.getLearningObjectiveIds();
         List<Long> requestTrainingProgramIds = syllabusDTO.getTrainingProgramIds();
         List<Long> requestMaterialIds = syllabusDTO.getMaterialIds();
         Syllabus entity;
 
+        // * Validate requestDTO ( if left null, then can be updated later )
+        if (unitIds != null){
+            ServiceUtils.validateUnitIds(unitIds, unitRepository);
+        }
+        if (requestTrainingProgramIds != null){
+            ServiceUtils.validateTrainingProgramIds(requestTrainingProgramIds, trainingProgramRepository);
+        }
+        if (requestLearningObjectiveIds != null){
+            ServiceUtils.validateLearningObjectiveIds(requestLearningObjectiveIds, learningObjectiveRepository);
+        }
+        if (requestTrainingProgramIds != null){
+            ServiceUtils.validateMaterialIds(requestMaterialIds, materialRepository);
+        }
+        if (!ServiceUtils.errors.isEmpty()) {
+            throw new CustomValidationException(ServiceUtils.errors);
+        }
+
         if(syllabusDTO.getId() != null){
-
             // Xử lí Update các giá trị cũ
-
             // Lấy Entity cũ ra
             Syllabus oldEntity = syllabusRepository.findById(syllabusDTO.getId()).get();
             // Clone cái cũ thành 1 thg entity khác
@@ -108,13 +120,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
             entity = fillMissingAttribute(entity, tempOldEntity);
 
             // Xử lí quan hệ
-
             // Xóa quan hệ cũ trong bảng phụ
             syllabusObjectiveRepository.deleteAllBySyllabusId(syllabusDTO.getId());
+            syllabusMaterialRepository.deleteAllBySyllabusId(syllabusDTO.getId());
+            syllabusTrainingProgramRepository.deleteAllBySyllabusId(syllabusDTO.getId());
+
             // Update quan hệ mới từ DTO
-            loadSyllabusObjectiveFromListSyllabusId(requestLearningObjecttiveIds, entity.getId());
-            loadTrainingProgramFromListSyllabusId(requestTrainingProgramIds, entity.getId());
-            loadMaterialFromListSyllabusId(requestMaterialIds, entity.getId());
+            loadListSyllabusObjectiveFromSyllabusId(requestLearningObjectiveIds, entity.getId());
+            loadListTrainingProgramFromSyllabusId(requestTrainingProgramIds, entity.getId());
+            loadListMaterialFromSyllabusId(requestMaterialIds, entity.getId());
             // Đánh dấu là đã fix
             entity.markModified();
             //save
@@ -123,9 +137,9 @@ public class SyllabusServiceImpl implements ISyllabusService {
             syllabusDTO.setStatus(true);
             entity = (Syllabus) genericConverter.toEntity(syllabusDTO, Syllabus.class);
             syllabusRepository.save(entity);
-            loadSyllabusObjectiveFromListSyllabusId(requestLearningObjecttiveIds, entity.getId());
-            loadTrainingProgramFromListSyllabusId(requestTrainingProgramIds, entity.getId());
-            loadMaterialFromListSyllabusId(requestMaterialIds, entity.getId());
+            loadListSyllabusObjectiveFromSyllabusId(requestLearningObjectiveIds, entity.getId());
+            loadListTrainingProgramFromSyllabusId(requestTrainingProgramIds, entity.getId());
+            loadListMaterialFromSyllabusId(requestMaterialIds, entity.getId());
         }
         SyllabusDTO result = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
         List<LearningObjective> learningObjectives = syllabusObjectiveRepository.findLearningObjectiveBySyllabusId(entity.getId());
@@ -134,61 +148,57 @@ public class SyllabusServiceImpl implements ISyllabusService {
             LearningObjectiveDTO newLearningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(learningObjective, LearningObjectiveDTO.class);
             learningObjectiveIds.add(newLearningObjectiveDTO.getId());
         }
-        result.setLearningObjectiveIds(learningObjectiveIds);
-
-        List<TrainingProgram> trainingPrograms = syllabusTrainingProgramRepository.findTrainingProgramBySyllabusId(entity.getId());
-        List<Long> trainingProgramDTOs = new ArrayList<>();
-        for(TrainingProgram trainingProgram: trainingPrograms){
-            TrainingProgramDTO newTrainingProgramDTO = (TrainingProgramDTO) genericConverter.toDTO(trainingProgram, TrainingProgramDTO.class);
-            trainingProgramDTOs.add(newTrainingProgramDTO.getId());
-        }
-        result.setTrainingProgramIds(trainingProgramDTOs);
-
-
-        List<Material> materials = syllabusMaterialRepository.findMaterialBySyllabusesId(entity.getId());
-        List<Long> MDTO = new ArrayList<>();
-        for(Material material : materials){
-            MaterialDTO newDTO = (MaterialDTO) genericConverter.toDTO(material, MaterialDTO.class);
-            MDTO.add(newDTO.getId());
-        }
-        result.setMaterialIds(MDTO);
-
+        result.setLearningObjectiveIds(requestLearningObjectiveIds);
+        result.setTrainingProgramIds(requestTrainingProgramIds);
+        result.setMaterialIds(requestMaterialIds);
+        result.setUnitIds(unitIds);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
-    private void loadSyllabusObjectiveFromListSyllabusId(List<Long> requestLearningObjecttiveIds, Long syllabusId) {
-        if (requestLearningObjecttiveIds != null && !requestLearningObjecttiveIds.isEmpty()) {
-            for (Long learningObjectiveId : requestLearningObjecttiveIds) {
-                SyllabusObjective syllabusObjective = new SyllabusObjective();
-                syllabusObjective.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveId));
-                syllabusObjective.setSyllabus(syllabusRepository.findOneById(syllabusId));
-                syllabusObjectiveRepository.save(syllabusObjective);
-            }
-        }
-    }
 
-    private void loadTrainingProgramFromListSyllabusId(List<Long> requestTrainingProgramIds, Long syllabusId) {
+    private void loadListTrainingProgramFromSyllabusId(List<Long> requestTrainingProgramIds, Long syllabusId) {
         if (requestTrainingProgramIds != null && !requestTrainingProgramIds.isEmpty()) {
             for (Long trainingProgramId : requestTrainingProgramIds) {
-                SyllabusTrainingProgram syllabusTrainingProgram = new SyllabusTrainingProgram();
-                syllabusTrainingProgram.setTrainingProgram(trainingProgramRepository.findById(trainingProgramId).get());
-                syllabusTrainingProgram.setSyllabus(syllabusRepository.findOneById(syllabusId));
-                syllabusTrainingProgramRepository.save(syllabusTrainingProgram);
+                TrainingProgram trainingProgram = trainingProgramRepository.findById(trainingProgramId).get();
+                Syllabus syllabus = syllabusRepository.findOneById(syllabusId);
+                if (trainingProgram != null && syllabus != null) {
+                    SyllabusTrainingProgram syllabusTrainingProgram = new SyllabusTrainingProgram();
+                    syllabusTrainingProgram.setTrainingProgram(trainingProgram);
+                    syllabusTrainingProgram.setSyllabus(syllabus);
+                    syllabusTrainingProgramRepository.save(syllabusTrainingProgram);
+                }
             }
         }
     }
 
-    private void loadMaterialFromListSyllabusId(List<Long> requestMaterialIds, Long syllabusId) {
+    private void loadListSyllabusObjectiveFromSyllabusId(List<Long> requestLearningObjectiveIds, Long syllabusId) {
+        if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {
+            for (Long learningObjectiveId : requestLearningObjectiveIds) {
+                LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
+                Syllabus syllabus = syllabusRepository.findOneById(syllabusId);
+                if (learningObjective != null && syllabus != null) {
+                    SyllabusObjective syllabusObjective = new SyllabusObjective();
+                    syllabusObjective.setLearningObjective(learningObjective);
+                    syllabusObjective.setSyllabus(syllabus);
+                    syllabusObjectiveRepository.save(syllabusObjective);
+                }
+            }
+        }
+    }
+
+    private void loadListMaterialFromSyllabusId(List<Long> requestMaterialIds, Long syllabusId) {
         if (requestMaterialIds != null && !requestMaterialIds.isEmpty()) {
             for (Long materialId : requestMaterialIds) {
-                SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
-                syllabusMaterial.setMaterial(materialRepository.findById(materialId));
-                syllabusMaterial.setSyllabus(syllabusRepository.findOneById(syllabusId));
-                syllabusMaterialRepository.save(syllabusMaterial);
+                Material material = materialRepository.findById(materialId);
+                Syllabus syllabus = syllabusRepository.findOneById(syllabusId);
+                if (material != null && syllabus != null) {
+                    SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
+                    syllabusMaterial.setMaterial(material);
+                    syllabusMaterial.setSyllabus(syllabus);
+                    syllabusMaterialRepository.save(syllabusMaterial);
+                }
             }
         }
     }
-
-
     private Syllabus cloneSyllabus(Syllabus syllabus){
         Syllabus clone = new Syllabus();
         try {
@@ -199,6 +209,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         }
         return clone;
     }
+
     private Syllabus fillMissingAttribute(Syllabus entity, Syllabus tempOldEntity){
         List<Field> allFields = new ArrayList<>();
         Class<?> currentClass = entity.getClass();
@@ -263,10 +274,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
         Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
-        for (Syllabus entity : entities){
-            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-            result.add(newDTO);
-        }
+        convertListSyllabusToListSyllabusDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -288,10 +296,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         List<Syllabus> entities = syllabusRepository.searchSortFilterADMIN(name, code, timeAllocation, description, isApproved, isActive, version, sortById, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
         Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
-        for (Syllabus entity : entities){
-            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-            result.add(newDTO);
-        }
+        convertListSyllabusToListSyllabusDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -313,20 +318,63 @@ public class SyllabusServiceImpl implements ISyllabusService {
         syllabus.setIsActive(dto.getIsActive());
         syllabus.setVersion(dto.getVersion());
 
-        syllabusMaterialRepository.deleteAllMaterialBySyllabusId(dto.getId());
-        List<SyllabusMaterial> syllabusMaterials = syllabusMaterialRepository.findAllMaterialBySyllabusId(dto.getId());
-        syllabus.setSyllabusMaterial(syllabusMaterials);
-
-        List<SyllabusTrainingProgram> syllabusTrainingPrograms = syllabusTrainingProgramRepository.findAllTrainingProgramSyllabusBySyllabusId(dto.getId());
-        syllabus.setSyllabusTrainingPrograms(syllabusTrainingPrograms);
-
-        List<SyllabusObjective> syllabusObjectives = syllabusObjectiveRepository.findAllLearingObjectiveBySyllabusId(dto.getId());
-        syllabus.setSyllabusObjectives(syllabusObjectives);
-
+//        List<SyllabusMaterial> syllabusMaterials = syllabusMaterialRepository.findAllMaterialBySyllabusId(dto.getId());
+//        syllabus.setSyllabusMaterial(syllabusMaterials);
+//
+//        List<SyllabusTrainingProgram> syllabusTrainingPrograms = syllabusTrainingProgramRepository.findAllTrainingProgramSyllabusBySyllabusId(dto.getId());
+//        syllabus.setSyllabusTrainingPrograms(syllabusTrainingPrograms);
+//
+//        List<SyllabusObjective> syllabusObjectives = syllabusObjectiveRepository.findAllLearingObjectiveBySyllabusId(dto.getId());
+//        syllabus.setSyllabusObjectives(syllabusObjectives);
+        List<Unit> units = new ArrayList<>();
+        for (Long id : dto.getUnitIds()) {
+            Unit unit = unitRepository.findById(id);
+            if (unit != null) {
+                unit.setSyllabus(syllabus); // Set the syllabus to the unit
+                units.add(unit);
+            }
+        }
+        syllabus.setUnits(units);
 
         return syllabus;
     }
 
+    private void convertListSyllabusToListSyllabusDTO(List<Syllabus> syllabusList, List<SyllabusDTO> syllabusDTOS){
+        for (Syllabus syllabus : syllabusList) {
+            SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
+            List<TrainingProgram> trainingProgramList = syllabusRepository.findTrainingProgramsBySyllabusId(syllabus.getId());
+            List<Material> materialList = syllabusRepository.findMaterialsBySyllabusId(syllabus.getId());
+            List<LearningObjective> learningObjectiveList = syllabusRepository.findLearningObjectivesBySyllabusId(syllabus.getId());
+            List<Unit> unitList = syllabusRepository.findUnitsBySyllabusId(syllabus.getId());
 
+            if (trainingProgramList == null) newDTO.setTrainingProgramIds(null);
+            else {
+                List<Long> trainingProgramIds = trainingProgramList.stream()
+                        .map(TrainingProgram::getId)
+                        .toList();
+                newDTO.setTrainingProgramIds(trainingProgramIds);
+            }
+            if (materialList == null) newDTO.setMaterialIds(null);
+            else {
+                List<Long> materialIds = materialList.stream()
+                        .map(Material::getId)
+                        .toList();
+                newDTO.setMaterialIds(materialIds);
+            }
+            if (learningObjectiveList == null) newDTO.setLearningObjectiveIds(null);
+            else {
+                List<Long> learningObjectiveIds = learningObjectiveList.stream()
+                        .map(LearningObjective::getId)
+                        .toList();
+                newDTO.setLearningObjectiveIds(learningObjectiveIds);
+            }
+            if (unitList == null) newDTO.setUnitIds(null);
+            else {
+                List<Long> unitIds = unitList.stream().map(Unit::getId).toList();
+                newDTO.setUnitIds(unitIds);
+            }
+            syllabusDTOS.add(newDTO);
+        }
+    }
 
 }

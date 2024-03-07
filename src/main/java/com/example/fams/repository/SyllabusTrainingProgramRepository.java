@@ -36,4 +36,9 @@ public interface SyllabusTrainingProgramRepository extends JpaRepository<Syllabu
     List<SyllabusTrainingProgram> findAllTrainingProgramSyllabusBySyllabusId(Long syllabusId);
 
 
+//    @Modifying
+//    @Transactional
+//    @Query("DELETE FROM SyllabusMaterial sm WHERE sm.syllabus.id = :syllabusId")
+//    void deleteAllMaterialBySyllabusId(Long syllabusId);
+
 }

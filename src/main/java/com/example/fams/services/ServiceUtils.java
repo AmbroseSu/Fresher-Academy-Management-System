@@ -94,7 +94,7 @@ public class ServiceUtils {
     }
     public static void validateUserIds(List<Long> userIds, UserRepository userRepository) {
         for (Long userId : userIds) {
-            if (userRepository.findById(userId) == null) {
+            if (userRepository.findById(userId).isEmpty()) {
                 errors.add("User with id " + userId + " does not exist");
             }
         }
@@ -102,8 +102,16 @@ public class ServiceUtils {
 
     public static void validateTrainingProgramIds(List<Long> trainingProgramIds, TrainingProgramRepository trainingProgramRepository) {
         for (Long trainingProgramId : trainingProgramIds) {
-            if (trainingProgramRepository.findById(trainingProgramId) == null) {
+            if (trainingProgramRepository.findById(trainingProgramId).isEmpty()) {
                 errors.add("Training Program with id " + trainingProgramId + " does not exist");
+            }
+        }
+    }
+
+    public static void validateMaterialIds(List<Long> materialIds, MaterialRepository materialRepository) {
+        for (Long materialId : materialIds) {
+            if (materialRepository.findById(materialId) == null) {
+                errors.add("Material with id " + materialId + " does not exist");
             }
         }
     }

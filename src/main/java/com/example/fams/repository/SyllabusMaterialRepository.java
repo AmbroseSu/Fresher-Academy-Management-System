@@ -36,8 +36,7 @@ public interface SyllabusMaterialRepository extends JpaRepository<SyllabusMateri
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM SyllabusMaterial sm WHERE sm.syllabus.id = :syllabusId")
-    void deleteAllMaterialBySyllabusId(Long syllabusId);
+    void deleteAllBySyllabusId(Long syllabusId);
 
 
     @Query("SELECT sm FROM SyllabusMaterial sm where sm.syllabus.id = :syllabusId AND sm.material.id= :materialId")
