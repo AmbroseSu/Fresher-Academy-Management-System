@@ -186,11 +186,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<?> changeStatus(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
+        User user = userRepository.findById(id);
+        if (user == null) {
             return ResponseUtil.error("Change status failed", "User not found", HttpStatus.NOT_FOUND);
         }
-        User newUser = user.get();
+        User newUser = user;
         newUser.setStatus(!newUser.getStatus());
         newUser.isEnabled();
         userRepository.save(newUser);

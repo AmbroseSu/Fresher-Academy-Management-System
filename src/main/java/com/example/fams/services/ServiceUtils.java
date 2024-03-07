@@ -94,7 +94,7 @@ public class ServiceUtils {
     }
     public static void validateUserIds(List<Long> userIds, UserRepository userRepository) {
         for (Long userId : userIds) {
-            if (userRepository.findById(userId).isEmpty()) {
+            if (userRepository.findById(userId) == null) {
                 errors.add("User with id " + userId + " does not exist");
             }
         }
