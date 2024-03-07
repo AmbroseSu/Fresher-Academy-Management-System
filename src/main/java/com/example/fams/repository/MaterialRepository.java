@@ -20,25 +20,29 @@ public interface MaterialRepository extends JpaRepository<Material, String> {
 
     Material findById(Long id);
 
-    @Query("SELECT m FROM Material m " +
-            "WHERE (:name IS NULL OR m.name = :name) AND m.status = TRUE " +
-            "AND (:description IS NULL OR m.description = :description)")
+    @Query(value = "SELECT * FROM tbl_material m " +
+            "WHERE (:name IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND m.status = TRUE " +
+            "AND (:description IS NULL OR LOWER(m.description) LIKE LOWER(CONCAT('%', :description,'%')))",
+            nativeQuery = true)
     List<Material> searchSortFilter(@Param("name") String name,
                                              @Param("description") String description,
                                              Pageable pageable);
 
-    @Query("SELECT COUNT(m) FROM Material m " +
-            "WHERE (:name IS NULL OR m.name = :name) AND m.status = TRUE " +
-            "AND (:description IS NULL OR m.description = :description)")
+    @Query(value = "SELECT COUNT(*) FROM tbl_material m " +
+            "WHERE (:name IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND m.status = TRUE " +
+            "AND (:description IS NULL OR LOWER(m.description) LIKE LOWER(CONCAT('%', :description,'%')))",
+            nativeQuery = true)
     Long countSearchSortFilter(String name,
                                String description);
-    @Query("SELECT m FROM Material m " +
-            "WHERE (:name IS NULL OR m.name = :name) " +
-            "AND (:description IS NULL OR m.description = :description)"+
-            "ORDER BY  " +
-            "CASE WHEN :sortById ='iDESC' THEN m.id  END DESC ," +
-            "CASE WHEN :sortById ='iASC' THEN m.id  END ASC ,"+
-            "m.id desc")
+
+    @Query(value = "SELECT * FROM tbl_material m " +
+            "WHERE (:name IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
+            "AND (:description IS NULL OR LOWER(m.description) LIKE LOWER(CONCAT('%', :description,'%'))) " +
+            "ORDER BY " +
+            "CASE WHEN :sortById ='iDESC' THEN m.id END DESC, " +
+            "CASE WHEN :sortById ='iASC' THEN m.id END ASC, " +
+            "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN m.id END DESC",
+            nativeQuery = true)
     List<Material> searchSortFilterADMIN(
                                                   @Param("name") String name,
                                                   @Param("description") String description,

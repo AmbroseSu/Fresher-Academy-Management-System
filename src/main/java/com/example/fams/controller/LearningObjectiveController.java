@@ -17,18 +17,19 @@ public class LearningObjectiveController {
     @Qualifier("LearningObjectiveService")
     private ILearningObjectiveService learningObjectiveService;
 
-    @GetMapping("user/learningObjective/findAllByStatusTrue")
-    public ResponseEntity<?> getAllLearningObjectivesByStatusTrue(@RequestParam int page, @RequestParam int limit) {
+    @GetMapping("user/learningObjective")
+    public ResponseEntity<?> getAllLearningObjectivesByStatusTrue(@RequestParam(defaultValue = "1") int page,
+                                                                  @RequestParam(defaultValue = "10") int limit) {
         return learningObjectiveService.findAllByStatusTrue(page, limit);
     }
 
-    @GetMapping("admin/learningObjective/findAll")
+    @GetMapping("admin/learningObjective")
     public ResponseEntity<?> getAllLearningObjectives(@RequestParam(defaultValue = "1") int page,
                                                       @RequestParam(defaultValue = "10") int limit) {
         return learningObjectiveService.findAll(page, limit);
     }
 
-    @GetMapping("user/learningObjective/findById/{id}")
+    @GetMapping("user/learningObjective/{id}")
     public ResponseEntity<?> getByLearningObjectiveId(@PathVariable Long id) {
         return learningObjectiveService.findById(id);
     }
@@ -42,23 +43,23 @@ public class LearningObjectiveController {
 
     @GetMapping("admin/learningObjective/search")
     public ResponseEntity<?> searchLearningObjectiveADMIN(@RequestBody LearningObjectiveDTO learningObjectiveDTO,
-                                                          @RequestParam String sortById,
+                                                          @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,
                                                           @RequestParam(defaultValue = "10") int limit){
         return learningObjectiveService.searchSortFilterADMIN(learningObjectiveDTO, sortById, page, limit);
     }
 
-    @PostMapping("admin/learningObjective/create")
+    @PostMapping("admin/learningObjective")
     public ResponseEntity<?> createLearningObjective(@Valid @RequestBody LearningObjectiveDTO learningObjective) {
         return learningObjectiveService.save(learningObjective);
     }
 
-    @PutMapping("admin/learningObjective/update")
-    public ResponseEntity<?> updateLearningObjective(@RequestBody LearningObjectiveDTO learningObjective) {
+    @PutMapping("admin/learningObjective")
+    public ResponseEntity<?> updateLearningObjective(@Valid @RequestBody LearningObjectiveDTO learningObjective) {
         return learningObjectiveService.save(learningObjective);
     }
 
-    @DeleteMapping("admin/learningObjective/delete/{id}")
+    @DeleteMapping("admin/learningObjective/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return learningObjectiveService.changeStatus(id);
     }

@@ -101,7 +101,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         if (requestLearningObjectiveIds != null){
             ServiceUtils.validateLearningObjectiveIds(requestLearningObjectiveIds, learningObjectiveRepository);
         }
-        if (requestTrainingProgramIds != null){
+        if (requestMaterialIds != null){
             ServiceUtils.validateMaterialIds(requestMaterialIds, materialRepository);
         }
         if (!ServiceUtils.errors.isEmpty()) {
@@ -142,6 +142,10 @@ public class SyllabusServiceImpl implements ISyllabusService {
             loadListMaterialFromSyllabusId(requestMaterialIds, entity.getId());
         }
         SyllabusDTO result = convertSyllabusToSyllabusDTO(entity);
+//        result.setUnitIds(unitIds);
+//        result.setTrainingProgramIds(requestTrainingProgramIds);
+//        result.setLearningObjectiveIds(requestLearningObjectiveIds);
+//        result.setMaterialIds(requestMaterialIds);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
@@ -317,11 +321,13 @@ public class SyllabusServiceImpl implements ISyllabusService {
 //        List<SyllabusObjective> syllabusObjectives = syllabusObjectiveRepository.findAllLearingObjectiveBySyllabusId(dto.getId());
 //        syllabus.setSyllabusObjectives(syllabusObjectives);
         List<Unit> units = new ArrayList<>();
-        for (Long id : dto.getUnitIds()) {
-            Unit unit = unitRepository.findById(id);
-            if (unit != null) {
-                unit.setSyllabus(syllabus); // Set the syllabus to the unit
-                units.add(unit);
+        if (dto.getUnitIds() != null) {
+            for (Long id : dto.getUnitIds()) {
+                Unit unit = unitRepository.findById(id);
+                if (unit != null) {
+                    unit.setSyllabus(syllabus); // Set the syllabus to the unit
+                    units.add(unit);
+                }
             }
         }
         syllabus.setUnits(units);

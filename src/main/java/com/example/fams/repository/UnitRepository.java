@@ -31,31 +31,29 @@ public interface UnitRepository extends JpaRepository<Unit, String> {
     void deleteAllContentInUnitByUnitId(Long unitId);
 
     // ? Search by fields filter
-    @Query("SELECT unit FROM Unit unit " +
-            "WHERE (:name IS NULL OR unit.name = :name) AND unit.status = TRUE " +
-            "AND (:duration IS NULL OR unit.duration = :duration)")
+    @Query(value = "SELECT * FROM tbl_unit u " +
+            "WHERE (:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND u.status = TRUE " +
+            "AND (:duration IS NULL OR u.duration = :duration)", nativeQuery = true)
     List<Unit> searchSortFilter(@Param("name") String name,
-                                             @Param("duration") Integer duration,
-                                             Pageable pageable);
-
-    @Query("SELECT COUNT(unit) FROM Unit unit " +
-            "WHERE (:name IS NULL OR unit.name = :name) AND unit.status = TRUE " +
-            "AND (:duration IS NULL OR unit.duration = :duration)")
-    Long countSearchSortFilter(@Param("name") String name,
-                                @Param("duration") Integer duration);
-
-
-    @Query("SELECT unit FROM Unit unit " +
-            "WHERE (:name IS NULL OR unit.name = :name)" +
-            "AND (:duration IS NULL OR unit.duration = :duration)"+
-            "ORDER BY  " +
-            "CASE WHEN :sortById ='iDESC' THEN unit.id  END DESC ," +
-            "CASE WHEN :sortById ='iASC' THEN unit.id  END ASC ,"+
-            "unit.id desc")
-    List<Unit> searchSortFilterADMIN(@Param("name") String name,
                                 @Param("duration") Integer duration,
-                                     @Param("sortById") String sortById,
                                 Pageable pageable);
 
+    @Query(value = "SELECT COUNT(*) FROM tbl_unit u " +
+            "WHERE (:name IS NULL OR  LOWER(u.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND u.status = TRUE " +
+            "AND (:duration IS NULL OR u.duration = :duration)", nativeQuery = true)
+    Long countSearchSortFilter(@Param("name") String name,
+                               @Param("duration") Integer duration);
+
+    @Query(value = "SELECT * FROM tbl_unit u " +
+            "WHERE (:name IS NULL OR  LOWER(u.name) LIKE LOWER(CONCAT('%', :name,'%')))" +
+            "AND (:duration IS NULL OR u.duration = :duration)"+
+            "ORDER BY  " +
+            "CASE WHEN :sortById ='iDESC' THEN u.id  END DESC ," +
+            "CASE WHEN :sortById ='iASC' THEN u.id  END ASC ,"+
+            "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN u.id END DESC", nativeQuery = true)
+    List<Unit> searchSortFilterADMIN(@Param("name") String name,
+                                     @Param("duration") Integer duration,
+                                     @Param("sortById") String sortById,
+                                     Pageable pageable);
 
 }

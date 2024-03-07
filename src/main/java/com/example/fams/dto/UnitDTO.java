@@ -17,7 +17,7 @@ public class UnitDTO {
 
     private Long syllabusId;
 
-    @NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Unit Name must not be blank")
     private String name;
 
     @NotNull(message = "Duration must not be null")

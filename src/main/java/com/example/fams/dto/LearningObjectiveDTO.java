@@ -16,16 +16,16 @@ import java.util.List;
 public class LearningObjectiveDTO {
     private Long id;
 
-    @NotBlank(message = "Code must not be blank")
+    @NotBlank(message = "Learning Objective Code must not be blank")
     private String code;
 
-    @NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Learning Objective Name must not be blank")
     private String name;
 
-    @NotNull(message = "Type must not be null")
+    @NotNull(message = "Learning Objective Type must not be null")
     private Integer type;
 
-    @NotBlank(message = "Description must not be blank")
+    @NotBlank(message = "Learning Objective Description must not be blank")
     private String description;
 
     private Boolean status;

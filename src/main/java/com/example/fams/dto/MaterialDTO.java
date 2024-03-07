@@ -13,7 +13,7 @@ import java.util.List;
 public class MaterialDTO {
 
     private Long id;
-    @NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Material Name must not be blank")
     private String name;
     @NotBlank(message = "Description must not be blank")
     private String description;

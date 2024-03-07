@@ -125,13 +125,13 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 trainingProgramRepository.save(entity);
             } else {
                 // For new training program creation
-                entity = (TrainingProgram) genericConverter.toEntity(trainingProgramDTO, TrainingProgram.class);
+                entity = convertDtoToEntity(trainingProgramDTO, syllabusTrainingProgramRepository);
                 entity.setStatus(true);
                 trainingProgramRepository.save(entity);
                 loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusIds, entity.getId());
             }
 
-           TrainingProgramDTO result = convertTpToTpDTO(entity);
+            TrainingProgramDTO result = convertTpToTpDTO(entity);
 
             // Return a success response with the saved entity
             return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");

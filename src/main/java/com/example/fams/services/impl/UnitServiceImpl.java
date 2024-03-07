@@ -79,7 +79,6 @@ public class UnitServiceImpl implements IUnitService {
             Unit tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
             unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
             ServiceUtils.fillMissingAttribute(unit, tempOldEntity);
-            unitRepository.deleteAllContentInUnitByUnitId(unitDTO.getId());
             loadContentsFromListContentIds(requestContentIds, unit.getId());
             unit.markModified();
             unitRepository.save(unit);
@@ -94,6 +93,8 @@ public class UnitServiceImpl implements IUnitService {
         }
 
         UnitDTO result = convertUnitToUnitDTO(unit);
+//        result.setSyllabusId(requestSyllabusId);
+//        result.setContentIds(requestContentIds);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 

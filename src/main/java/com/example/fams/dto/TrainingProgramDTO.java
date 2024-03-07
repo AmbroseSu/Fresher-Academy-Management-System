@@ -15,7 +15,7 @@ import java.util.List;
 public class TrainingProgramDTO {
     private Long id;
 
-    @NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Training Program Name must not be blank")
     private String name;
 
     @NotNull(message = "Start time must not be null")

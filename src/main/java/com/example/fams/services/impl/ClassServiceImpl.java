@@ -90,13 +90,15 @@ public class ClassServiceImpl implements IClassService {
     // * For create request
     else {
       classDTO.setStatus(true);
-      entity = (FamsClass) genericConverter.toEntity(classDTO, FamsClass.class);
+      entity = convertDtoToEntity(classDTO, trainingProgramRepository);
       classRepository.save(entity);
       loadClassUserFromListUserId(requestUserIds, entity.getId());
     }
 
 
     ClassDTO result = convertClassToClassDTO(entity);
+/*    result.setUserIds(requestUserIds);
+    result.setTrainingProgramId(requestTrainingProgramId);*/
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 

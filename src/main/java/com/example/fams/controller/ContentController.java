@@ -5,6 +5,7 @@ import com.example.fams.dto.ContentDTO;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.IContentService;
 import com.example.fams.services.IGenericService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +18,18 @@ public class ContentController {
   @Qualifier("ContentService")
   private IContentService contentService;
 
-  @GetMapping("user/content/findAllByStatusTrue")
+  @GetMapping("user/content")
   public ResponseEntity<?> getAllContentByStatusTrue(@RequestParam int page, @RequestParam int limit) {
     return contentService.findAllByStatusTrue(page, limit);
   }
 
-  @GetMapping("admin/content/findAll")
-  public ResponseEntity<?> getAllContent(@RequestParam int page, @RequestParam int limit) {
+  @GetMapping("admin/content")
+  public ResponseEntity<?> getAllContent(@RequestParam(defaultValue = "1") int page,
+                                         @RequestParam(defaultValue = "10") int limit) {
     return contentService.findAll(page, limit);
   }
 
-  @GetMapping("user/content/findById/{id}")
+  @GetMapping("user/content/{id}")
   public ResponseEntity<?> getByClassId(@PathVariable Long id) {
     return contentService.findById(id);
   }
@@ -41,23 +43,23 @@ public class ContentController {
 
   @GetMapping("admin/content/search")
   public ResponseEntity<?> searchContentADMIN(@RequestBody ContentDTO contentDTO,
-      @RequestParam String sortById,
+      @RequestParam(required = false) String sortById,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int limit){
     return contentService.searchSortFilterADMIN(contentDTO, sortById, page, limit);
   }
 
-  @PostMapping("admin/content/create")
-  public ResponseEntity<?> createContent(@RequestBody ContentDTO contentDTO) {
+  @PostMapping("admin/content")
+  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO) {
     return contentService.save(contentDTO);
   }
 
-  @PutMapping("admin/content/update")
-  public ResponseEntity<?> updateContent(@RequestBody ContentDTO contentDTO) {
+  @PutMapping("admin/content")
+  public ResponseEntity<?> updateContent(@Valid @RequestBody ContentDTO contentDTO) {
     return contentService.save(contentDTO);
   }
 
-  @DeleteMapping("admin/content/delete/{id}")
+  @DeleteMapping("admin/content/{id}")
   public ResponseEntity<?> changeStatus(@PathVariable Long id) {
     return contentService.changeStatus(id);
   }

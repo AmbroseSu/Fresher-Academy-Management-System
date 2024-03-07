@@ -4,6 +4,7 @@ import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ISyllabusService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,20 @@ public class SyllabusController {
     @Qualifier("SyllabusService")
     private ISyllabusService syllabusService;
 
-    @GetMapping("user/syllabus/findAllByStatusTrue")
-    public ResponseEntity<?> getAllSyllabusByStatusTrue(@RequestParam int page, @RequestParam int limit) {
+    @GetMapping("user/syllabus/{id}")
+    public ResponseEntity<?> getBySyllabusId(@PathVariable Long id) {
+        return syllabusService.findById(id);
+    }
+
+    @GetMapping("user/syllabus")
+    public ResponseEntity<?> getAllSyllabusByStatusTrue(@RequestParam(defaultValue = "1") int page,
+                                                        @RequestParam(defaultValue = "10") int limit) {
         return syllabusService.findAllByStatusTrue(page, limit);
     }
 
-    @GetMapping("admin/syllabus/findAll")
-    public ResponseEntity<?> getAllSyllabus(@RequestParam int page, @RequestParam int limit) {
+    @GetMapping("admin/syllabus")
+    public ResponseEntity<?> getAllSyllabus(@RequestParam(defaultValue = "1") int page,
+                                            @RequestParam(defaultValue = "10") int limit) {
         return syllabusService.findAll(page, limit);
     }
     @GetMapping("user/syllabus/search")
@@ -34,23 +42,23 @@ public class SyllabusController {
     }
     @GetMapping("admin/syllabus/search")
     public ResponseEntity<?> searchSyllabusADMIN(@RequestBody SyllabusDTO syllabusDTO,
-                                                        @RequestParam String sortById,
+                                                        @RequestParam(required = false) String sortById,
                                                         @RequestParam(defaultValue = "1") int page,
                                                         @RequestParam(defaultValue = "10") int limit){
         return syllabusService.searchSortFilterADMIN(syllabusDTO, sortById, page, limit);
     }
 
-    @PostMapping("admin/syllabus/create")
-    public ResponseEntity<?> createSyllabus(@RequestBody SyllabusDTO syllabusDTO) {
+    @PostMapping("admin/syllabus")
+    public ResponseEntity<?> createSyllabus(@Valid @RequestBody SyllabusDTO syllabusDTO) {
         return syllabusService.save(syllabusDTO);
     }
 
-    @PutMapping("admin/syllabus/update")
-    public ResponseEntity<?> updateSyllabus(@RequestBody SyllabusDTO syllabusDTO) {
+    @PutMapping("admin/syllabus")
+    public ResponseEntity<?> updateSyllabus(@Valid @RequestBody SyllabusDTO syllabusDTO) {
         return syllabusService.save(syllabusDTO);
     }
 
-    @DeleteMapping("admin/syllabus/delete/{id}")
+    @DeleteMapping("admin/syllabus/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return syllabusService.changeStatus(id);
     }

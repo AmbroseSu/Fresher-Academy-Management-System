@@ -15,12 +15,15 @@ public class ContentDTO {
 
 
   private Long id;
+
   private Long unitId;
-  @NotNull
+
+  @NotNull(message = "Content delivery type must not be null")
   private Integer deliveryType;
-  @NotNull
+
+  @NotNull(message = "Content duration must not be null")
   private Long duration;
-  @NotNull
+
   private Boolean status;
   private List<Long> learningObjectiveIds;
 }

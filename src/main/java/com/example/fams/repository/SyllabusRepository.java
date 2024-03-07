@@ -37,14 +37,14 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Query("SELECT u FROM Unit u WHERE u.syllabus.id = :syllabusId")
     List<Unit> findUnitsBySyllabusId(Long syllabusId);
 
-    @Query("SELECT sl FROM Syllabus sl " +
-            "WHERE (:name IS NULL OR sl.name = :name) AND sl.status = TRUE " +
-            "AND (:code IS NULL OR sl.code = :code) " +
-            "AND (:timeAllocation IS NULL OR sl.timeAllocation = :timeAllocation) " +
+    @Query(value = "SELECT * FROM tbl_syllabus sl " +
+            "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND sl.status = TRUE " +
+            "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
+            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
-            "AND (:isApproved IS NULL OR sl.isApproved = :isApproved) " +
-            "AND (:isActive IS NULL OR sl.isActive = :isActive) " +
-            "AND (:version IS NULL OR sl.version = :version) " )
+            "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
+            "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
+            "AND (:version IS NULL OR sl.version = :version) ", nativeQuery = true )
     List<Syllabus> searchSortFilter(@Param("name") String name,
                                     @Param("code") String code,
                                     @Param("timeAllocation") Long timeAllocation,
@@ -54,14 +54,14 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
                                     @Param("version") String version,
                                     Pageable pageable);
 
-    @Query("SELECT COUNT(sl) FROM Syllabus sl " +
-            "WHERE (:name IS NULL OR sl.name = :name) AND sl.status = TRUE " +
-            "AND (:code IS NULL OR sl.code = :code) " +
-            "AND (:timeAllocation IS NULL OR sl.timeAllocation = :timeAllocation) " +
+    @Query(value = "SELECT COUNT(*) FROM tbl_syllabus sl " +
+            "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND sl.status = TRUE " +
+            "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
+            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
-            "AND (:isApproved IS NULL OR sl.isApproved = :isApproved) " +
-            "AND (:isActive IS NULL OR sl.isActive = :isActive) " +
-            "AND (:version IS NULL OR sl.version = :version) " )
+            "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
+            "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
+            "AND (:version IS NULL OR sl.version = :version) ", nativeQuery = true )
     Long countSearchSortFilter(@Param("name") String name,
                                @Param("code") String code,
                                @Param("timeAllocation") Long timeAllocation,
@@ -72,18 +72,18 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
 
 
 
-    @Query("SELECT sl FROM Syllabus sl " +
-            "WHERE (:name IS NULL OR sl.name = :name) AND sl.status = TRUE " +
-            "AND (:code IS NULL OR sl.code = :code) " +
-            "AND (:timeAllocation IS NULL OR sl.timeAllocation = :timeAllocation) " +
+    @Query(value = "SELECT * FROM tbl_syllabus sl " +
+            "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
+            "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
+            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
-            "AND (:isApproved IS NULL OR sl.isApproved = :isApproved) " +
-            "AND (:isActive IS NULL OR sl.isActive = :isActive) " +
+            "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
+            "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
             "AND (:version IS NULL OR sl.version = :version) "+
             "ORDER BY " +
             "CASE WHEN :sortById ='iDESC' THEN sl.id END DESC, " +
             "CASE WHEN :sortById ='iASC' THEN sl.id END ASC, " +
-            "sl.id DESC")
+            "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN sl.id END DESC", nativeQuery = true)
     List<Syllabus> searchSortFilterADMIN(@Param("name") String name,
                                          @Param("code") String code,
                                          @Param("timeAllocation") Long timeAllocation,

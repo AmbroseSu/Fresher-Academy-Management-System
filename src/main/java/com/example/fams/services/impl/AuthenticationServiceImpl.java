@@ -9,8 +9,12 @@ import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SignUpRequest;
 import com.example.fams.dto.request.SigninRequest;
+import com.example.fams.entities.ClassUser;
+import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
+import com.example.fams.repository.ClassRepository;
+import com.example.fams.repository.ClassUserRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
 import com.example.fams.services.EmailService;
@@ -30,11 +34,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +60,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final EmailService emailService;
 
+    private final ClassUserRepository classUserRepository;
+
+    private final ClassRepository classRepository;
+
     public ResponseEntity<?> signup(User user) {
         try {
             // check if user already exists
@@ -67,11 +71,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 return ResponseUtil.error("Email is already in use","Sign up failed", HttpStatus.BAD_REQUEST);
             }
 
-        user.setRole(Role.USER);
+            user.setRole(Role.USER);
             user.setUuid(UUID.randomUUID().toString());
             UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
             userRepository.save(user);
-
             return ResponseUtil.getObject(result, HttpStatus.CREATED, "ok");
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
@@ -91,6 +94,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         JwtAuthenticationRespone jwtAuthenticationRespone = new JwtAuthenticationRespone();
 
+        UserDTO userDTO = convertUserToUserDTO(user);
+
+        jwtAuthenticationRespone.setUserDTO(userDTO);
         jwtAuthenticationRespone.setToken(jwt);
         jwtAuthenticationRespone.setRefreshToken(refreshToken);
         return ResponseUtil.getObject(jwtAuthenticationRespone, HttpStatus.OK, "Sign in successfully");
@@ -114,7 +120,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
 
 //        try {
-            // Generate a random OTP
+        // Generate a random OTP
         String otp = generateOTP();
 
         // Store the OTP in the session or database for verification
@@ -167,4 +173,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
     }
+
+    private UserDTO convertUserToUserDTO(User entity) {
+        UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
+        List<FamsClass> classes = classUserRepository.findClassByUserId(entity.getId());
+        if (entity.getClassUsers() == null){
+            newUserDTO.setClassIds(null);
+        }
+        else {
+            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+            List<Long> classIds = classes.stream()
+                    .map(FamsClass::getId)
+                    .toList();
+
+            newUserDTO.setClassIds(classIds);
+
+        }
+        return newUserDTO;
+    }
+
 }

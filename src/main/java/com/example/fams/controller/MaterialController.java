@@ -15,33 +15,35 @@ public class MaterialController {
     @Qualifier("MaterialService")
     private IMaterialService materialService;
 
-    @GetMapping("user/material/findAllByStatusTrue")
-    public ResponseEntity<?> getAllMaterialByStatusTrue(@RequestParam int page , @RequestParam int limit){
+    @GetMapping("user/material")
+    public ResponseEntity<?> getAllMaterialByStatusTrue(@RequestParam(defaultValue = "1") int page,
+                                                        @RequestParam(defaultValue = "10") int limit){
         return materialService.findAllByStatusTrue(page, limit);
     }
 
-    @GetMapping("admin/material/findAll")
-    public ResponseEntity<?> getAllMaterial(@RequestParam int page, @RequestParam int limit){
+    @GetMapping("admin/material")
+    public ResponseEntity<?> getAllMaterial(@RequestParam(defaultValue = "1") int page,
+                                            @RequestParam(defaultValue = "10") int limit){
 
         return  materialService.findAll(page, limit);
     }
-    @GetMapping("admin/material/findById/{id}")
+    @GetMapping("admin/material/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Long id){
 
         return  materialService.findById(id);
     }
 
-    @PostMapping("admin/material/create")
+    @PostMapping("admin/material")
     public ResponseEntity<?> createMaterial(@Valid @RequestBody MaterialDTO materialDTO){
         return materialService.save(materialDTO);
     }
 
-    @PutMapping("admin/material/update")
+    @PutMapping("admin/material")
     public ResponseEntity<?> updateMaterial(@Valid @RequestBody MaterialDTO materialDTO){
         return materialService.save(materialDTO);
     }
 
-    @DeleteMapping("admin/material/delete/{id}")
+    @DeleteMapping("admin/material/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return materialService.changeStatus(id);
     }
@@ -54,7 +56,7 @@ public class MaterialController {
 
     @GetMapping("admin/material/search")
     public ResponseEntity<?> searchMaterialADMIN(@RequestBody MaterialDTO materialDTO,
-                                                          @RequestParam String sortById,
+                                                          @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,
                                                           @RequestParam(defaultValue = "10") int limit){
         return materialService.searchSortFilterADMIN(materialDTO, sortById, page, limit);

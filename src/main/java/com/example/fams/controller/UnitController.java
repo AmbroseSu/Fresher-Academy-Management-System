@@ -18,27 +18,35 @@ public class UnitController {
     @Qualifier("UnitService")
     private IUnitService unitService;
 
-    @GetMapping("user/unit/findAllByStatusTrue")
-    public ResponseEntity<?> getAllUnitsByStatusTrue(@RequestParam int page, @RequestParam int limit) {
+    @GetMapping("user/unit/{id}")
+    public ResponseEntity<?> getByUnitId(@PathVariable Long id) {
+        return unitService.findById(id);
+    }
+
+
+    @GetMapping("user/unit")
+    public ResponseEntity<?> getAllUnitsByStatusTrue(@RequestParam(defaultValue = "1") int page,
+                                                     @RequestParam(defaultValue = "10") int limit) {
         return unitService.findAllByStatusTrue(page, limit);
     }
 
-    @GetMapping("admin/unit/findAll")
-    public ResponseEntity<?> getAllUnits(@RequestParam int page, @RequestParam int limit) {
+    @GetMapping("admin/unit")
+    public ResponseEntity<?> getAllUnits(@RequestParam(defaultValue = "1") int page,
+                                         @RequestParam(defaultValue = "10") int limit) {
         return unitService.findAll(page, limit);
     }
 
-    @PostMapping("admin/unit/create")
+    @PostMapping("admin/unit")
     public ResponseEntity<?> createUnit(@Valid @RequestBody UnitDTO unit) {
         return unitService.save(unit);
     }
 
-    @PutMapping("admin/unit/update")
+    @PutMapping("admin/unit")
     public ResponseEntity<?> updateUnit(@Valid @RequestBody UnitDTO unit) {
         return unitService.save(unit);
     }
 
-    @DeleteMapping("admin/unit/delete/{id}")
+    @DeleteMapping("admin/unit/{id}")
     public ResponseEntity<?> deleteUnit(@PathVariable Long id) {
         return unitService.changeStatus(id);
     }
@@ -52,7 +60,7 @@ public class UnitController {
 
     @GetMapping("admin/unit/search")
     public ResponseEntity<?> searchUnitADMIN(@RequestBody UnitDTO unitDTO,
-                                             @RequestParam String sortById,
+                                             @RequestParam(required = false) String sortById,
                                         @RequestParam(defaultValue = "1") int page,
                                         @RequestParam(defaultValue = "10") int limit){
         return unitService.searchSortFilterADMIN(unitDTO, sortById, page, limit);

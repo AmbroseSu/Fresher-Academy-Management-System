@@ -14,16 +14,16 @@ import java.util.List;
 public class SyllabusDTO {
     private Long id;
 
-    @NotBlank(message = "Name must not be blank")
+    @NotBlank(message = "Syllabus Name must not be blank")
     private String name;
 
-    @NotBlank(message = "Code must not be blank")
+    @NotBlank(message = "Syllabus Code must not be blank")
     private String code;
 
     @NotNull(message = "Time Allocation must not be null")
     private Long timeAllocation;
 
-    @NotBlank(message = "Description must not be blank")
+    @NotBlank(message = "Syllabus Description must not be blank")
     private String description;
 
     @NotNull(message = "Is Approved must not be null")

@@ -28,50 +28,33 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
   LearningObjective changeStatus(Boolean status, String code);
 
   // ? Search by fields filter
-  @Query("SELECT cl FROM FamsClass cl " +
-      "WHERE (:code IS NULL OR cl.code = :code) AND cl.status = TRUE " +
-      "AND (:name IS NULL OR cl.name = :name) " /*+
-      "AND (:duration IS NULL OR cl.duration = :duration) " +
-      "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)"*/ )
+  @Query(value = "SELECT * FROM tbl_class cl " +
+          "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%'))) AND cl.status = TRUE " +
+          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%')))",
+          nativeQuery = true)
   List<FamsClass> searchSortFilter(@Param("code") String code,
-      @Param("name") String name,
-      /*@Param("duration") Long duration,
-      @Param("startDate") Long startDate,
-      @Param("endDate") Long endDate,*/
-      Pageable pageable);
+                                   @Param("name") String name,
+                                   Pageable pageable);
 
-  @Query("SELECT COUNT(cl) FROM FamsClass cl " +
-      "WHERE (:code IS NULL OR cl.code = :code) AND cl.status = TRUE " +
-      "AND (:name IS NULL OR cl.name = :name) " /*+
-      "AND (:duration IS NULL OR cl.duration = :duration) " +
-      "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)"*/ )
+  @Query(value = "SELECT COUNT(*) FROM tbl_class cl " +
+          "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%'))) AND cl.status = TRUE " +
+          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%')))",
+          nativeQuery = true)
   Long countSearchSortFilter(String code,
-      String name/*,
-      Long duration,
-      Long startDate,
-      Long endDate*/);
+                             String name);
 
-
-  @Query("SELECT cl FROM FamsClass cl " +
-      "WHERE (:code IS NULL OR cl.code = :code) " +
-      "AND (:name IS NULL OR cl.name = :name) " +
-      /*"AND (:duration IS NULL OR cl.duration = :duration) " +
-      "AND (:startDate IS NULL OR cl.startDate = :startDate)"+
-      "AND (:endDate IS NULL OR cl.endDate = :endDate)"+*/
-      "ORDER BY  " +
-      "CASE WHEN :sortById ='iDESC' THEN cl.id  END DESC ," +
-      "CASE WHEN :sortById ='iASC' THEN cl.id  END ASC ,"+
-      "cl.id desc")
+  @Query(value = "SELECT * FROM tbl_class cl " +
+          "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%')))  " +
+          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
+          "ORDER BY " +
+          "CASE WHEN :sortById ='iDESC' THEN cl.id END DESC, " +
+          "CASE WHEN :sortById ='iASC' THEN cl.id END ASC, " +
+          "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN cl.id END DESC",
+          nativeQuery = true)
   List<FamsClass> searchSortFilterADMIN(@Param("code") String code,
-      @Param("name") String name,
-      /*@Param("duration") Long duration,
-      @Param("startDate") Long startDate,
-      @Param("endDate") Long endDate,*/
-      @Param("sortById") String sortById,
-      Pageable pageable);
-
+                                        @Param("name") String name,
+                                        @Param("sortById") String sortById,
+                                        Pageable pageable);
 
 
 
