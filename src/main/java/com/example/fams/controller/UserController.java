@@ -2,6 +2,7 @@ package com.example.fams.controller;
 
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.UpsertUserDTO;
+import com.example.fams.dto.UserDTO;
 import com.example.fams.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,8 @@ public class UserController {
     }
 
     @PutMapping("user/update")
-    public ResponseEntity<?> updateLearningObjective(@RequestBody UpsertUserDTO upsertUserDTO) {
-        return userService.save(upsertUserDTO);
+    public ResponseEntity<?> updateLearningObjective(@RequestBody UserDTO userDTO) {
+        return userService.save(userDTO);
     }
 
 //    *************

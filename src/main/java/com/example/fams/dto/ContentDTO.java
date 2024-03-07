@@ -15,12 +15,12 @@ public class ContentDTO {
 
 
   private Long id;
-  private UnitDTO unitDTO;
+  private Long unitId;
   @NotNull
   private Integer deliveryType;
   @NotNull
   private Long duration;
   @NotNull
   private Boolean status;
-  private List<LearningObjectiveDTO> learningObjectiveDTOS;
+  private List<Long> learningObjectiveIds;
 }

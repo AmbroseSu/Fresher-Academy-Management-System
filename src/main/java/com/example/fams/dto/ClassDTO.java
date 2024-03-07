@@ -20,5 +20,6 @@ public class ClassDTO {
   private Boolean status;
 //  private Long startDate;
 //  private Long endDate;
-  private List<UserDTO> userDTOs;
+  private List<Long> userIds;
+  private Long trainingProgramId;
 }

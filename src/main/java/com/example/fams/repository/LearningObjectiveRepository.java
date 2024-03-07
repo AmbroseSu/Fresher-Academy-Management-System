@@ -15,6 +15,7 @@ import java.util.List;
 @Repository
 public interface LearningObjectiveRepository extends JpaRepository<LearningObjective, String> {
     List<LearningObjective> findAllByStatusIsTrue(Pageable pageable);
+    List<LearningObjective> findAllBy(Pageable pageable);
     List<LearningObjective> findAllByOrderByIdDesc(Pageable pageable);
     LearningObjective findById(Long id);
     LearningObjective findByStatusIsTrueAndId(Long id);

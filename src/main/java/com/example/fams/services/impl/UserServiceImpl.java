@@ -1,15 +1,12 @@
 package com.example.fams.services.impl;
 
 import com.example.fams.config.ConstraintViolationExceptionHandler;
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
-import com.example.fams.entities.FamsClass;
-import com.example.fams.entities.Content;
-import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.User;
-import com.example.fams.repository.UserClassRepository;
-import com.example.fams.repository.UserRepository;
+import com.example.fams.entities.*;
+import com.example.fams.repository.*;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ServiceUtils;
 import com.example.fams.services.UserService;
@@ -34,8 +31,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserClassRepository userClassRepository;
+    private final ClassUserRepository classUserRepository;
     private final GenericConverter genericConverter;
+    private final ClassRepository classRepository;
 
 
     @Override
@@ -64,7 +62,7 @@ public class UserServiceImpl implements UserService {
             return ResponseUtil.error("Not found","User not found", HttpStatus.NOT_FOUND);
         }
 
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -72,14 +70,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> findByUuid(String uuid) {
         User user = userRepository.findByStatusIsTrueAndUuid(uuid);
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
     @Override
     public ResponseEntity<?> findById(Long id) {
         User user = userRepository.findByStatusIsTrueAndId(id);
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -89,20 +87,7 @@ public class UserServiceImpl implements UserService {
         List<User> entities = userRepository.findAllByStatusIsTrue(pageable);
         List<UserDTO> result = new ArrayList<>();
 
-        for (User entity : entities) {
-            UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
-            List<Class> classes = userClassRepository.findClassesByUserId(entity.getId());
-
-            List<ClassDTO> classDTOS = new ArrayList<>();
-            for (Class c : classes) {
-                ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(c, ClassDTO.class);
-                classDTOS.add(newClassDTO);
-            }
-
-            newUserDTO.setClasses(classDTOS);
-            result.add(newUserDTO);
-        }
-
+        convertListUserToListUserDTO(entities, result);
 
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -119,26 +104,7 @@ public class UserServiceImpl implements UserService {
         List<User> entities = userRepository.findAllByOrderByIdDesc(pageable);
         List<UserDTO> result = new ArrayList<>();
 
-        // ? Với mỗi learningObjective, chuyển nó thành learningObjectiveDTO (chưa có List<ContentDTO> ở trong)
-        for (User entity : entities) {
-            UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
-            // * Lấy list Content từ learningObjectiveId
-            List<Class> classes = userClassRepository.findClassesByUserId(entity.getId());
-
-            // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
-            List<ClassDTO> classDTOS = new ArrayList<>();
-            for (Class c : classes) {
-                ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(c, ClassDTO.class);
-                classDTOS.add(newClassDTO);
-            }
-
-            // ! Set list contentDTO sau khi convert ở trên vào learningObjectiveDTO
-            newUserDTO.setClasses(classDTOS);
-
-            // todo trả về List DTO đã có contentDTOs ở trong
-            result.add(newUserDTO);
-        }
-
+        convertListUserToListUserDTO(entities, result);
 
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -150,31 +116,44 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> save(UpsertUserDTO upsertUserDTO) {
+    public ResponseEntity<?> save(UserDTO userDTO) {
         try {
+            ServiceUtils.errors.clear();
+            List<Long> requestClassIds = userDTO.getClassIds();
+//            User user;
+
+            if (requestClassIds != null) {
+                ServiceUtils.validateClassIds(requestClassIds, classRepository);
+            }
+            if (!ServiceUtils.errors.isEmpty()) {
+                throw new CustomValidationException(ServiceUtils.errors);
+            }
+
             // Cannot create a new user with this method
             // For create request, use the signup method in AuthenticationService
-            if (upsertUserDTO.getEmail() == null) {
+            if (userDTO.getEmail() == null) {
                 return ResponseUtil.error("Update failed", "Email is required", HttpStatus.BAD_REQUEST);
             }
 
             // * For update request (if applicable)
-            Optional<User> user1 = userRepository.findByEmail(upsertUserDTO.getEmail());
+            Optional<User> user1 = userRepository.findByEmail(userDTO.getEmail());
             if (user1.isEmpty()) {
                 return ResponseUtil.error("Update failed", "User not found", HttpStatus.NOT_FOUND);
             }
             User user = user1.get();
             User tempOldUser = ServiceUtils.cloneFromEntity(user);
             // Apply updates efficiently using a converter, handling potential missing fields
-            user = (User) genericConverter.updateEntity(upsertUserDTO, user);
-//            user = ServiceUtils.fillMissingAttribute(user, userRepository.findByEmail(user.getEmail()).get());
+            user = convertDtoToEntity(userDTO);
             user = ServiceUtils.fillMissingAttribute(user, tempOldUser);
-
+            classUserRepository.deleteAllByUserId(user.getId());
+            loadClassUserFromListClassId(requestClassIds, user.getId());
+            user.markModified();
             // Save the user and handle potential errors
             user = userRepository.save(user);
 
+
             // Prepare the response with user information (filter sensitive data if needed)
-            UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
+            UserDTO result = convertUserToUserDTO(user);
 
             return ResponseUtil.getObject(result, HttpStatus.OK, "Update successful");
         } catch (ConstraintViolationException e) {
@@ -186,14 +165,72 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<?> changeStatus(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
+        User user = userRepository.findById(id);
+        if (user == null) {
             return ResponseUtil.error("Change status failed", "User not found", HttpStatus.NOT_FOUND);
         }
-        User newUser = user.get();
+        User newUser = user;
         newUser.setStatus(!newUser.getStatus());
         newUser.isEnabled();
         userRepository.save(newUser);
         return ResponseUtil.getObject(genericConverter.toDTO(newUser,UserDTO.class), HttpStatus.OK, "Change status successful");
     }
+
+    private void convertListUserToListUserDTO(List<User> entities, List<UserDTO> result) {
+        for (User user : entities){
+            UserDTO newUserDTO = convertUserToUserDTO(user);
+            result.add(newUserDTO);
+        }
+    }
+
+    private UserDTO convertUserToUserDTO(User entity) {
+        UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
+        List<FamsClass> classes = classUserRepository.findClassByUserId(entity.getId());
+        if (entity.getClassUsers() == null){
+            newUserDTO.setClassIds(null);
+        }
+        else {
+            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+            List<Long> classIds = classes.stream()
+                    .map(FamsClass::getId)
+                    .toList();
+
+            newUserDTO.setClassIds(classIds);
+
+        }
+        return newUserDTO;
+    }
+
+    public User convertDtoToEntity(UserDTO userDTO) {
+        User user = new User();
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setEmail(userDTO.getEmail());
+        user.setRole(userDTO.getRole());
+        user.setPhone(userDTO.getPhone());
+        user.setDob(userDTO.getDob());
+        user.setGender(userDTO.getGender());
+        user.setStatus(userDTO.getStatus());
+
+        return user;
+    }
+
+    private void loadClassUserFromListClassId(List<Long> requestClassIds, Long userId) {
+        if (requestClassIds != null && !requestClassIds.isEmpty()) {
+            User user = userRepository.findById(userId);
+            if (user != null) {
+                for (Long requestClassId: requestClassIds) {
+                    FamsClass famsClass = classRepository.findById(requestClassId);
+                    if (famsClass != null) {
+                        ClassUser classUser = new ClassUser();
+                        classUser.setFamsClass(famsClass);
+                        classUser.setUser(user);
+                        classUserRepository.save(classUser);
+                    }
+                }
+            }
+
+        }
+    }
+
 }

@@ -21,10 +21,12 @@ public interface ContentRepository extends JpaRepository<Content, String> {
 
   List<Content> findAllByStatusIsTrue(Pageable pageable);
   List<Content> findAllByOrderByIdDesc(Pageable pageable);
+  List<Content> findAllBy(Pageable pageable);
   Content findById(Long id);
   Content findByStatusIsTrueAndId(Long id);
   //Content findByStatusIsTrueAndCode(String code);
   Long countAllByStatusIsTrue();
+
   @Transactional
   @Modifying
   @Query("UPDATE Content co SET co.status = ?1 WHERE co.id = ?2")
@@ -62,5 +64,5 @@ public interface ContentRepository extends JpaRepository<Content, String> {
       Pageable pageable);
 
   @Query("SELECT c.unit FROM Content c WHERE c.unit.id = :unitId")
-  Unit findUnitByUnitId(@Param("unitId") Long unitId);
+    Unit findUnitByUnitId(@Param("unitId") Long unitId);
 }

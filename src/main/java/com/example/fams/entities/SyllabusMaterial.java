@@ -19,6 +19,12 @@ public class SyllabusMaterial {
     @ManyToOne
     @JoinColumn(name = "materialId")
     private Material material;
+
+
+    @Override
+    public String toString(){
+        return "SyllabusMaterial{" + "id=" + id  +"}";
+    }
 }
 
 

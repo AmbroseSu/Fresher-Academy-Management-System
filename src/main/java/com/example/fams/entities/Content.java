@@ -18,7 +18,14 @@ public class Content extends BaseEntity {
 
     private Long duration;
 
-    @OneToMany(mappedBy="content", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy="content")
     private List<LearningObjectiveContent> learningObjectiveContents;
 
+    @Override
+    public String toString() {
+        return "Content{" +
+            "id=" + super.getId() +
+            // Include only necessary fields, avoid calling toString() on collections or related entities
+            '}';
+    }
 }

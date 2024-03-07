@@ -1,19 +1,16 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.UnitDTO;
-import com.example.fams.entities.Content;
-import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.LearningObjectiveContent;
-import com.example.fams.entities.Unit;
-import com.example.fams.repository.ContentLearningObjectiveRepository;
-import com.example.fams.repository.ContentRepository;
-import com.example.fams.repository.LearningObjectiveRepository;
+import com.example.fams.entities.*;
+import com.example.fams.repository.*;
 import com.example.fams.services.IContentService;
 import com.example.fams.services.ServiceUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,15 +25,19 @@ public class ContentServiceImpl implements IContentService {
 
 
   private final ContentRepository contentRepository;
+  private final UnitRepository unitRepository;
+  private final LearningObjectiveContentRepository learningObjectiveContentRepository;
   private final ContentLearningObjectiveRepository contentLearningObjectiveRepository;
   private final LearningObjectiveRepository learningObjectiveRepository;
   private final GenericConverter genericConverter;
 
-  public ContentServiceImpl(ContentRepository contentRepository,
-      ContentLearningObjectiveRepository contentLearningObjectiveRepository,
-      LearningObjectiveRepository learningObjectiveRepository, GenericConverter genericConverter) {
+  public ContentServiceImpl(ContentRepository contentRepository, UnitRepository unitRepository, LearningObjectiveContentRepository learningObjectiveContentRepository,
+                            ContentLearningObjectiveRepository contentLearningObjectiveRepository,
+                            LearningObjectiveRepository learningObjectiveRepository, GenericConverter genericConverter) {
     this.contentRepository = contentRepository;
-    this.contentLearningObjectiveRepository = contentLearningObjectiveRepository;
+      this.unitRepository = unitRepository;
+      this.learningObjectiveContentRepository = learningObjectiveContentRepository;
+      this.contentLearningObjectiveRepository = contentLearningObjectiveRepository;
     this.learningObjectiveRepository = learningObjectiveRepository;
     this.genericConverter = genericConverter;
   }
@@ -47,22 +48,7 @@ public class ContentServiceImpl implements IContentService {
     List<Content> entities = contentRepository.findAllByStatusIsTrue(pageable);
     List<ContentDTO> result = new ArrayList<>();
 
-    for (Content entity : entities) {
-      ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-
-      List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
-
-      List<LearningObjectiveDTO> learningObjectiveDTOS = new ArrayList<>();
-      for (LearningObjective learningObjective : learningObjectives) {
-        LearningObjectiveDTO newLearningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(learningObjective, LearningObjectiveDTO.class);
-        learningObjectiveDTOS.add(newLearningObjectiveDTO);
-      }
-
-      newContentDTO.setLearningObjectiveDTOS(learningObjectiveDTOS);
-
-      result.add(newContentDTO);
-    }
-
+    convertListContentToListContentDTO(entities, result);
 
     return ResponseUtil.getCollection(result,
         HttpStatus.OK,
@@ -74,18 +60,31 @@ public class ContentServiceImpl implements IContentService {
 
   @Override
   public ResponseEntity<?> save(ContentDTO contentDTO) {
-    List<LearningObjectiveDTO> requestLearningObjectiveDTOs = contentDTO.getLearningObjectiveDTOS();
-
+    ServiceUtils.errors.clear();
+    List<Long> requestLearningObjectiveIds = contentDTO.getLearningObjectiveIds();
+    Long requestUnitId = contentDTO.getUnitId();
     Content entity;
+
+    // * Validate requestDTO ( if left null, then can be updated later )
+    if (requestLearningObjectiveIds != null){
+      ServiceUtils.validateLearningObjectiveIds(requestLearningObjectiveIds, learningObjectiveRepository);
+    }
+    if (requestUnitId != null){
+      ServiceUtils.validateUnitIds(List.of(requestUnitId), unitRepository);
+    }
+    if (!ServiceUtils.errors.isEmpty()) {
+      throw new CustomValidationException(ServiceUtils.errors);
+    }
 
     // * For update request
     if (contentDTO.getId() != null){
       Content oldEntity = contentRepository.findById(contentDTO.getId());
       Content tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-      entity = (Content) genericConverter.updateEntity(contentDTO, oldEntity);
+      entity = convertDtoToEntity(contentDTO, unitRepository);
       entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
       contentLearningObjectiveRepository.deleteAllByContentId(contentDTO.getId());
-      loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveDTOs, entity.getId());
+      loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
+      entity.setUnit(unitRepository.findById(requestUnitId));
       entity.markModified();
       contentRepository.save(entity);
     }
@@ -93,40 +92,21 @@ public class ContentServiceImpl implements IContentService {
     // * For create request
     else {
       contentDTO.setStatus(true);
-      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
+      entity = convertDtoToEntity(contentDTO, unitRepository);
       contentRepository.save(entity);
-      loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveDTOs, entity.getId());
+      loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
     }
 
 
-    ContentDTO result = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-
-    List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
-    List<LearningObjectiveDTO> learningObjectiveDTOS = new ArrayList<>();
-    for (LearningObjective learningObjective : learningObjectives) {
-      LearningObjectiveDTO newLearningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(learningObjective, LearningObjectiveDTO.class);
-      learningObjectiveDTOS.add(newLearningObjectiveDTO);
-    }
-    result.setLearningObjectiveDTOS(learningObjectiveDTOS);
+    ContentDTO result = convertContentToContentDTO(entity);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
-  }
-
-  private void loadContentLearningObjectiveFromListLearningObjectiveId(List<LearningObjectiveDTO> requestLearningObjectiveDTOs, Long contentId) {
-    if (requestLearningObjectiveDTOs != null && !requestLearningObjectiveDTOs.isEmpty()) {
-      for (LearningObjectiveDTO learningObjectiveDTO : requestLearningObjectiveDTOs) {
-        LearningObjectiveContent clo = new LearningObjectiveContent();
-        clo.setContent(contentRepository.findById(contentId));
-        clo.setLearningObjective(learningObjectiveRepository.findById(learningObjectiveDTO.getId()));
-        contentLearningObjectiveRepository.save(clo);
-      }
-    }
   }
 
   @Override
   public ResponseEntity<?> findById(Long id) {
     Content entity = contentRepository.findByStatusIsTrueAndId(id);
     if (entity != null) {
-      ContentDTO result = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
+      ContentDTO result = convertContentToContentDTO(entity);
       return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     } else {
       return ResponseUtil.error("Content not found", "Cannot Find Content", HttpStatus.NOT_FOUND);
@@ -137,38 +117,23 @@ public class ContentServiceImpl implements IContentService {
   @Override
   public ResponseEntity<?> findAll(int page, int limit) {
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<Content> entities = contentRepository.findAllByOrderByIdDesc(pageable);
+    List<Content> entities = contentRepository.findAllBy(pageable);
     List<ContentDTO> result = new ArrayList<>();
-    for (Content entity : entities) {
-      ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-      if(entity.getUnit() != null){
-        Unit unit = contentRepository.findUnitByUnitId(entity.getUnit().getId());
-        List<LearningObjective> learningObjective = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
-        UnitDTO unitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-        List<LearningObjectiveDTO> learningObjectiveDTOs = new ArrayList<>();
-        for(LearningObjective lo : learningObjective){
-          LearningObjectiveDTO learningObjectiveDTO = (LearningObjectiveDTO) genericConverter.toDTO(lo, LearningObjectiveDTO.class);
-          learningObjectiveDTOs.add(learningObjectiveDTO);
-        }
-        newDTO.setUnitDTO(unitDTO);
-        newDTO.setLearningObjectiveDTOS(learningObjectiveDTOs);
-      }
 
+    convertListContentToListContentDTO(entities, result);
 
-      result.add(newDTO);
-    }
     return ResponseUtil.getCollection(result,
-        HttpStatus.OK,
-        "Fetched successfully",
-        page,
-        limit,
-        contentRepository.countAllByStatusIsTrue());
+            HttpStatus.OK,
+            "Fetched successfully",
+            page,
+            limit,
+            contentRepository.countAllByStatusIsTrue());
   }
 
   @Override
   public ResponseEntity<?> changeStatus(Long id) {
     Content entity = contentRepository.findById(id);
-    if (entity != null) {
+    if (entity != null){
       if (entity.getStatus()) {
         entity.setStatus(false);
       } else {
@@ -189,10 +154,7 @@ public class ContentServiceImpl implements IContentService {
     List<Content> entities = contentRepository.searchSortFilter(delieryType, duration, pageable);
     List<ContentDTO> result = new ArrayList<>();
     Long count = contentRepository.countSearchSortFilter(delieryType, duration);
-    for (Content entity : entities){
-      ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-      result.add(newDTO);
-    }
+    convertListContentToListContentDTO(entities, result);
     return ResponseUtil.getCollection(result,
         HttpStatus.OK,
         "Fetched successfully",
@@ -203,21 +165,75 @@ public class ContentServiceImpl implements IContentService {
 
   @Override
   public ResponseEntity<?> searchSortFilterADMIN(ContentDTO contentDTO, String sortById, int page, int limit) {
-    Integer deliveryType = contentDTO.getDeliveryType();
+    Integer delieryType = contentDTO.getDeliveryType();
     Long duration = contentDTO.getDuration();
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<Content> entities = contentRepository.searchSortFilterADMIN(deliveryType, duration, sortById, pageable);
+    List<Content> entities = contentRepository.searchSortFilterADMIN(delieryType, duration, sortById,  pageable);
     List<ContentDTO> result = new ArrayList<>();
-    Long count = contentRepository.countSearchSortFilter(deliveryType, duration);
-    for (Content entity : entities){
-      ContentDTO newDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
-      result.add(newDTO);
-    }
+    Long count = contentRepository.countSearchSortFilter(delieryType, duration);
+    convertListContentToListContentDTO(entities, result);
     return ResponseUtil.getCollection(result,
-        HttpStatus.OK,
-        "Fetched successfully",
-        page,
-        limit,
-        count);
+            HttpStatus.OK,
+            "Fetched successfully",
+            page,
+            limit,
+            count);
+  }
+
+  private void convertListContentToListContentDTO(List<Content> entities, List<ContentDTO> result) {
+    for (Content content : entities){
+      ContentDTO newContentDTO = convertContentToContentDTO(content);
+      result.add(newContentDTO);
+    }
+  }
+
+  private ContentDTO convertContentToContentDTO(Content entity) {
+    ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
+    List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
+
+    if (learningObjectives == null) newContentDTO.setLearningObjectiveIds(null);
+    else {
+      // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+      List<Long> learningObjectiveIds = learningObjectives.stream()
+              .map(LearningObjective::getId)
+              .toList();
+      newContentDTO.setLearningObjectiveIds(learningObjectiveIds);
+    }
+
+    if (entity.getUnit() == null) newContentDTO.setUnitId(null);
+    else {
+      Unit unit = contentRepository.findUnitByUnitId(entity.getUnit().getId());
+      newContentDTO.setUnitId(unit.getId());
+    }
+    return newContentDTO;
+  }
+
+  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
+    Content content = new Content();
+    content.setId(contentDTO.getId());
+    content.setDeliveryType(contentDTO.getDeliveryType());
+    content.setDuration(contentDTO.getDuration());
+    content.setStatus(contentDTO.getStatus());
+
+    // Fetch the Unit using the provided unitId
+    Unit unit = unitRepository.findById(contentDTO.getUnitId());
+    content.setUnit(unit);
+
+    return content;
+  }
+
+  private void loadContentLearningObjectiveFromListLearningObjectiveId(List<Long> requestLearningObjectiveIds, Long contentId) {
+    if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {
+      for (Long learningObjectiveId : requestLearningObjectiveIds) {
+        LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
+        Content content = contentRepository.findById(contentId);
+        if (learningObjective != null && content != null) {
+          LearningObjectiveContent clo = new LearningObjectiveContent();
+          clo.setContent(content);
+          clo.setLearningObjective(learningObjective);
+          learningObjectiveContentRepository.save(clo);
+        }
+      }
+    }
   }
 }
