@@ -88,7 +88,7 @@ public class UnitServiceImpl implements IUnitService {
         // * For create request
         else {
             unitDTO.setStatus(true);
-            unit = (Unit) genericConverter.toEntity(unitDTO, Unit.class);
+            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
             unitRepository.save(unit);
             loadContentsFromListContentIds(requestContentIds, unit.getId());
         }

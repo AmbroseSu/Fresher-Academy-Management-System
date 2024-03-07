@@ -92,7 +92,7 @@ public class ContentServiceImpl implements IContentService {
     // * For create request
     else {
       contentDTO.setStatus(true);
-      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
+      entity = convertDtoToEntity(contentDTO, unitRepository);
       contentRepository.save(entity);
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
     }

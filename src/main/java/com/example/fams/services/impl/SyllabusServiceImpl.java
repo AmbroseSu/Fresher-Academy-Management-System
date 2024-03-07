@@ -135,7 +135,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
             syllabusRepository.save(entity);
         } else {
             syllabusDTO.setStatus(true);
-            entity = (Syllabus) genericConverter.toEntity(syllabusDTO, Syllabus.class);
+            entity = convertDtoToEntity(syllabusDTO, syllabusMaterialRepository, syllabusTrainingProgramRepository, syllabusObjectiveRepository);
             syllabusRepository.save(entity);
             loadListSyllabusObjectiveFromSyllabusId(requestLearningObjectiveIds, entity.getId());
             loadListTrainingProgramFromSyllabusId(requestTrainingProgramIds, entity.getId());

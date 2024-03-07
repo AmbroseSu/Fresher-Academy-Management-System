@@ -32,6 +32,7 @@ public abstract class BaseEntity{
     private Long createdDate;
 
     @Column(name = "create_by")
+//    @CreationTimestamp
     private String createBy;
 
     @Column(name = "modified_by")
@@ -40,6 +41,7 @@ public abstract class BaseEntity{
 
 
     @Column(name = "modified_date")
+//    @UpdateTimestamp
     private Long modifiedDate;
 
     @PrePersist

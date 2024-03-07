@@ -106,7 +106,7 @@ public class MaterialServiceImpl implements IMaterialService {
         // * For create request
         else {
             materialDTO.setStatus(true);
-            entity = (Material) genericConverter.toEntity(materialDTO, Material.class);
+            entity = convertDtoToEntity(materialDTO);
             materialRepository.save(entity);
             loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
         }

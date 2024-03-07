@@ -90,7 +90,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         // * For create request
         else {
             learningObjectiveDTO.setStatus(true);
-            lo = (LearningObjective) genericConverter.toEntity(learningObjectiveDTO, LearningObjective.class);
+            lo = convertDtoToEntity(learningObjectiveDTO);
             learningObjectiveRepository.save(lo);
             loadContentLearningObjectiveFromListContentId(requestContentIds, lo.getId());
             loadSyllabusObjectiveFromListSyllabusId(requestSyllabusIds, lo.getId());
