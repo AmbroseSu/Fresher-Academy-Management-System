@@ -8,6 +8,7 @@ import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.ServiceUtils;
+import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,8 @@ public class ClassServiceImpl implements IClassService {
   private final TrainingProgramRepository trainingProgramRepository;
   private final GenericConverter genericConverter;
 
-  public ClassServiceImpl(ClassRepository classRepository, UserClassRepository userClassRepository,
+  public ClassServiceImpl(ClassRepository classRepository,
+      UserClassRepository userClassRepository,
                           ClassUserRepository classUserRepository, UserRepository userRepository, TrainingProgramRepository trainingProgramRepository, GenericConverter genericConverter) {
     this.classRepository = classRepository;
     this.userClassRepository = userClassRepository;
@@ -102,10 +104,14 @@ public class ClassServiceImpl implements IClassService {
   private void loadClassUserFromListUserId(List<Long> requestUserIds, Long classId) {
     if (requestUserIds != null && !requestUserIds.isEmpty()) {
       for (Long userId : requestUserIds) {
-        ClassUser clu = new ClassUser();
-        clu.setFamsClass(classRepository.findById(classId));
-        clu.setUser(userRepository.findById(userId).get());
-        classUserRepository.save(clu);
+        User user = userRepository.findById(userId);
+        FamsClass famsClass = classRepository.findById(classId);
+        if (user != null && famsClass != null) {
+          ClassUser clu = new ClassUser();
+          clu.setUser(user);
+          clu.setFamsClass(famsClass);
+          classUserRepository.save(clu);
+        }
       }
     }
   }
