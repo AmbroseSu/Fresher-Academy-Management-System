@@ -28,6 +28,11 @@ public class LearningObjectiveController {
         return learningObjectiveService.findAll(page, limit);
     }
 
+    @GetMapping("user/learningObjective/findById/{id}")
+    public ResponseEntity<?> getByLearningObjectiveId(@PathVariable Long id) {
+        return learningObjectiveService.findById(id);
+    }
+
     @GetMapping("user/learningObjective/search")
     public ResponseEntity<?> searchLearningObjective(@RequestBody LearningObjectiveDTO learningObjectiveDTO,
                                                      @RequestParam(defaultValue = "1") int page,

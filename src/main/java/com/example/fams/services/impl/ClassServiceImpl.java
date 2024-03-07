@@ -120,7 +120,7 @@ public class ClassServiceImpl implements IClassService {
   public ResponseEntity<?> findById(Long id) {
     FamsClass entity = classRepository.findByStatusIsTrueAndId(id);
     if (entity != null) {
-      ClassDTO result = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
+      ClassDTO result = convertClassToClassDTO(entity);
       return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     } else {
       return ResponseUtil.error("Class not found", "Cannot Find Class", HttpStatus.NOT_FOUND);
@@ -196,22 +196,27 @@ public class ClassServiceImpl implements IClassService {
 
   private void convertListClassToListClassDTO(List<FamsClass> entities, List<ClassDTO> result) {
     for (FamsClass famsClass : entities){
-      ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(famsClass, ClassDTO.class);
-      List<User> users = classUserRepository.findUserByClassId(famsClass.getId());
-      if (famsClass.getClassUsers() == null){
-        newClassDTO.setUserIds(null);
-      }
-      else {
-        // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
-        List<Long> userIds = users.stream()
-            .map(User::getId)
-            .toList();
-
-        newClassDTO.setUserIds(userIds);
-
-      }
+      ClassDTO newClassDTO = convertClassToClassDTO(famsClass);
       result.add(newClassDTO);
     }
+  }
+
+  private ClassDTO convertClassToClassDTO(FamsClass entity) {
+    ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
+    List<User> users = classUserRepository.findUserByClassId(entity.getId());
+    if (entity.getClassUsers() == null){
+      newClassDTO.setUserIds(null);
+    }
+    else {
+      // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+      List<Long> userIds = users.stream()
+              .map(User::getId)
+              .toList();
+
+      newClassDTO.setUserIds(userIds);
+
+    }
+    return newClassDTO;
   }
 
   public FamsClass convertDtoToEntity(ClassDTO classDTO, TrainingProgramRepository trainingProgramRepository) {

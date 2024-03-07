@@ -108,7 +108,7 @@ public class ContentServiceImpl implements IContentService {
   public ResponseEntity<?> findById(Long id) {
     Content entity = contentRepository.findByStatusIsTrueAndId(id);
     if (entity != null) {
-      ContentDTO result = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
+      ContentDTO result = convertContentToContentDTO(entity);
       return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     } else {
       return ResponseUtil.error("Content not found", "Cannot Find Content", HttpStatus.NOT_FOUND);
@@ -184,25 +184,30 @@ public class ContentServiceImpl implements IContentService {
 
   private void convertListContentToListContentDTO(List<Content> entities, List<ContentDTO> result) {
     for (Content content : entities){
-      ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(content, ContentDTO.class);
-      List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(content.getId());
-
-      if (learningObjectives == null) newContentDTO.setLearningObjectiveIds(null);
-      else {
-        // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
-        List<Long> learningObjectiveIds = learningObjectives.stream()
-                .map(LearningObjective::getId)
-                .toList();
-        newContentDTO.setLearningObjectiveIds(learningObjectiveIds);
-      }
-
-      if (content.getUnit() == null) newContentDTO.setUnitId(null);
-      else {
-        Unit unit = contentRepository.findUnitByUnitId(content.getUnit().getId());
-        newContentDTO.setUnitId(unit.getId());
-      }
+      ContentDTO newContentDTO = convertContentToContentDTO(content);
       result.add(newContentDTO);
     }
+  }
+
+  private ContentDTO convertContentToContentDTO(Content entity) {
+    ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
+    List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
+
+    if (learningObjectives == null) newContentDTO.setLearningObjectiveIds(null);
+    else {
+      // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+      List<Long> learningObjectiveIds = learningObjectives.stream()
+              .map(LearningObjective::getId)
+              .toList();
+      newContentDTO.setLearningObjectiveIds(learningObjectiveIds);
+    }
+
+    if (entity.getUnit() == null) newContentDTO.setUnitId(null);
+    else {
+      Unit unit = contentRepository.findUnitByUnitId(entity.getUnit().getId());
+      newContentDTO.setUnitId(unit.getId());
+    }
+    return newContentDTO;
   }
 
   public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {

@@ -13,5 +13,5 @@ public interface UserClassRepository extends JpaRepository<UserClass, Long> {
     @Query("SELECT c FROM FamsClass c " +
             "JOIN UserClass uc ON c.id = uc.aClass.id " +
             "WHERE uc.user.id = :userId")
-    List<Class> findClassesByUserId(Long userId);
+    List<FamsClass> findClassesByUserId(Long userId);
 }

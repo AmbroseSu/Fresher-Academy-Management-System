@@ -76,15 +76,19 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         // * For update request
         if (learningObjectiveDTO.getId() != null){
             LearningObjective oldEntity = learningObjectiveRepository.findById(learningObjectiveDTO.getId());
-            LearningObjective tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-            lo = convertDtoToEntity(learningObjectiveDTO);
-            ServiceUtils.fillMissingAttribute(lo, tempOldEntity);
-            learningObjectiveContentRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
-            loadContentLearningObjectiveFromListContentId(requestContentIds, lo.getId());
-            syllabusObjectiveRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
-            loadSyllabusObjectiveFromListSyllabusId(requestSyllabusIds, lo.getId());
-            lo.markModified();
-            learningObjectiveRepository.save(lo);
+            if (oldEntity != null) {
+                LearningObjective tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
+                lo = convertDtoToEntity(learningObjectiveDTO);
+                ServiceUtils.fillMissingAttribute(lo, tempOldEntity);
+                learningObjectiveContentRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
+                loadContentLearningObjectiveFromListContentId(requestContentIds, lo.getId());
+                syllabusObjectiveRepository.deleteAllByLearningObjectiveId(learningObjectiveDTO.getId());
+                loadSyllabusObjectiveFromListSyllabusId(requestSyllabusIds, lo.getId());
+                lo.markModified();
+                learningObjectiveRepository.save(lo);
+            } else {
+                throw new RuntimeException("LearningObjective with id " + learningObjectiveDTO.getId() + " does not exists!");
+            }
         }
 
         // * For create request
@@ -96,18 +100,14 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             loadSyllabusObjectiveFromListSyllabusId(requestSyllabusIds, lo.getId());
         }
 
-
-        LearningObjectiveDTO result = (LearningObjectiveDTO) genericConverter.toDTO(lo, LearningObjectiveDTO.class);
-
-        result.setContentIds(requestContentIds);
-        result.setSyllabusIds(requestSyllabusIds);
+        LearningObjectiveDTO result = convertLoToLoDTO(lo);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
     @Override
     public ResponseEntity<?> findById(Long id) {
         LearningObjective entity = learningObjectiveRepository.findByStatusIsTrueAndId(id);
-        LearningObjectiveDTO result = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+        LearningObjectiveDTO result = convertLoToLoDTO(entity);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -182,29 +182,33 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
 
     private void convertListLoToListLoDTO(List<LearningObjective> entities, List<LearningObjectiveDTO> result) {
         for (LearningObjective lo : entities){
-            LearningObjectiveDTO newLoDTO = (LearningObjectiveDTO) genericConverter.toDTO(lo, LearningObjectiveDTO.class);
-            List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(lo.getId());
-            List<Syllabus> syllabus = syllabusObjectiveRepository.findSyllabusByLearningObjectiveId(lo.getId());
-
-            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
-
-            if (contents == null) newLoDTO.setContentIds(null);
-            else {
-                List<Long> contentIds = contents.stream()
-                        .map(Content::getId)
-                        .toList();
-                newLoDTO.setContentIds(contentIds);
-            }
-
-            if (syllabus == null) newLoDTO.setSyllabusIds(null);
-            else {
-                List<Long> syllabusIds = syllabus.stream()
-                        .map(Syllabus::getId)
-                        .toList();
-                newLoDTO.setSyllabusIds(syllabusIds);
-            }
-            result.add(newLoDTO);
+            result.add(convertLoToLoDTO(lo));
         }
+    }
+
+    private LearningObjectiveDTO convertLoToLoDTO(LearningObjective entity) {
+        LearningObjectiveDTO newLoDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
+        List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(entity.getId());
+        List<Syllabus> syllabus = syllabusObjectiveRepository.findSyllabusByLearningObjectiveId(entity.getId());
+
+        // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+
+        if (contents == null) newLoDTO.setContentIds(null);
+        else {
+            List<Long> contentIds = contents.stream()
+                    .map(Content::getId)
+                    .toList();
+            newLoDTO.setContentIds(contentIds);
+        }
+
+        if (syllabus == null) newLoDTO.setSyllabusIds(null);
+        else {
+            List<Long> syllabusIds = syllabus.stream()
+                    .map(Syllabus::getId)
+                    .toList();
+            newLoDTO.setSyllabusIds(syllabusIds);
+        }
+        return newLoDTO;
     }
 
     public LearningObjective convertDtoToEntity(LearningObjectiveDTO LoDTO) {

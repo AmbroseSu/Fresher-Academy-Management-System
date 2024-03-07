@@ -4,10 +4,8 @@ import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
-import com.example.fams.entities.FamsClass;
-import com.example.fams.entities.Content;
-import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.User;
+import com.example.fams.entities.*;
+import com.example.fams.repository.TrainingProgramRepository;
 import com.example.fams.repository.UserClassRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.IGenericService;
@@ -64,7 +62,7 @@ public class UserServiceImpl implements UserService {
             return ResponseUtil.error("Not found","User not found", HttpStatus.NOT_FOUND);
         }
 
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -72,14 +70,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> findByUuid(String uuid) {
         User user = userRepository.findByStatusIsTrueAndUuid(uuid);
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
     @Override
     public ResponseEntity<?> findById(Long id) {
         User user = userRepository.findByStatusIsTrueAndId(id);
-        UserDTO result = (UserDTO) genericConverter.toDTO(user, UserDTO.class);
+        UserDTO result = convertUserToUserDTO(user);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -89,20 +87,7 @@ public class UserServiceImpl implements UserService {
         List<User> entities = userRepository.findAllByStatusIsTrue(pageable);
         List<UserDTO> result = new ArrayList<>();
 
-        for (User entity : entities) {
-            UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
-            List<Class> classes = userClassRepository.findClassesByUserId(entity.getId());
-
-            List<ClassDTO> classDTOS = new ArrayList<>();
-            for (Class c : classes) {
-                ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(c, ClassDTO.class);
-                classDTOS.add(newClassDTO);
-            }
-
-            newUserDTO.setClasses(classDTOS);
-            result.add(newUserDTO);
-        }
-
+        convertListUserToListUserDTO(entities, result);
 
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -119,26 +104,7 @@ public class UserServiceImpl implements UserService {
         List<User> entities = userRepository.findAllByOrderByIdDesc(pageable);
         List<UserDTO> result = new ArrayList<>();
 
-        // ? Với mỗi learningObjective, chuyển nó thành learningObjectiveDTO (chưa có List<ContentDTO> ở trong)
-        for (User entity : entities) {
-            UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
-            // * Lấy list Content từ learningObjectiveId
-            List<Class> classes = userClassRepository.findClassesByUserId(entity.getId());
-
-            // * Với mỗi content trong list content vừa lấy được, convert sang contentDTO rồi nhét vào list contentDTOS
-            List<ClassDTO> classDTOS = new ArrayList<>();
-            for (Class c : classes) {
-                ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(c, ClassDTO.class);
-                classDTOS.add(newClassDTO);
-            }
-
-            // ! Set list contentDTO sau khi convert ở trên vào learningObjectiveDTO
-            newUserDTO.setClasses(classDTOS);
-
-            // todo trả về List DTO đã có contentDTOs ở trong
-            result.add(newUserDTO);
-        }
-
+        convertListUserToListUserDTO(entities, result);
 
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -196,4 +162,43 @@ public class UserServiceImpl implements UserService {
         userRepository.save(newUser);
         return ResponseUtil.getObject(genericConverter.toDTO(newUser,UserDTO.class), HttpStatus.OK, "Change status successful");
     }
+
+    private void convertListUserToListUserDTO(List<User> entities, List<UserDTO> result) {
+        for (User user : entities){
+            UserDTO newUserDTO = convertUserToUserDTO(user);
+            result.add(newUserDTO);
+        }
+    }
+
+    private UserDTO convertUserToUserDTO(User entity) {
+        UserDTO newUserDTO = (UserDTO) genericConverter.toDTO(entity, UserDTO.class);
+        List<FamsClass> classes = userClassRepository.findClassesByUserId(entity.getId());
+        if (entity.getClassUsers() == null){
+            newUserDTO.setClassIds(null);
+        }
+        else {
+            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+            List<Long> classIds = classes.stream()
+                    .map(FamsClass::getId)
+                    .toList();
+
+            newUserDTO.setClassIds(classIds);
+
+        }
+        return newUserDTO;
+    }
+
+    public FamsClass convertDtoToEntity(ClassDTO classDTO, TrainingProgramRepository trainingProgramRepository) {
+        FamsClass famsClass = new FamsClass();
+        famsClass.setId(classDTO.getId());
+        famsClass.setName(classDTO.getName());
+        famsClass.setCode(classDTO.getCode());
+        famsClass.setStatus(classDTO.getStatus());
+
+        TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
+        famsClass.setTrainingProgram(trainingProgram);
+
+        return famsClass;
+    }
+
 }

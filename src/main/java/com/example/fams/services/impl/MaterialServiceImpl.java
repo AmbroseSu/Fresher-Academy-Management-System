@@ -40,9 +40,9 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     public ResponseEntity<?> findById(Long id) {
-        Material entity=materialRepository.findByStatusIsTrueAndId(id);
+        Material entity = materialRepository.findByStatusIsTrueAndId(id);
         if (entity!= null) {
-            MaterialDTO result = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+            MaterialDTO result = convertMaterialToMaterialDTO(entity);
             return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
         }else {
             return ResponseUtil.error("Material not found", "Cannot Find Material", HttpStatus.NOT_FOUND);
@@ -179,16 +179,21 @@ public class MaterialServiceImpl implements IMaterialService {
     }
     private void convertListMaterialToMaterialDTO(List<Material> entities,List<MaterialDTO> result){
         for (Material entity : entities){
-            MaterialDTO newMaterialDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
-            List<Syllabus> syllabuses= syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
-            if (syllabuses==null){
-                newMaterialDTO.setSyllabusIds(null);
-            }
-            else {
-                List<Long> SyllabusIds = syllabuses.stream().map(Syllabus::getId).toList();
-            newMaterialDTO.setSyllabusIds(SyllabusIds);}
+            MaterialDTO newMaterialDTO = convertMaterialToMaterialDTO(entity);
             result.add(newMaterialDTO);
         }
+    }
+
+    private MaterialDTO convertMaterialToMaterialDTO(Material entity){
+        MaterialDTO newMaterialDTO = (MaterialDTO) genericConverter.toDTO(entity, MaterialDTO.class);
+        List<Syllabus> syllabuses= syllabusMaterialRepository.findSyllabusesByMaterialId(entity.getId());
+        if (syllabuses==null){
+            newMaterialDTO.setSyllabusIds(null);
+        }
+        else {
+            List<Long> SyllabusIds = syllabuses.stream().map(Syllabus::getId).toList();
+            newMaterialDTO.setSyllabusIds(SyllabusIds);}
+        return newMaterialDTO;
     }
 
     public Material convertDtoToEntity(MaterialDTO contentDTO) {

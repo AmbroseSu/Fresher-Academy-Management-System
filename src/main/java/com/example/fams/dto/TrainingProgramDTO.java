@@ -29,5 +29,5 @@ public class TrainingProgramDTO {
 
     private Boolean status;
 
-    private List<SyllabusDTO> syllabusDTOs;
+    private List<Long> syllabusIds;
 }
