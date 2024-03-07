@@ -2,6 +2,8 @@ package com.example.fams.config;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,11 +30,11 @@ public class GlobalExceptionHandler {
         return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(CustomValidationException.class)
+    @ExceptionHandler(MailException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleValidationException(CustomValidationException ex) {
-        List<String> errorMessages = ex.getErrors();
-        return ResponseUtil.error(errorMessages, "Bad request", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> handleMailException(MailException ex) {
+        String errorMessage = ex.getMessage();
+        return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
     }
 
     // ! Lộc add thêm vào ngày 01/02/2024
