@@ -39,12 +39,11 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
         List<TrainingProgramDTO> result = new ArrayList<>();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<TrainingProgram> entities = trainingProgramRepository.findAllByStatusIsTrue(pageable);
+        List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAllByStatusIsTrue(pageable);
 
-        for (TrainingProgram entity : entities){
-            TrainingProgramDTO dto = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
-            result.add(dto);
-        }
+        List<TrainingProgramDTO> dtos = new ArrayList<>();
+        convertListTpToListTpDTO(trainingPrograms, dtos);
+
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -60,10 +59,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAll(pageable).getContent();
 
             List<TrainingProgramDTO> dtos = new ArrayList<>();
-            for (TrainingProgram trainingProgram : trainingPrograms) {
-                TrainingProgramDTO dto = (TrainingProgramDTO) genericConverter.toDTO(trainingProgram, TrainingProgramDTO.class);
-                dtos.add(dto);
-            }
+            convertListTpToListTpDTO(trainingPrograms, dtos);
 
             long totalCount = trainingProgramRepository.count();
             return ResponseUtil.getCollection(dtos, HttpStatus.OK, "Fetched successfully", page, limit, totalCount);
@@ -83,7 +79,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             // Check if the training program exists
             if (entity != null) {
                 // Convert the entity to DTO
-                TrainingProgramDTO dto = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
+                TrainingProgramDTO dto = convertTpToTpDTO(entity);
                 // Return a successful response with the DTO
                 return ResponseUtil.getObject(dto, HttpStatus.OK, "Fetched successfully");
             } else {
@@ -191,17 +187,13 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<TrainingProgram> entities = trainingProgramRepository.searchSortFilter(name, startTime, duration, training_status, pageable);
         List<TrainingProgramDTO> result = new ArrayList<>();
-        Long count = trainingProgramRepository.countSearchSortFilter(name, startTime, duration, training_status);
-        for (TrainingProgram entity : entities){
-            TrainingProgramDTO newDTO = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
-            result.add(newDTO);
-        }
+        convertListTpToListTpDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
                 page,
                 limit,
-                count);
+                result.size() + 1);
     }
 
     @Override
@@ -213,17 +205,13 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<TrainingProgram> entities = trainingProgramRepository.searchSortFilterADMIN(name, startTime, duration, training_status, sortById,  pageable);
         List<TrainingProgramDTO> result = new ArrayList<>();
-        Long count = trainingProgramRepository.countSearchSortFilter(name, startTime, duration, training_status);
-        for (TrainingProgram entity : entities){
-            TrainingProgramDTO newDTO = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
-            result.add(newDTO);
-        }
+        convertListTpToListTpDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",
                 page,
                 limit,
-                count);
+                result.size() + 1);
     }
 
     private TrainingProgram convertDtoToEntity(TrainingProgramDTO trainingProgramDTO, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository) {
@@ -238,23 +226,28 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         return trainingProgram;
     }
 
-//    private void convertListTpToListTpDTO(List<TrainingProgram> entities, List<TrainingProgramDTO> result) {
-//        for (TrainingProgram tp : entities){
-//            TrainingProgramDTO newTpDTO = (TrainingProgramDTO) genericConverter.toDTO(tp, TrainingProgram.class);
-//            List<Syllabus> syllabus = syllabusTrainingProgramRepository.findSyllabusByTrainingProgramId(tp.getId());
-//            if (tp.getSyllabusTrainingPrograms() == null){
-//                newTpDTO.setSyllabusIds(null);
-//            }
-//            else {
-//                // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
-//                List<Long> syllabusIds = syllabus.stream()
-//                        .map(Syllabus::getId)
-//                        .toList();
-//
-//                newTpDTO.setSyllabusIds(syllabusIds);
-//
-//            }
-//            result.add(newTpDTO);
-//        }
-//    }
+    private void convertListTpToListTpDTO(List<TrainingProgram> entities, List<TrainingProgramDTO> result) {
+        for (TrainingProgram tp : entities){
+            TrainingProgramDTO trainingProgramDTO = convertTpToTpDTO(tp);
+            result.add(trainingProgramDTO);
+        }
+    }
+
+    private TrainingProgramDTO convertTpToTpDTO(TrainingProgram entity) {
+        TrainingProgramDTO newTpDTO = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
+        List<Syllabus> syllabus = syllabusTrainingProgramRepository.findSyllabusByTrainingProgramId(entity.getId());
+        if (entity.getSyllabusTrainingPrograms() == null){
+            newTpDTO.setSyllabusIds(null);
+        }
+        else {
+            // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
+            List<Long> syllabusIds = syllabus.stream()
+                    .map(Syllabus::getId)
+                    .toList();
+
+            newTpDTO.setSyllabusIds(syllabusIds);
+
+        }
+        return newTpDTO;
+    }
 }

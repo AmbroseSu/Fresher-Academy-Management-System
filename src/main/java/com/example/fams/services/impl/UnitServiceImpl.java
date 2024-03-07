@@ -104,7 +104,7 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     public ResponseEntity<?> findById(Long id) {
         Unit entity = unitRepository.findById(id);
-        UnitDTO result = (UnitDTO) genericConverter.toDTO(entity, UnitDTO.class);
+        UnitDTO result = convertUnitToUnitDTO(entity);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
@@ -209,26 +209,29 @@ public class UnitServiceImpl implements IUnitService {
 
     private void convertListUnitToListUnitDTO(List<Unit> units, List<UnitDTO> result) {
         for (Unit unit : units) {
-            UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
-            // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
-            List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
-
-            // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
-
-            if (contents == null) newUnitDTO.setContentIds(null);
-            else {
-                List<Long> contentIds = contents.stream()
-                        .map(Content::getId)
-                        .toList();
-                newUnitDTO.setContentIds(contentIds);
-            }
-
-            if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
-            else newUnitDTO.setSyllabusId(unit.getSyllabus().getId());
-
-            // todo trả về List DTO đã có contentIds và SyllabusId ở trong
+            UnitDTO newUnitDTO = convertUnitToUnitDTO(unit);
             result.add(newUnitDTO);
         }
+    }
+
+    private UnitDTO convertUnitToUnitDTO(Unit unit) {
+        UnitDTO newUnitDTO = (UnitDTO) genericConverter.toDTO(unit, UnitDTO.class);
+        // * Lấy list Content từ unitId và lấy Syllabus từ syllabusId trong unitDTO
+        List<Content> contents = unitRepository.findContentsByUnitId(unit.getId());
+
+        // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
+
+        if (contents == null) newUnitDTO.setContentIds(null);
+        else {
+            List<Long> contentIds = contents.stream()
+                    .map(Content::getId)
+                    .toList();
+            newUnitDTO.setContentIds(contentIds);
+        }
+
+        if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
+        else newUnitDTO.setSyllabusId(unit.getSyllabus().getId());
+        return newUnitDTO;
     }
 }
 

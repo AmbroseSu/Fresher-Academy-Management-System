@@ -28,7 +28,7 @@ public class UserDTO {
     private Long dob;
     private Boolean status;
     private Boolean gender;
-    private List<ClassDTO> classes;
+    private List<Long> classIds;
     private Long createdDate;
     private String createBy;
     private String modifiedBy;
