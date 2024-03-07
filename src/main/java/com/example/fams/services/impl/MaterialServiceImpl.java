@@ -133,10 +133,14 @@ public class MaterialServiceImpl implements IMaterialService {
     private void loadSyllabusMaterialFromListSyllabusId(List<Long> requestSyllabusIds, Long materialId) {
         if (requestSyllabusIds != null && !requestSyllabusIds.isEmpty()) {
             for (Long syllabusId : requestSyllabusIds) {
-                SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
-                syllabusMaterial.setMaterial(materialRepository.findById(materialId));
-                syllabusMaterial.setSyllabus(syllabusRepository.findOneById(syllabusId));
-                syllabusMaterialRepository.save(syllabusMaterial);
+                Material material=materialRepository.findById(materialId);
+                Syllabus syllabus=syllabusRepository.findOneById(syllabusId);
+                if (material!= null && syllabus!= null) {
+                    SyllabusMaterial syllabusMaterial = new SyllabusMaterial();
+                    syllabusMaterial.setMaterial(material);
+                    syllabusMaterial.setSyllabus(syllabus);
+                    syllabusMaterialRepository.save(syllabusMaterial);
+                }
             }
         }
     }
