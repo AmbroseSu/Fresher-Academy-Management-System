@@ -176,6 +176,11 @@ public class UserServiceImpl implements UserService {
         return ResponseUtil.getObject(genericConverter.toDTO(newUser,UserDTO.class), HttpStatus.OK, "Change status successful");
     }
 
+    @Override
+    public Boolean checkExist(Long id) {
+        return null;
+    }
+
     private void convertListUserToListUserDTO(List<User> entities, List<UserDTO> result) {
         for (User user : entities){
             UserDTO newUserDTO = convertUserToUserDTO(user);

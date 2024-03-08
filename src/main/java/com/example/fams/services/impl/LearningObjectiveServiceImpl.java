@@ -143,6 +143,11 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
     }
 
     @Override
+    public Boolean checkExist(Long id) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<?> searchSortFilter(LearningObjectiveDTO learningObjectiveDTO, int page, int limit) {
         String code = learningObjectiveDTO.getCode();
         String name = learningObjectiveDTO.getName();

@@ -147,6 +147,11 @@ public class ContentServiceImpl implements IContentService {
   }
 
   @Override
+  public Boolean checkExist(Long id) {
+    return null;
+  }
+
+  @Override
   public ResponseEntity<?> searchSortFilter(ContentDTO contentDTO, int page, int limit) {
     Integer delieryType = contentDTO.getDeliveryType();
     Long duration = contentDTO.getDuration();
