@@ -1,5 +1,6 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.UnitDTO;
 import com.example.fams.services.IGenericService;
@@ -7,6 +8,7 @@ import com.example.fams.services.IUnitService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,10 +43,15 @@ public class UnitController {
         return unitService.save(unit);
     }
 
-    @PutMapping("admin/unit")
-    public ResponseEntity<?> updateUnit(@Valid @RequestBody UnitDTO unit) {
-        return unitService.save(unit);
-    }
+    @PutMapping("admin/unit/{id}")
+    public ResponseEntity<?> updateUnit(@Valid @RequestBody UnitDTO unit, @PathVariable(name = "id") Long id) {
+
+        if(unitService.checkExist(id)){
+            unit.setId(id);
+            return unitService.save(unit);
+
+        }
+        return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);    }
 
     @DeleteMapping("admin/unit/{id}")
     public ResponseEntity<?> deleteUnit(@PathVariable Long id) {

@@ -13,4 +13,6 @@ public interface IGenericService<T> {
 
     ResponseEntity<?> changeStatus(Long id);
 
+    Boolean checkExist(Long id);
+
 }

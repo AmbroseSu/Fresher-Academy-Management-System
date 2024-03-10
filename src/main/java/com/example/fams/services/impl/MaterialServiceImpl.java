@@ -129,6 +129,12 @@ public class MaterialServiceImpl implements IMaterialService {
             return ResponseUtil.error("Material not found", "Cannot change status of non-existing Material", HttpStatus.NOT_FOUND);
         }
     }
+
+    @Override
+    public Boolean checkExist(Long id) {
+        return null;
+    }
+
     private void loadSyllabusMaterialFromListSyllabusId(List<Long> requestSyllabusIds, Long materialId) {
         if (requestSyllabusIds != null && !requestSyllabusIds.isEmpty()) {
             for (Long syllabusId : requestSyllabusIds) {

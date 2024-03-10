@@ -162,6 +162,11 @@ public class ClassServiceImpl implements IClassService {
   }
 
   @Override
+  public Boolean checkExist(Long id) {
+    return null;
+  }
+
+  @Override
   public ResponseEntity<?> searchSortFilter(ClassDTO classDTO, int page, int limit) {
     String code = classDTO.getCode();
     String name = classDTO.getName();

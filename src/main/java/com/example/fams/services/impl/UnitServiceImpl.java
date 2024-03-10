@@ -98,6 +98,11 @@ public class UnitServiceImpl implements IUnitService {
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
+    public Boolean checkExist(Long id){
+       Unit unit = unitRepository.findById(id);
+        return unit != null;
+    }
+
     @Override
     public ResponseEntity<?> findById(Long id) {
         Unit entity = unitRepository.findById(id);
