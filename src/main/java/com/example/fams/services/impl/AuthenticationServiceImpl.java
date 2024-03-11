@@ -7,9 +7,7 @@ import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
-import com.example.fams.dto.request.SignUpRequest;
 import com.example.fams.dto.request.SigninRequest;
-import com.example.fams.entities.ClassUser;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
@@ -25,7 +23,6 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -43,8 +39,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final int OTP_LENGTH = 6;
 
     private static final long EXPIRATION_MINUTES = 3;
-
-    private final Validator validator;
 
     private final UserRepository userRepository;
 
@@ -61,8 +55,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailService emailService;
 
     private final ClassUserRepository classUserRepository;
-
-    private final ClassRepository classRepository;
 
     public ResponseEntity<?> signup(User user) {
         try {
