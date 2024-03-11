@@ -72,6 +72,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
 
             user.setRole(Role.USER);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setUuid(UUID.randomUUID().toString());
             UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
             userRepository.save(user);
@@ -118,22 +119,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
+        if (userRepository.findByEmail(userEmail).isPresent()) {
+            // Generate a random OTP
+            String otp = generateOTP();
 
-//        try {
-        // Generate a random OTP
-        String otp = generateOTP();
-
-        // Store the OTP in the session or database for verification
-        httpSession.setAttribute("otp", otp);
-        httpSession.setAttribute("otpUserEmail", userEmail);
-        httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
-        emailService.sendOTPByEmail(userEmail, otp);
-        return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
-//        } catch (MailException ex) {
-//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-//        } catch (Exception ex) {
-//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
+            // Store the OTP in the session or database for verification
+            httpSession.setAttribute("otp", otp);
+            httpSession.setAttribute("otpUserEmail", userEmail);
+            httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+            emailService.sendOTPByEmail(userEmail, otp);
+            return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
+        }
+        return ResponseUtil.error("Cannot send email", "Email does not exists", HttpStatus.NOT_ACCEPTABLE);
     }
 
     private static String generateOTP() {
