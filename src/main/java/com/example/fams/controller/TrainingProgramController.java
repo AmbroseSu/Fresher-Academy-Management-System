@@ -1,10 +1,12 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.services.ITrainingProgramService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,9 +49,14 @@ public class TrainingProgramController {
     public ResponseEntity<?> createTrainingProgram(@Valid @RequestBody TrainingProgramDTO trainingProgramDTO) {
         return trainingProgramService.save(trainingProgramDTO);
     }
-    @PutMapping("admin/trainingProgram")
-    public ResponseEntity<?> updateTrainingProgram(@Valid @RequestBody TrainingProgramDTO trainingProgramDTO){
-        return trainingProgramService.save(trainingProgramDTO);
+    @PutMapping("admin/trainingProgram/{id}")
+    public ResponseEntity<?> updateTrainingProgram(@Valid @RequestBody TrainingProgramDTO trainingProgramDTO, @PathVariable(name ="id") Long id){
+
+        if(trainingProgramService.checkEixst(id)){
+            trainingProgramDTO.setId(id);
+          return   trainingProgramService.save(trainingProgramDTO);
+        }
+        return ResponseUtil.error("Not found","TrainingProgram not exist", HttpStatus.NOT_FOUND);
     }
     @DeleteMapping("admin/trainingProgram/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id){
