@@ -25,10 +25,11 @@ public class AuthenticationController {
 //        authen.generateAndSendOTP("phongdcse171753@fpt.edu.vn");
 //    }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody User user){
-            return authenticationService.signup(user);
-    }
+    // !Không dùng nữa
+//    @PostMapping("/signup")
+//    public ResponseEntity<?> signup(@Valid @RequestBody User user){
+//            return authenticationService.signup(user);
+//    }
 
     @PostMapping("/signin")
     public ResponseEntity<?> signin (@RequestBody SigninRequest signinRequest){

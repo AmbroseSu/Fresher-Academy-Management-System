@@ -7,6 +7,7 @@ import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.*;
 import com.example.fams.entities.*;
 import com.example.fams.repository.*;
+import com.example.fams.services.EmailService;
 import com.example.fams.services.IGenericService;
 import com.example.fams.services.ServiceUtils;
 import com.example.fams.services.UserService;
@@ -21,11 +22,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,8 @@ public class UserServiceImpl implements UserService {
     private final ClassUserRepository classUserRepository;
     private final GenericConverter genericConverter;
     private final ClassRepository classRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
     @Override
@@ -120,7 +126,7 @@ public class UserServiceImpl implements UserService {
         try {
             ServiceUtils.errors.clear();
             List<Long> requestClassIds = userDTO.getClassIds();
-//            User user;
+            User user;
 
             if (requestClassIds != null) {
                 ServiceUtils.validateClassIds(requestClassIds, classRepository);
@@ -129,32 +135,35 @@ public class UserServiceImpl implements UserService {
                 throw new CustomValidationException(ServiceUtils.errors);
             }
 
-            // Cannot create a new user with this method
-            // For create request, use the signup method in AuthenticationService
-            if (userDTO.getEmail() == null) {
-                return ResponseUtil.error("Update failed", "Email is required", HttpStatus.BAD_REQUEST);
-            }
-
             // * For update request (if applicable)
-            Optional<User> user1 = userRepository.findByEmail(userDTO.getEmail());
-            if (user1.isEmpty()) {
-                return ResponseUtil.error("Update failed", "User not found", HttpStatus.NOT_FOUND);
+            if (userDTO.getId() != null) {
+                User oldEntity = userRepository.findById(userDTO.getId());
+                User tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
+                user = convertDtoToEntity(userDTO);
+                ServiceUtils.fillMissingAttribute(user, tempOldEntity);
+                loadClassUserFromListClassId(requestClassIds, user.getId());
+                user.markModified();
+                userRepository.save(user);
+            } else {
+                // * For create new user
+                Optional<User> tempUser = userRepository.findByEmail(userDTO.getEmail());
+
+                if (tempUser.isPresent()) {
+                    return ResponseUtil.error("Create failed", "Email already exists!", HttpStatus.NOT_FOUND);
+                }
+
+                user = convertDtoToEntity(userDTO);
+                // * Set UUID lần đầu tiên tạo
+                user.setUuid(UUID.randomUUID().toString());
+                user.markModified();
+                userRepository.save(user);
+                loadClassUserFromListClassId(requestClassIds, user.getId());
+
+                // * Gửi email cho người được thêm vào
+                emailService.sendWelcomeEmail(userDTO.getEmail(), userDTO.getFirstName(), userDTO.getPassword());
             }
-            User user = user1.get();
-            User tempOldUser = ServiceUtils.cloneFromEntity(user);
-            // Apply updates efficiently using a converter, handling potential missing fields
-            user = convertDtoToEntity(userDTO);
-            user = ServiceUtils.fillMissingAttribute(user, tempOldUser);
-            classUserRepository.deleteAllByUserId(user.getId());
-            loadClassUserFromListClassId(requestClassIds, user.getId());
-            user.markModified();
-            // Save the user and handle potential errors
-            user = userRepository.save(user);
 
-
-            // Prepare the response with user information (filter sensitive data if needed)
             UserDTO result = convertUserToUserDTO(user);
-
             return ResponseUtil.getObject(result, HttpStatus.OK, "Update successful");
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
@@ -201,8 +210,8 @@ public class UserServiceImpl implements UserService {
                     .toList();
 
             newUserDTO.setClassIds(classIds);
-
         }
+        newUserDTO.setPassword(null);
         return newUserDTO;
     }
 
@@ -211,6 +220,7 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole(userDTO.getRole());
         user.setPhone(userDTO.getPhone());
         user.setDob(userDTO.getDob());
