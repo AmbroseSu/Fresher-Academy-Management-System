@@ -1,5 +1,4 @@
 package com.example.fams.config;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
