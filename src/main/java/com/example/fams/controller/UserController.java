@@ -1,11 +1,14 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,9 +41,13 @@ public class UserController {
         return userService.findByUuid(uuid);
     }
 
-    @PutMapping("user/update")
-    public ResponseEntity<?> updateLearningObjective(@RequestBody UserDTO userDTO) {
-        return userService.save(userDTO);
+    @PutMapping("user/update/{id}")
+    public ResponseEntity<?> updateLearningObjective(@Valid @RequestBody UserDTO userDTO, @PathVariable(name = "id") Long id) {
+        if (userService.checkExist(id)) {
+            userDTO.setId(id);
+            return userService.save(userDTO);
+        }
+        return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);
     }
 
 //    *************
