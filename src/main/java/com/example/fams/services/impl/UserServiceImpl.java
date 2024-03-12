@@ -178,7 +178,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean checkExist(Long id) {
-        return null;
+        User user = userRepository.findById(id);
+        return user != null;
     }
 
     private void convertListUserToListUserDTO(List<User> entities, List<UserDTO> result) {
