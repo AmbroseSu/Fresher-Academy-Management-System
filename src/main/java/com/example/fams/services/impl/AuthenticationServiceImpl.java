@@ -7,13 +7,10 @@ import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
-import com.example.fams.dto.request.SignUpRequest;
 import com.example.fams.dto.request.SigninRequest;
-import com.example.fams.entities.ClassUser;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Role;
-import com.example.fams.repository.ClassRepository;
 import com.example.fams.repository.ClassUserRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
@@ -21,11 +18,9 @@ import com.example.fams.services.EmailService;
 import com.example.fams.services.JWTService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -43,8 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final int OTP_LENGTH = 6;
 
     private static final long EXPIRATION_MINUTES = 3;
-
-    private final Validator validator;
 
     private final UserRepository userRepository;
 
@@ -62,8 +54,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ClassUserRepository classUserRepository;
 
-    private final ClassRepository classRepository;
-
     public ResponseEntity<?> signup(User user) {
         try {
             // check if user already exists
@@ -72,6 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
 
             user.setRole(Role.USER);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setUuid(UUID.randomUUID().toString());
             UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
             userRepository.save(user);
@@ -118,22 +109,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
+        if (userRepository.findByEmail(userEmail).isPresent()) {
+            // Generate a random OTP
+            String otp = generateOTP();
 
-//        try {
-        // Generate a random OTP
-        String otp = generateOTP();
-
-        // Store the OTP in the session or database for verification
-        httpSession.setAttribute("otp", otp);
-        httpSession.setAttribute("otpUserEmail", userEmail);
-        httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
-        emailService.sendOTPByEmail(userEmail, otp);
-        return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
-//        } catch (MailException ex) {
-//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-//        } catch (Exception ex) {
-//            return ResponseUtil.error("Cannot send OTP", ex.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
+            // Store the OTP in the session or database for verification
+            httpSession.setAttribute("otp", otp);
+            httpSession.setAttribute("otpUserEmail", userEmail);
+            httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+            emailService.sendOTPByEmail(userEmail, otp);
+            return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
+        }
+        return ResponseUtil.error("Cannot send email", "Email does not exists", HttpStatus.NOT_ACCEPTABLE);
     }
 
     private static String generateOTP() {

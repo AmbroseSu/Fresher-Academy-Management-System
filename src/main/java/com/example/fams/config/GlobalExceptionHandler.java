@@ -1,5 +1,5 @@
 package com.example.fams.config;
-import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -33,6 +33,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MailException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleMailException(MailException ex) {
+        String errorMessage = ex.getMessage();
+        return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleMailException(MessagingException ex) {
         String errorMessage = ex.getMessage();
         return ResponseUtil.error(errorMessage, "Bad request", HttpStatus.BAD_REQUEST);
     }

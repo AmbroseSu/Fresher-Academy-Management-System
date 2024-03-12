@@ -1,8 +1,6 @@
 package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
-import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.services.UserService;
 import jakarta.validation.Valid;
@@ -20,17 +18,17 @@ public class UserController {
     UserService userService;
 
 //    ****ADMIN****
-    @GetMapping("/admin/user/")
+    @GetMapping("/admin/user")
     public ResponseEntity<?> getAllActiveUser(@RequestParam int page, @RequestParam int limit){
         return userService.findAllByStatusTrue(page, limit);
     }
     @GetMapping("/admin/user/all")
-    public ResponseEntity<?> getAllUser(@RequestParam int page, @RequestParam int limit){
+    public ResponseEntity<?> getAll(@RequestParam int page, @RequestParam int limit){
         return userService.findAll(page, limit);
     }
 
     @DeleteMapping("/admin/user/delete/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         return userService.changeStatus(id);
     }
 //    *************
@@ -51,4 +49,12 @@ public class UserController {
     }
 
 //    *************
+
+    @PostMapping("user/create")
+    public ResponseEntity<?> create(@RequestBody UserDTO userDTO) {
+        if (userDTO.getEmail() == null || userDTO.getEmail().isBlank() || userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
+            return ResponseUtil.error("Missing attribute", "email and password must not be null", HttpStatus.BAD_REQUEST);
+        }
+        return userService.save(userDTO);
+    }
 }
