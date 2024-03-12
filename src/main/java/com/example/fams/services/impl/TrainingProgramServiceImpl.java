@@ -222,9 +222,9 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         TrainingProgram trainingProgram = new TrainingProgram();
         trainingProgram.setId(trainingProgramDTO.getId());
         trainingProgram.setName(trainingProgramDTO.getName());
-        trainingProgram.setStartTime(trainingProgram.getStartTime());
+        trainingProgram.setStartTime(trainingProgramDTO.getStartTime());
         trainingProgram.setDuration(trainingProgramDTO.getDuration());
-        trainingProgram.setTraining_status(trainingProgram.getTraining_status());
+        trainingProgram.setTraining_status(trainingProgramDTO.getTraining_status());
         trainingProgram.setStatus(trainingProgramDTO.getStatus());
 
         return trainingProgram;
