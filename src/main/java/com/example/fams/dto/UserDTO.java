@@ -1,6 +1,7 @@
 package com.example.fams.dto;
 
 import com.example.fams.entities.enums.Role;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,15 +17,12 @@ public class UserDTO {
     private String lastName;
     private String email;
     private String password;
-    private Role role;
     private String uuid;
     private String phone;
     private Long dob;
     private Boolean status;
     private Boolean gender;
     private List<Long> classIds;
-    private Long createdDate;
-    private String createBy;
-    private String modifiedBy;
-    private Long modifiedDate;
+    @NotNull(message = "User Role Id must not be null")
+    private Long userRoleId;
 }

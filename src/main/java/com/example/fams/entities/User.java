@@ -28,7 +28,10 @@ public class User extends BaseEntity implements UserDetails {
     @ValidEmail
     private String email;
     private String password;
-    private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "roleId")
+    private UserRole userRole;
 
     @Column(name = "uuid", nullable = false, unique = true)
     private String uuid;
@@ -45,9 +48,17 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(
+                new SimpleGrantedAuthority("syllabus:" + userRole.getSyllabusPermission().name()),
+                new SimpleGrantedAuthority("material:" + userRole.getMaterialPermission().name()),
+                new SimpleGrantedAuthority("trainingProgram:" + userRole.getTrainingProgramPermission().name()),
+                new SimpleGrantedAuthority("learningObjective:" + userRole.getLearningObjectivePermission().name()),
+                new SimpleGrantedAuthority("unit:" + userRole.getUnitPermission().name()),
+                new SimpleGrantedAuthority("class:" + userRole.getClassPermission().name()),
+                new SimpleGrantedAuthority("content:" + userRole.getContentPermission().name()),
+                new SimpleGrantedAuthority("user:" + userRole.getUserPermission().name())
+        );
     }
-
     @Override
     public String getUsername() {
         return email;

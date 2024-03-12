@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin
 public class TrainingProgramController {
     @Autowired
     @Qualifier("TrainingProgramService")

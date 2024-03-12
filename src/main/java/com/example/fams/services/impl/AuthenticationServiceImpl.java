@@ -1,23 +1,19 @@
 package com.example.fams.services.impl;
 
-import com.example.fams.config.ConstraintViolationExceptionHandler;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SigninRequest;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.User;
-import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.ClassUserRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
 import com.example.fams.services.EmailService;
 import com.example.fams.services.JWTService;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,24 +49,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailService emailService;
 
     private final ClassUserRepository classUserRepository;
-
-    public ResponseEntity<?> signup(User user) {
-        try {
-            // check if user already exists
-            if (userRepository.existsByEmail(user.getEmail())) {
-                return ResponseUtil.error("Email is already in use","Sign up failed", HttpStatus.BAD_REQUEST);
-            }
-
-            user.setRole(Role.USER);
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setUuid(UUID.randomUUID().toString());
-            UpsertUserDTO result = (UpsertUserDTO) genericConverter.toDTO(user, UpsertUserDTO.class);
-            userRepository.save(user);
-            return ResponseUtil.getObject(result, HttpStatus.CREATED, "ok");
-        } catch (ConstraintViolationException e) {
-            return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
-        }
-    }
 
     public ResponseEntity<?> signin(SigninRequest signinRequest) {
         // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object

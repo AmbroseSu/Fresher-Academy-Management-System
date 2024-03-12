@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final GenericConverter genericConverter;
     private final ClassRepository classRepository;
     private final EmailService emailService;
+    private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
@@ -132,7 +133,11 @@ public class UserServiceImpl implements UserService {
             if (!ServiceUtils.errors.isEmpty()) {
                 throw new CustomValidationException(ServiceUtils.errors);
             }
+            Optional<User> tempUser = userRepository.findByEmail(userDTO.getEmail());
 
+            if (tempUser.isPresent()) {
+                return ResponseUtil.error("Create failed", "Email already exists!", HttpStatus.NOT_FOUND);
+            }
             // * For update request (if applicable)
             if (userDTO.getId() != null) {
                 User oldEntity = userRepository.findById(userDTO.getId());
@@ -144,11 +149,6 @@ public class UserServiceImpl implements UserService {
                 userRepository.save(user);
             } else {
                 // * For create new user
-                Optional<User> tempUser = userRepository.findByEmail(userDTO.getEmail());
-
-                if (tempUser.isPresent()) {
-                    return ResponseUtil.error("Create failed", "Email already exists!", HttpStatus.NOT_FOUND);
-                }
 
                 user = convertDtoToEntity(userDTO);
                 // * Set UUID lần đầu tiên tạo
@@ -219,8 +219,10 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setRole(userDTO.getRole());
+        if (userDTO.getPassword() != null){
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+        user.setUserRole(userRoleRepository.findById(userDTO.getUserRoleId()).get());
         user.setPhone(userDTO.getPhone());
         user.setDob(userDTO.getDob());
         user.setGender(userDTO.getGender());
