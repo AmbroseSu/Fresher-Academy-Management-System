@@ -1,5 +1,6 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.ClassDTO;
 import com.example.fams.dto.ContentDTO;
 import com.example.fams.services.IClassService;
@@ -8,6 +9,7 @@ import com.example.fams.services.IGenericService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,10 +51,13 @@ public class ContentController {
     return contentService.searchSortFilterADMIN(contentDTO, sortById, page, limit);
   }
 
-  @PostMapping("admin/content")
-  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO) {
-    return contentService.save(contentDTO);
-  }
+  @PostMapping("admin/content/{id}")
+  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO, @PathVariable(name = "id") Long id) {
+    if(contentService.checkExist(id)){
+      contentDTO.setId(id);
+      return contentService.save(contentDTO);
+    }
+    return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);  }
 
   @PutMapping("admin/content")
   public ResponseEntity<?> updateContent(@Valid @RequestBody ContentDTO contentDTO) {
