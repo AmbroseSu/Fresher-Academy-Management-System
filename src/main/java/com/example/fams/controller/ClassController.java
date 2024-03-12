@@ -1,10 +1,12 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.ClassDTO;
 import com.example.fams.services.IClassService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,9 +49,14 @@ public class ClassController {
         return classService.searchSortFilterADMIN(classDTO, sortById, page, limit);
     }
 
-    @PostMapping("admin/class")
-    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO) {
-        return classService.save(classDTO);
+    @PostMapping("admin/class/{id}")
+    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
+        if(classService.checkExist(id)){
+            classDTO.setId(id);
+            return classService.save(classDTO);
+
+        }
+        return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("admin/class")
