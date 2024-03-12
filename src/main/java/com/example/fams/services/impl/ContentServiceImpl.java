@@ -148,7 +148,9 @@ public class ContentServiceImpl implements IContentService {
 
   @Override
   public Boolean checkExist(Long id) {
-    return null;
+    Content content = contentRepository.findById(id);
+    return content != null;
+
   }
 
   @Override

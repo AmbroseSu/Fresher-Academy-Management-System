@@ -163,7 +163,9 @@ public class ClassServiceImpl implements IClassService {
 
   @Override
   public Boolean checkExist(Long id) {
-    return null;
+    FamsClass famsClass = classRepository.findById(id);
+    return famsClass != null;
+
   }
 
   @Override

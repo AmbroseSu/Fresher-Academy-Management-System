@@ -49,19 +49,19 @@ public class ClassController {
         return classService.searchSortFilterADMIN(classDTO, sortById, page, limit);
     }
 
-    @PostMapping("admin/class/{id}")
-    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
+    @PostMapping("admin/class")
+    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO) {
+        return classService.save(classDTO);
+    }
+
+    @PutMapping("admin/class/{id}")
+    public ResponseEntity<?> updateClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
         if(classService.checkExist(id)){
             classDTO.setId(id);
             return classService.save(classDTO);
 
         }
         return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
-    }
-
-    @PutMapping("admin/class")
-    public ResponseEntity<?> updateClass(@Valid @RequestBody ClassDTO classDTO) {
-        return classService.save(classDTO);
     }
 
     @DeleteMapping("admin/class/{id}")

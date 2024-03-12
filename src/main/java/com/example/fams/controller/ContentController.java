@@ -51,17 +51,18 @@ public class ContentController {
     return contentService.searchSortFilterADMIN(contentDTO, sortById, page, limit);
   }
 
-  @PostMapping("admin/content/{id}")
-  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO, @PathVariable(name = "id") Long id) {
+  @PostMapping("admin/content")
+  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO) {
+    return contentService.save(contentDTO);
+  }
+
+  @PutMapping("admin/content/{id}")
+  public ResponseEntity<?> updateContent(@Valid @RequestBody ContentDTO contentDTO, @PathVariable(name = "id") Long id) {
     if(contentService.checkExist(id)){
       contentDTO.setId(id);
       return contentService.save(contentDTO);
     }
-    return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);  }
-
-  @PutMapping("admin/content")
-  public ResponseEntity<?> updateContent(@Valid @RequestBody ContentDTO contentDTO) {
-    return contentService.save(contentDTO);
+    return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
   }
 
   @DeleteMapping("admin/content/{id}")
