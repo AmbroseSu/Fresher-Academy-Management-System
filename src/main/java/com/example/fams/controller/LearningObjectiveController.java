@@ -1,5 +1,6 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.services.IGenericService;
@@ -7,6 +8,7 @@ import com.example.fams.services.ILearningObjectiveService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,9 +56,13 @@ public class LearningObjectiveController {
         return learningObjectiveService.save(learningObjective);
     }
 
-    @PutMapping("admin/learningObjective")
-    public ResponseEntity<?> updateLearningObjective(@Valid @RequestBody LearningObjectiveDTO learningObjective) {
-        return learningObjectiveService.save(learningObjective);
+    @PutMapping("admin/learningObjective/{id}")
+    public ResponseEntity<?> updateLearningObjective(@Valid @RequestBody LearningObjectiveDTO learningObjective, @PathVariable(name ="id") Long id) {
+        if(learningObjectiveService.checkExist(id)){
+            learningObjective.setId(id);
+            return learningObjectiveService.save(learningObjective);
+        }
+        return ResponseUtil.error("Not found","LearningObjective not exist", HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("admin/learningObjective/{id}")

@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service("SyllabusService")
 public class SyllabusServiceImpl implements ISyllabusService {
@@ -162,6 +163,11 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 }
             }
         }
+    }
+
+    public Boolean checkExist(Long id){
+       Syllabus syllabus = syllabusRepository.findOneById(id);
+        return syllabus != null;
     }
 
     private void loadListSyllabusObjectiveFromSyllabusId(List<Long> requestLearningObjectiveIds, Long syllabusId) {

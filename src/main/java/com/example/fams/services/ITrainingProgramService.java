@@ -4,7 +4,7 @@ import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.TrainingProgramDTO;
 import org.springframework.http.ResponseEntity;
 
-public interface ITrainingProgramService  {
+public interface ITrainingProgramService   {
     ResponseEntity<?> findAllByStatusTrue(int page, int limit);
 
     ResponseEntity<?> findAll(int page, int limit);
@@ -15,6 +15,7 @@ public interface ITrainingProgramService  {
 
     ResponseEntity<?> changeStatus(Long id);
 
+    Boolean checkEixst(Long id);
     ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO,
                                        int page, int limit);
 

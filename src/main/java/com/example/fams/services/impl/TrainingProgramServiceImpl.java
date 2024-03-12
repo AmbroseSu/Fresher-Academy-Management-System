@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service("TrainingProgramService")
 public class TrainingProgramServiceImpl implements ITrainingProgramService {
@@ -142,8 +143,6 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         }
     }
 
-
-
     private void loadTrainingProgramSyllabusFromListSyllabus(List<Long> requestyllabusIds, Long trainingProgramId) {
         if (requestyllabusIds != null && !requestyllabusIds.isEmpty()) {
             TrainingProgram trainingProgram = trainingProgramRepository.findOneById(trainingProgramId);
@@ -176,6 +175,13 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             return ResponseUtil.error("LearningObjective not found", "Cannot change status of non-existing LearningObjective", HttpStatus.NOT_FOUND);
         }
     }
+
+    @Override
+    public Boolean checkEixst(Long id) {
+        TrainingProgram trainingProgram = trainingProgramRepository.findOneById(id);
+        return trainingProgram != null;
+    }
+
     @Override
     public ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO, int page, int limit) {
         String name = trainingProgramDTO.getName();
@@ -216,9 +222,9 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         TrainingProgram trainingProgram = new TrainingProgram();
         trainingProgram.setId(trainingProgramDTO.getId());
         trainingProgram.setName(trainingProgramDTO.getName());
-        trainingProgram.setStartTime(trainingProgram.getStartTime());
+        trainingProgram.setStartTime(trainingProgramDTO.getStartTime());
         trainingProgram.setDuration(trainingProgramDTO.getDuration());
-        trainingProgram.setTraining_status(trainingProgram.getTraining_status());
+        trainingProgram.setTraining_status(trainingProgramDTO.getTraining_status());
         trainingProgram.setStatus(trainingProgramDTO.getStatus());
 
         return trainingProgram;

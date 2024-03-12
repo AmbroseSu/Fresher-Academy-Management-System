@@ -1,5 +1,6 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.services.IGenericService;
@@ -7,8 +8,11 @@ import com.example.fams.services.ISyllabusService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -53,9 +57,14 @@ public class SyllabusController {
         return syllabusService.save(syllabusDTO);
     }
 
-    @PutMapping("admin/syllabus")
-    public ResponseEntity<?> updateSyllabus(@Valid @RequestBody SyllabusDTO syllabusDTO) {
-        return syllabusService.save(syllabusDTO);
+    @PutMapping("admin/syllabus/{id}")
+    public ResponseEntity<?> updateSyllabus(@Valid @RequestBody SyllabusDTO syllabusDTO, @PathVariable(name = "id") Long id) {
+
+        if(syllabusService.checkExist(id)){
+            syllabusDTO.setId(id);
+           return syllabusService.save(syllabusDTO);
+        }
+        return ResponseUtil.error("Not found","Syllabus not exist", HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("admin/syllabus/{id}")
