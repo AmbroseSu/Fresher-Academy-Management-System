@@ -227,6 +227,7 @@ public class UserServiceImpl implements UserService {
         user.setDob(userDTO.getDob());
         user.setGender(userDTO.getGender());
         user.setStatus(userDTO.getStatus());
+        user.setAvatarUrl(userDTO.getAvatarUrl());
 
         return user;
     }

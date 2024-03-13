@@ -6,6 +6,7 @@ import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Permission;
 import com.example.fams.repository.UserRoleRepository;
 import com.example.fams.services.UserService;
+import com.example.fams.services.impl.StorageServiceImpl;
 import com.example.fams.services.impl.UserRoleServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -27,6 +29,8 @@ public class UserController {
     UserRoleServiceImpl userRoleService;
     @Autowired
     UserService userService;
+    @Autowired
+    private StorageServiceImpl storageService;
 
 //    ****ADMIN****
     @GetMapping("/admin/user")
@@ -51,9 +55,16 @@ public class UserController {
     }
 
     @PutMapping("user/update/{id}")
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateUser(@Valid @ModelAttribute UserDTO userDTO,
+                                        @PathVariable(name = "id") Long id) {
         if (userService.checkExist(id)) {
             userDTO.setId(id);
+            if (userDTO.getAvatar() != null) {
+                String avatarUrl = storageService.uploadFile(userDTO.getAvatar());
+                if (!avatarUrl.isBlank()) {
+                    userDTO.setAvatarUrl(avatarUrl);
+                }
+            }
             return userService.save(userDTO);
         }
         return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);

@@ -40,6 +40,7 @@ public class User extends BaseEntity implements UserDetails {
     private String phone;
     private Long dob;
     private Boolean gender;
+    private String avatarUrl;
 
 //    @ManyToMany(mappedBy = "user")
 //    private List<User> user;
