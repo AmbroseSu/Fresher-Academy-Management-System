@@ -4,13 +4,14 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
-import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.UnitDTO;
-import com.example.fams.entities.*;
+import com.example.fams.entities.Content;
+import com.example.fams.entities.LearningObjective;
+import com.example.fams.entities.LearningObjectiveContent;
+import com.example.fams.entities.Unit;
+import com.example.fams.entities.enums.DeliveryType;
 import com.example.fams.repository.*;
 import com.example.fams.services.IContentService;
 import com.example.fams.services.ServiceUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -155,12 +156,12 @@ public class ContentServiceImpl implements IContentService {
 
   @Override
   public ResponseEntity<?> searchSortFilter(ContentDTO contentDTO, int page, int limit) {
-    Integer delieryType = contentDTO.getDeliveryType();
+    DeliveryType deliveryType = contentDTO.getDeliveryType();
     Long duration = contentDTO.getDuration();
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<Content> entities = contentRepository.searchSortFilter(delieryType, duration, pageable);
+    List<Content> entities = contentRepository.searchSortFilter(deliveryType, duration, pageable);
     List<ContentDTO> result = new ArrayList<>();
-    Long count = contentRepository.countSearchSortFilter(delieryType, duration);
+    Long count = contentRepository.countSearchSortFilter(deliveryType, duration);
     convertListContentToListContentDTO(entities, result);
     return ResponseUtil.getCollection(result,
         HttpStatus.OK,
@@ -172,12 +173,12 @@ public class ContentServiceImpl implements IContentService {
 
   @Override
   public ResponseEntity<?> searchSortFilterADMIN(ContentDTO contentDTO, String sortById, int page, int limit) {
-    Integer delieryType = contentDTO.getDeliveryType();
+    DeliveryType deliveryType = contentDTO.getDeliveryType();
     Long duration = contentDTO.getDuration();
     Pageable pageable = PageRequest.of(page - 1, limit);
-    List<Content> entities = contentRepository.searchSortFilterADMIN(delieryType, duration, sortById,  pageable);
+    List<Content> entities = contentRepository.searchSortFilterADMIN(deliveryType, duration, sortById,  pageable);
     List<ContentDTO> result = new ArrayList<>();
-    Long count = contentRepository.countSearchSortFilter(delieryType, duration);
+    Long count = contentRepository.countSearchSortFilter(deliveryType, duration);
     convertListContentToListContentDTO(entities, result);
     return ResponseUtil.getCollection(result,
             HttpStatus.OK,
@@ -221,6 +222,8 @@ public class ContentServiceImpl implements IContentService {
     content.setDeliveryType(contentDTO.getDeliveryType());
     content.setDuration(contentDTO.getDuration());
     content.setStatus(contentDTO.getStatus());
+    content.setTrainingFormat(contentDTO.getTrainingFormat());
+    content.setDeliveryType(contentDTO.getDeliveryType());
 
     // Fetch the Unit using the provided unitId
     Unit unit = unitRepository.findById(contentDTO.getUnitId());

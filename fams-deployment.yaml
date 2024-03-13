@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fams
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fams
+  template:
+    metadata:
+      labels:
+        app: fams
+    spec:
+      containers:
+        - name: fams
+          image: doanvinhphu321/nhom2-fams:latest  # Replace with your actual image
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/fams
+          ports:
+            - containerPort: 8080

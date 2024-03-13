@@ -26,7 +26,7 @@ public class ClassController {
         return classService.findAllByStatusTrue(page, limit);
     }
 
-    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
+    @PreAuthorize("hasAuthority('class:Full_Access')")
     @GetMapping("/class/hidden")
     public ResponseEntity<?> getAllClasses(@RequestParam(defaultValue = "1") int page,
                                            @RequestParam(defaultValue = "10") int limit) {
@@ -48,7 +48,7 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
-    @GetMapping("/class/search/admin")
+    @GetMapping("/class/search/hidden")
     public ResponseEntity<?> searchClassADMIN(@RequestBody ClassDTO classDTO,
                                               @RequestParam(required = false) String sortById,
                                               @RequestParam(defaultValue = "1") int page,

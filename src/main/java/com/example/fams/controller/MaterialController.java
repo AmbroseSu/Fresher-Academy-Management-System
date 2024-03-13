@@ -28,7 +28,7 @@ public class MaterialController {
         return materialService.findAllByStatusTrue(page, limit);
     }
 
-    @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:View')")
+    @PreAuthorize("hasAuthority('material:Full_Access')")
     @GetMapping("/material/hidden")
     public ResponseEntity<?> getAllMaterial(@RequestParam(defaultValue = "1") int page,
                                             @RequestParam(defaultValue = "10") int limit){
@@ -64,6 +64,7 @@ public class MaterialController {
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return materialService.changeStatus(id);
     }
+
     @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:View')")
     @GetMapping("material/search")
     public ResponseEntity<?> searchMaterial(@RequestBody MaterialDTO materialDTO,
@@ -72,8 +73,8 @@ public class MaterialController {
         return materialService.searchSortFilter(materialDTO, page, limit);
     }
 
-    @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:View')")
-    @GetMapping("material/search/admin")
+    @PreAuthorize("hasAuthority('material:Full_Access')")
+    @GetMapping("material/search/hidden")
     public ResponseEntity<?> searchMaterialADMIN(@RequestBody MaterialDTO materialDTO,
                                                           @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,

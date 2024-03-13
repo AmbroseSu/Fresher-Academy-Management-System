@@ -12,7 +12,7 @@ public class FamsClass extends BaseEntity{
     @ManyToOne
     @JoinColumn(name="training_programID")
     private TrainingProgram trainingProgram;
-
+    private String fsu;
     private String name;
 
     private String code;

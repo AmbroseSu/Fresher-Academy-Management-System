@@ -1,5 +1,7 @@
 package com.example.fams.entities;
 
+import com.example.fams.entities.enums.DeliveryType;
+import com.example.fams.entities.enums.TrainingFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,7 +16,11 @@ public class Content extends BaseEntity {
     @JoinColumn(name="unitId")
     private Unit unit;
 
-    private Integer deliveryType;
+    @Enumerated(EnumType.STRING)
+    private DeliveryType deliveryType;
+
+    @Enumerated(EnumType.STRING)
+    private TrainingFormat trainingFormat;
 
     private Long duration;
 

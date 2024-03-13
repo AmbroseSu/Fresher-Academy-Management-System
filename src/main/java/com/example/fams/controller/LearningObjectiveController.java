@@ -26,7 +26,7 @@ public class LearningObjectiveController {
                                                                   @RequestParam(defaultValue = "10") int limit) {
         return learningObjectiveService.findAllByStatusTrue(page, limit);
     }
-    @PreAuthorize("hasAuthority('learningObjective:Full_Access') || hasAuthority('learningObjective:View')")
+    @PreAuthorize("hasAuthority('learningObjective:Full_Access')")
     @GetMapping("/learningObjective/hidden")
     public ResponseEntity<?> getAllLearningObjectives(@RequestParam(defaultValue = "1") int page,
                                                       @RequestParam(defaultValue = "10") int limit) {
@@ -44,8 +44,8 @@ public class LearningObjectiveController {
                                                      @RequestParam(defaultValue = "10") int limit){
         return learningObjectiveService.searchSortFilter(learningObjectiveDTO, page, limit);
     }
-    @PreAuthorize("hasAuthority('learningObjective:Full_Access') || hasAuthority('learningObjective:View')")
-    @GetMapping("/learningObjective/search/admin")
+    @PreAuthorize("hasAuthority('learningObjective:Full_Access')")
+    @GetMapping("/learningObjective/search/hidden")
     public ResponseEntity<?> searchLearningObjectiveADMIN(@RequestBody LearningObjectiveDTO learningObjectiveDTO,
                                                           @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,

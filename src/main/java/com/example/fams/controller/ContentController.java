@@ -29,7 +29,7 @@ public class ContentController {
     return contentService.findAllByStatusTrue(page, limit);
   }
 
-  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
+  @PreAuthorize("hasAuthority('content:Full_Access')")
   @GetMapping("/content/hidden")
   public ResponseEntity<?> getAllContent(@RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "10") int limit) {
@@ -50,8 +50,8 @@ public class ContentController {
     return contentService.searchSortFilter(contentDTO, page, limit);
   }
 
-  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
-  @GetMapping("/content/search/admin")
+  @PreAuthorize("hasAuthority('content:Full_Access')")
+  @GetMapping("/content/search/hidden")
   public ResponseEntity<?> searchContentADMIN(@RequestBody ContentDTO contentDTO,
       @RequestParam(required = false) String sortById,
       @RequestParam(defaultValue = "1") int page,

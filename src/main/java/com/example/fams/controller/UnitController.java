@@ -36,7 +36,7 @@ public class UnitController {
         return unitService.findAllByStatusTrue(page, limit);
     }
 
-    @PreAuthorize("hasAuthority('unit:Full_Access') || hasAuthority('unit:View')")
+    @PreAuthorize("hasAuthority('unit:Full_Access')")
     @GetMapping("/unit/hidden")
     public ResponseEntity<?> getAllUnits(@RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "10") int limit) {
@@ -74,7 +74,7 @@ public class UnitController {
         return unitService.searchSortFilter(unitDTO, page, limit);
     }
 
-    @PreAuthorize("hasAuthority('unit:Full_Access') || hasAuthority('unit:View')")
+    @PreAuthorize("hasAuthority('unit:Full_Access')")
     @GetMapping("/unit/search/hidden")
     public ResponseEntity<?> searchUnitADMIN(@RequestBody UnitDTO unitDTO,
                                              @RequestParam(required = false) String sortById,

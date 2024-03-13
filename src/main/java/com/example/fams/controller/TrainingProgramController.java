@@ -31,7 +31,7 @@ public class TrainingProgramController {
                                                                @RequestParam(defaultValue = "10") int limit) {
         return trainingProgramService.findAllByStatusTrue(page, limit);
     }
-    @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
+    @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
     @GetMapping("/trainingProgram/hidden")
     public ResponseEntity<?> getAllTrainingProgram(@RequestParam(defaultValue = "1") int page,
                                                    @RequestParam(defaultValue = "10") int limit) {
@@ -44,8 +44,8 @@ public class TrainingProgramController {
                                                    @RequestParam(defaultValue = "10") int limit){
         return trainingProgramService.searchSortFilter(trainingProgramDTO, page, limit);
     }
-    @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
-    @GetMapping("/trainingProgram/search/admin")
+    @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
+    @GetMapping("/trainingProgram/search/hidden")
     public ResponseEntity<?> searchTrainingProgramADMIN(@RequestBody TrainingProgramDTO trainingProgramDTO,
                                                         @RequestParam(required = false) String sortById,
                                                         @RequestParam(defaultValue = "1") int page,
@@ -77,6 +77,7 @@ public class TrainingProgramController {
     }
 
 
+    @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:Modify') || hasAuthority('trainingProgram:Create')")
     @PostMapping("admin/trainingProgram/upload")
     public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
 

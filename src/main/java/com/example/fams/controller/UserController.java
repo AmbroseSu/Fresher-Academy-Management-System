@@ -32,29 +32,41 @@ public class UserController {
     @Autowired
     private StorageServiceImpl storageService;
 
-//    ****ADMIN****
-    @GetMapping("/admin/user")
-    public ResponseEntity<?> getAllActiveUser(@RequestParam int page, @RequestParam int limit){
+    @PreAuthorize("hasAuthority('user:Full_Access')")
+    @GetMapping("/user/role")
+    public ResponseEntity<?> getAllUserRoles(){
+        return userRoleService.findAllUserRole();
+    }
+
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
+    @GetMapping("/user")
+    public ResponseEntity<?> getAllActiveUser(@RequestParam(defaultValue = "1") int page,
+                                              @RequestParam(defaultValue = "10") int limit){
         return userService.findAllByStatusTrue(page, limit);
     }
-    @GetMapping("/admin/user/all")
-    public ResponseEntity<?> getAll(@RequestParam int page, @RequestParam int limit){
+
+    @PreAuthorize("hasAuthority('user:Full_Access')")
+    @GetMapping("/user/hidden")
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "1") int page,
+                                    @RequestParam(defaultValue = "10") int limit){
         return userService.findAll(page, limit);
     }
 
-    @DeleteMapping("/admin/user/delete/{id}")
+    @PreAuthorize("hasAuthority('user:Full_Access')")
+    @DeleteMapping("/user/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return userService.changeStatus(id);
     }
-//    *************
 
-//    ****USER****
+
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
     @GetMapping("/user/{uuid}")
     public ResponseEntity<?> getInfo(@PathVariable String uuid) {
         return userService.findByUuid(uuid);
     }
 
-    @PutMapping("user/update/{id}")
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
+    @PutMapping("user/{id}")
     public ResponseEntity<?> updateUser(@Valid @ModelAttribute UserDTO userDTO,
                                         @PathVariable(name = "id") Long id) {
         if (userService.checkExist(id)) {
@@ -70,7 +82,8 @@ public class UserController {
         return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping("user/update/permission/{userId}")
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
+    @PutMapping("user/permission/{userId}")
     public ResponseEntity<?> updateUserRolePermissions(@PathVariable Long userId,
                                                        @RequestParam("syllabusPermission") Permission syllabusPermission,
                                                        @RequestParam("materialPermission") Permission materialPermission,
@@ -85,11 +98,8 @@ public class UserController {
     }
 
 
-
-//    *************
-
-//    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Create')")
-    @PostMapping("/auth/signup")
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Create')")
+    @PostMapping("/user")
     public ResponseEntity<?> create(@Valid @RequestBody UserDTO userDTO) {
         if (userDTO.getEmail() == null || userDTO.getEmail().isBlank() || userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
             return ResponseUtil.error("Missing attribute", "email and password must not be null", HttpStatus.BAD_REQUEST);

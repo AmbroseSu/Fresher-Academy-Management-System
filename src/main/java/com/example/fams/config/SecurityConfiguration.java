@@ -39,8 +39,6 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**",
                                 "webjars/**")
                         .permitAll()
-                        .requestMatchers("/api/v1/auth/signup").hasAnyAuthority(Permission.Full_Access.name())
-                        .requestMatchers("/api/v1/auth/signup").hasAnyAuthority(Permission.Create.name())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

@@ -1,20 +1,18 @@
 package com.example.fams.repository;
 
 import com.example.fams.entities.Content;
-import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.Unit;
-import org.springframework.data.domain.Page;
+import com.example.fams.entities.enums.DeliveryType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface ContentRepository extends JpaRepository<Content, String> {
@@ -38,7 +36,7 @@ public interface ContentRepository extends JpaRepository<Content, String> {
       "AND (:deliveryType IS NULL OR co.deliveryType = :deliveryType) " +
       "AND (:duration IS NULL OR co.duration = :duration) ")
   List<Content> searchSortFilter(
-      @Param("deliveryType") Integer deliveryType,
+      @Param("deliveryType") DeliveryType deliveryType,
       @Param("duration") Long duration,
       Pageable pageable);
 
@@ -47,7 +45,7 @@ public interface ContentRepository extends JpaRepository<Content, String> {
       "AND (:deliveryType IS NULL OR co.deliveryType = :deliveryType) " +
       "AND (:duration IS NULL OR co.duration = :duration) " )
   Long countSearchSortFilter(
-      Integer deliveryType,
+      DeliveryType deliveryType,
       Long duration);
 
 
@@ -58,7 +56,7 @@ public interface ContentRepository extends JpaRepository<Content, String> {
       "CASE WHEN :sortById ='iDESC' THEN co.id  END DESC ," +
       "CASE WHEN :sortById ='iASC' THEN co.id  END ASC ,"+
       "co.id desc")
-  List<Content> searchSortFilterADMIN(@Param("deliveryType") Integer deliveryType,
+  List<Content> searchSortFilterADMIN(@Param("deliveryType") DeliveryType deliveryType,
       @Param("duration") Long duration,
       @Param("sortById") String sortById,
       Pageable pageable);

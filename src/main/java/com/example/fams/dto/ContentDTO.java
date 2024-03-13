@@ -1,12 +1,13 @@
 package com.example.fams.dto;
 
-import com.example.fams.entities.Unit;
-import jakarta.validation.constraints.NotBlank;
+import com.example.fams.entities.enums.DeliveryType;
+import com.example.fams.entities.enums.TrainingFormat;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +20,10 @@ public class ContentDTO {
   private Long unitId;
 
   @NotNull(message = "Content delivery type must not be null")
-  private Integer deliveryType;
+  private DeliveryType deliveryType;
+
+  @NotNull(message = "Content training format type must not be null")
+  private TrainingFormat trainingFormat;
 
   @NotNull(message = "Content duration must not be null")
   private Long duration;

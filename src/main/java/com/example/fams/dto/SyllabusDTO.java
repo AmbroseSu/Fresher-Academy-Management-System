@@ -14,6 +14,9 @@ import java.util.List;
 public class SyllabusDTO {
     private Long id;
 
+    @NotNull(message = "Attendee must not be null")
+    private Long attendee;
+
     @NotBlank(message = "Syllabus Name must not be blank")
     private String name;
 

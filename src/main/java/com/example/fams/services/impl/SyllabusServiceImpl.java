@@ -3,12 +3,11 @@ package com.example.fams.services.impl;
 import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.*;
+import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
 import com.example.fams.services.ServiceUtils;
-import java.io.IOException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -20,14 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service("SyllabusService")
 public class SyllabusServiceImpl implements ISyllabusService {
@@ -323,7 +322,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         syllabus.setIsApproved(dto.getIsApproved());
         syllabus.setIsActive(dto.getIsActive());
         syllabus.setVersion(dto.getVersion());
-
+        syllabus.setAttendee(dto.getAttendee());
 //        List<SyllabusMaterial> syllabusMaterials = syllabusMaterialRepository.findAllMaterialBySyllabusId(dto.getId());
 //        syllabus.setSyllabusMaterial(syllabusMaterials);
 //
@@ -407,32 +406,34 @@ public class SyllabusServiceImpl implements ISyllabusService {
                     syllabusDTO.setIsApproved(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
                     syllabusDTO.setIsActive(Boolean.valueOf(getCellValueAsString(row.getCell(5))));
                     syllabusDTO.setVersion(getCellValueAsString(row.getCell(6)));
-                    if(!getCellValueAsString(row.getCell(7)).isEmpty()){
-                        String[] unitIds = getCellValueAsString(row.getCell(7)).split(",");
+                    syllabusDTO.setAttendee(Long.valueOf(getCellValueAsString(row.getCell(7))));
+
+                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
+                        String[] unitIds = getCellValueAsString(row.getCell(8)).split(",");
                         List<Long> unitId = new ArrayList<>();
                         for(String un : unitIds){
                             unitId.add(Long.valueOf(un));
                         }
                         syllabusDTO.setUnitIds(unitId);
                     }
-                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
-                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(8)).split(",");
+                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
+                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(9)).split(",");
                         List<Long> leobId = new ArrayList<>();
                         for(String leob : learningObjectiveIds){
                             leobId.add(Long.valueOf(leob));
                         }
                         syllabusDTO.setLearningObjectiveIds(leobId);
                     }
-                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
-                        String[] materialIds = getCellValueAsString(row.getCell(9)).split(",");
+                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
+                        String[] materialIds = getCellValueAsString(row.getCell(10)).split(",");
                         List<Long> maId = new ArrayList<>();
                         for(String ma : materialIds){
                             maId.add(Long.valueOf(ma));
                         }
                         syllabusDTO.setMaterialIds(maId);
                     }
-                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
-                        String[] trainingProgramIds = getCellValueAsString(row.getCell(10)).split(",");
+                    if(!getCellValueAsString(row.getCell(11)).isEmpty()){
+                        String[] trainingProgramIds = getCellValueAsString(row.getCell(11)).split(",");
                         List<Long> trpoId = new ArrayList<>();
                         for(String trpo : trainingProgramIds){
                             trpoId.add(Long.valueOf(trpo));

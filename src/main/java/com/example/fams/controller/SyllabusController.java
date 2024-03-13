@@ -40,7 +40,7 @@ public class SyllabusController {
         return syllabusService.findAllByStatusTrue(page, limit);
     }
 
-    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
+    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
     @GetMapping("/syllabus/hidden")
     public ResponseEntity<?> getAllSyllabus(@RequestParam(defaultValue = "1") int page,
                                             @RequestParam(defaultValue = "10") int limit) {
@@ -55,8 +55,8 @@ public class SyllabusController {
         return syllabusService.searchSortFilter(syllabusDTO, page, limit);
     }
 
-    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
-    @GetMapping("/syllabus/search/admin")
+    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
+    @GetMapping("/syllabus/search/hidden")
     public ResponseEntity<?> searchSyllabusADMIN(@RequestBody SyllabusDTO syllabusDTO,
                                                         @RequestParam(required = false) String sortById,
                                                         @RequestParam(defaultValue = "1") int page,

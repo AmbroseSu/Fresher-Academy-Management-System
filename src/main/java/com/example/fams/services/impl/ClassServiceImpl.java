@@ -4,11 +4,13 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ClassDTO;
-import com.example.fams.entities.*;
+import com.example.fams.entities.ClassUser;
+import com.example.fams.entities.FamsClass;
+import com.example.fams.entities.TrainingProgram;
+import com.example.fams.entities.User;
 import com.example.fams.repository.*;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.ServiceUtils;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -233,6 +235,7 @@ public class ClassServiceImpl implements IClassService {
     famsClass.setName(classDTO.getName());
     famsClass.setCode(classDTO.getCode());
     famsClass.setStatus(classDTO.getStatus());
+    famsClass.setFsu(classDTO.getFsu());
 
     TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
     famsClass.setTrainingProgram(trainingProgram);
