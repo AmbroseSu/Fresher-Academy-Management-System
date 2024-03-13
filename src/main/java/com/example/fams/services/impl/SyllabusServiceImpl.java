@@ -8,7 +8,12 @@ import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
 import com.example.fams.services.ServiceUtils;
+import java.io.IOException;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service("SyllabusService")
 public class SyllabusServiceImpl implements ISyllabusService {
@@ -382,6 +388,84 @@ public class SyllabusServiceImpl implements ISyllabusService {
             newDTO.setUnitIds(unitIds);
         }
         return newDTO;
+    }
+
+    public List<SyllabusDTO> parseExcelFile(MultipartFile file) throws IOException {
+        List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
+        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+        XSSFSheet worksheet = workbook.getSheetAt(0);
+
+        for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
+            if (index > 0) {
+                XSSFRow row = worksheet.getRow(index);
+                SyllabusDTO syllabusDTO = new SyllabusDTO();
+
+                    syllabusDTO.setName(getCellValueAsString(row.getCell(0)));
+                    syllabusDTO.setCode(getCellValueAsString(row.getCell(1)));
+                    syllabusDTO.setTimeAllocation(Long.valueOf(getCellValueAsString(row.getCell(2))));
+                    syllabusDTO.setDescription(getCellValueAsString(row.getCell(3)));
+                    syllabusDTO.setIsApproved(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
+                    syllabusDTO.setIsActive(Boolean.valueOf(getCellValueAsString(row.getCell(5))));
+                    syllabusDTO.setVersion(getCellValueAsString(row.getCell(6)));
+                    if(!getCellValueAsString(row.getCell(7)).isEmpty()){
+                        String[] unitIds = getCellValueAsString(row.getCell(7)).split(",");
+                        List<Long> unitId = new ArrayList<>();
+                        for(String un : unitIds){
+                            unitId.add(Long.valueOf(un));
+                        }
+                        syllabusDTO.setUnitIds(unitId);
+                    }
+                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
+                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(8)).split(",");
+                        List<Long> leobId = new ArrayList<>();
+                        for(String leob : learningObjectiveIds){
+                            leobId.add(Long.valueOf(leob));
+                        }
+                        syllabusDTO.setLearningObjectiveIds(leobId);
+                    }
+                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
+                        String[] materialIds = getCellValueAsString(row.getCell(9)).split(",");
+                        List<Long> maId = new ArrayList<>();
+                        for(String ma : materialIds){
+                            maId.add(Long.valueOf(ma));
+                        }
+                        syllabusDTO.setMaterialIds(maId);
+                    }
+                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
+                        String[] trainingProgramIds = getCellValueAsString(row.getCell(10)).split(",");
+                        List<Long> trpoId = new ArrayList<>();
+                        for(String trpo : trainingProgramIds){
+                            trpoId.add(Long.valueOf(trpo));
+                        }
+                        syllabusDTO.setTrainingProgramIds(trpoId);
+                    }
+                    syllabusDTOS.add(syllabusDTO);
+
+
+
+
+
+            }
+        }
+
+        workbook.close();
+        return syllabusDTOS;
+    }
+
+    private String getCellValueAsString(XSSFCell cell) {
+        if (cell == null) {
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return Long.toString((long) cell.getNumericCellValue());
+            case BOOLEAN:
+                return Boolean.toString(cell.getBooleanCellValue());
+            default:
+                return "";
+        }
     }
 
 }
