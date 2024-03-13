@@ -96,7 +96,7 @@ public class MaterialServiceImpl implements IMaterialService {
             Material oldEntity = materialRepository.findById(materialDTO.getId());
             Material tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
             entity = convertDtoToEntity(materialDTO);
-            entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
+            ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
             syllabusMaterialRepository.deleteAllByMaterialId(materialDTO.getId());
             loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
             entity.markModified();
@@ -132,7 +132,9 @@ public class MaterialServiceImpl implements IMaterialService {
 
     @Override
     public Boolean checkExist(Long id) {
-        return null;
+
+        Material material=materialRepository.findById(id);
+        return material!=null;
     }
 
     private void loadSyllabusMaterialFromListSyllabusId(List<Long> requestSyllabusIds, Long materialId) {

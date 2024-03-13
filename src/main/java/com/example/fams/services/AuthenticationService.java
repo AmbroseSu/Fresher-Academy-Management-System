@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface AuthenticationService {
-    ResponseEntity<?> signup(User user);
     ResponseEntity<?> signin(SigninRequest signinRequest);
     ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest);
     ResponseEntity<?> generateAndSendOTP(String userEmail);

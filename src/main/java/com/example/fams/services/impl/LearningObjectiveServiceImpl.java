@@ -104,6 +104,8 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
+
+
     @Override
     public ResponseEntity<?> findById(Long id) {
         LearningObjective entity = learningObjectiveRepository.findByStatusIsTrueAndId(id);
@@ -144,7 +146,9 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
 
     @Override
     public Boolean checkExist(Long id) {
-        return null;
+        LearningObjective learningObjective = learningObjectiveRepository.findById(id);
+
+        return learningObjective != null;
     }
 
     @Override
