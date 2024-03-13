@@ -1,8 +1,6 @@
 package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
-import com.example.fams.dto.LearningObjectiveDTO;
-import com.example.fams.dto.UpsertUserDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.services.UserService;
 import jakarta.validation.Valid;
