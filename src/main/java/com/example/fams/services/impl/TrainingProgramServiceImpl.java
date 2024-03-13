@@ -12,6 +12,11 @@ import com.example.fams.repository.SyllabusTrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramRepository;
 import com.example.fams.services.ITrainingProgramService;
 import com.example.fams.services.ServiceUtils;
+import java.io.IOException;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service("TrainingProgramService")
 public class TrainingProgramServiceImpl implements ITrainingProgramService {
@@ -253,5 +259,61 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
         }
         return newTpDTO;
+    }
+
+    public List<TrainingProgramDTO> parseExcelFile(MultipartFile file) throws IOException {
+        List<TrainingProgramDTO> trainingProgramDTOS = new ArrayList<>();
+        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+        XSSFSheet worksheet = workbook.getSheetAt(0);
+
+        for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
+            if (index > 0) {
+                XSSFRow row = worksheet.getRow(index);
+                TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+
+
+
+
+
+                        //trainingProgramDTO.setId(Long.valueOf(getCellValueAsString(row.getCell(0))));
+                        trainingProgramDTO.setName(getCellValueAsString(row.getCell(0)));
+                        trainingProgramDTO.setStartTime(Long.valueOf(getCellValueAsString(row.getCell(1))));
+                        trainingProgramDTO.setDuration(Long.valueOf(getCellValueAsString(row.getCell(2))));
+                        trainingProgramDTO.setTraining_status(Integer.valueOf(getCellValueAsString(row.getCell(3))));
+                      //  trainingProgramDTO.setStatus(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
+                    if(!getCellValueAsString(row.getCell(4)).isEmpty()){
+                        String[] syllabusIds = getCellValueAsString(row.getCell(4)).split(",");
+                        List<Long> syId = new ArrayList<>();
+                        for(String sy : syllabusIds){
+                            syId.add(Long.valueOf(sy));
+                        }
+                        trainingProgramDTO.setSyllabusIds(syId);
+                    }
+
+                        trainingProgramDTOS.add(trainingProgramDTO);
+
+
+
+            }
+        }
+
+        workbook.close();
+        return trainingProgramDTOS;
+    }
+
+    private String getCellValueAsString(XSSFCell cell) {
+        if (cell == null) {
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return Long.toString((long) cell.getNumericCellValue());
+            case BOOLEAN:
+                return Boolean.toString(cell.getBooleanCellValue());
+            default:
+                return "";
+        }
     }
 }

@@ -4,12 +4,14 @@ import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.services.ITrainingProgramService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -73,4 +75,22 @@ public class TrainingProgramController {
     public ResponseEntity<?> changeStatus(@PathVariable Long id){
         return trainingProgramService.changeStatus(id);
     }
+
+
+    @PostMapping("admin/trainingProgram/upload")
+    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
+
+
+        try {
+            List<TrainingProgramDTO> trainingProgramDTOS = trainingProgramService.parseExcelFile(file);
+            for(TrainingProgramDTO trainingProgramDTO : trainingProgramDTOS) {
+                trainingProgramService.save(trainingProgramDTO);
+            }
+            return ResponseUtil.getObject(trainingProgramDTOS,HttpStatus.CREATED,"Upload Successfully!");
+        } catch (Exception e) {
+            String result = e.getMessage().toString();
+            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
