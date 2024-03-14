@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,9 +67,12 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/{id}")
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO,
+    public ResponseEntity<?> updateUser(@Validated(PasswordValidationGroup.class) @RequestBody UserDTO userDTO,
                                         @PathVariable(name = "id") Long id) {
-
+        if (userService.checkExist(id)) {
+            userDTO.setId(id);
+            return userService.save(userDTO);
+        }
         return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);
     }
 
@@ -104,7 +108,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Create')")
     @PostMapping("/user")
-    public ResponseEntity<?> create(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> create(@Validated(AllFieldValidationGroup.class) @RequestBody UserDTO userDTO) {
         if (userDTO.getEmail() == null || userDTO.getEmail().isBlank() || userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
             return ResponseUtil.error("Missing attribute", "email and password must not be null", HttpStatus.BAD_REQUEST);
         }

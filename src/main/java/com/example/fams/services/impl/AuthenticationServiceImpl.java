@@ -143,7 +143,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
             user.get().setPassword(passwordEncoder.encode(newPassword));
-            return ResponseUtil.getObject(userRepository.save(user.get()), HttpStatus.OK, "Password changed successfully");
+            User newUser = userRepository.save(user.get());
+            UserDTO userDTO = convertUserToUserDTO(newUser);
+            return ResponseUtil.getObject(userDTO, HttpStatus.OK, "Password changed successfully");
         }
         return ResponseUtil.error("User not found", "Cannot reset password", HttpStatus.BAD_REQUEST);
     }
