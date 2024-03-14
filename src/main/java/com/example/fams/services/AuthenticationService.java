@@ -13,6 +13,6 @@ public interface AuthenticationService {
     ResponseEntity<?> signin(SigninRequest signinRequest);
     ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest);
     ResponseEntity<?> generateAndSendOTP(String userEmail);
-    ResponseEntity<?> verifyOTP(String enteredOTP);
+    ResponseEntity<?> verifyOTP(String enteredOTP, Long id);
     ResponseEntity<?> resetPassword(String email, String newPassword);
 }
