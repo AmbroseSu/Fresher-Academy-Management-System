@@ -11,4 +11,7 @@ public interface UserService extends IGenericService<UserDTO> {
     ResponseEntity<?> findByUuid(String uuid);
 
     ResponseEntity<?> updateUserImage(Long id, String avatarUrl);
+
+    ResponseEntity<?> searchSortFilter(UserDTO userDTO, String sortById, int page, int limit);
+    ResponseEntity<?> searchSortFilterADMIN(UserDTO userDTO, String sortById, int page, int limit);
 }

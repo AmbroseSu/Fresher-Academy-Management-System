@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -72,6 +73,45 @@ public class UserServiceImpl implements UserService {
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
+    public ResponseEntity<?> searchSortFilterADMIN(UserDTO userDTO, String sortById, int page, int limit){
+        String firstName = userDTO.getFirstName();
+        String lastName = userDTO.getLastName();
+        String email = userDTO.getEmail();
+        String uuid = userDTO.getUuid();
+        String phone = userDTO.getPhone();
+        Long dob = userDTO.getDob();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<User> users = userRepository.searchSortFilterADMIN(firstName, lastName, email, uuid, phone, dob, sortById, pageable);
+        List<UserDTO> userDTOList = new ArrayList<>();
+        convertListUserToListUserDTO(users, userDTOList);
+        Long count = userRepository.countSearchSortFilterADMIN(firstName, lastName, email, uuid, phone, dob);
+        return ResponseUtil.getCollection(userDTOList,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
+
+    public ResponseEntity<?> searchSortFilter(UserDTO userDTO, String sortById, int page, int limit){
+        String firstName = userDTO.getFirstName();
+        String lastName = userDTO.getLastName();
+        String email = userDTO.getEmail();
+        String uuid = userDTO.getUuid();
+        String phone = userDTO.getPhone();
+        Long dob = userDTO.getDob();
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<User> users = userRepository.searchSortFilter(firstName, lastName, email, uuid, phone, dob, sortById, pageable);
+        List<UserDTO> userDTOList = new ArrayList<>();
+        convertListUserToListUserDTO(users, userDTOList);
+        Long count = userRepository.countSearchSortFilter(firstName, lastName, email, uuid, phone, dob);
+        return ResponseUtil.getCollection(userDTOList,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                count);
+    }
 
     @Override
     public ResponseEntity<?> findByUuid(String uuid) {
@@ -92,9 +132,7 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<User> entities = userRepository.findAllByStatusIsTrue(pageable);
         List<UserDTO> result = new ArrayList<>();
-
         convertListUserToListUserDTO(entities, result);
-
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
                 "Fetched successfully",

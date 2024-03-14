@@ -1,6 +1,7 @@
 package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.UnitDTO;
 import com.example.fams.dto.UserDTO;
 import com.example.fams.entities.User;
 import com.example.fams.entities.enums.Permission;
@@ -23,14 +24,35 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@CrossOrigin
 public class UserController {
 
     @Autowired
     UserRoleServiceImpl userRoleService;
+
     @Autowired
     UserService userService;
+
     @Autowired
     private StorageServiceImpl storageService;
+
+    @PreAuthorize("hasAuthority('unit:Full_Access')")
+    @GetMapping("/user/search/hidden")
+    public ResponseEntity<?> searchUserADMIN(@RequestBody UserDTO userDTO,
+                                             @RequestParam(required = false) String sortById,
+                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "10") int limit){
+        return userService.searchSortFilterADMIN(userDTO, sortById, page, limit);
+    }
+
+    @PreAuthorize("hasAuthority('unit:Full_Access')")
+    @GetMapping("/user/search")
+    public ResponseEntity<?> searchUser(@RequestBody UserDTO userDTO,
+                                             @RequestParam(required = false) String sortById,
+                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "10") int limit){
+        return userService.searchSortFilter(userDTO, sortById, page, limit);
+    }
 
     @PreAuthorize("hasAuthority('user:Full_Access')")
     @GetMapping("/user/role")
@@ -52,18 +74,18 @@ public class UserController {
         return userService.findAll(page, limit);
     }
 
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
+    @GetMapping("/user/{uuid}")
+    public ResponseEntity<?> getInfo(@PathVariable String uuid) {
+        return userService.findByUuid(uuid);
+    }
+
     @PreAuthorize("hasAuthority('user:Full_Access')")
     @DeleteMapping("/user/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return userService.changeStatus(id);
     }
 
-
-    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
-    @GetMapping("/user/{uuid}")
-    public ResponseEntity<?> getInfo(@PathVariable String uuid) {
-        return userService.findByUuid(uuid);
-    }
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/{id}")
