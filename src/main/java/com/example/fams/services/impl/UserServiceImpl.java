@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,6 +190,14 @@ public class UserServiceImpl implements UserService {
         return user != null;
     }
 
+    public ResponseEntity<?> updateUserImage(Long id, String avatarUrl) {
+        User user = userRepository.findById(id);
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+        UserDTO userDTO = convertUserToUserDTO(user);
+        return ResponseUtil.getObject(userDTO, HttpStatus.OK, "Update Successfully");
+    }
+
     private void convertListUserToListUserDTO(List<User> entities, List<UserDTO> result) {
         for (User user : entities){
             UserDTO newUserDTO = convertUserToUserDTO(user);
@@ -227,7 +236,6 @@ public class UserServiceImpl implements UserService {
         user.setDob(userDTO.getDob());
         user.setGender(userDTO.getGender());
         user.setStatus(userDTO.getStatus());
-        user.setAvatarUrl(userDTO.getAvatarUrl());
 
         return user;
     }

@@ -1,10 +1,13 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.request.ResetPasswordRequest;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SigninRequest;
 import com.example.fams.services.AuthenticationService;
+import com.example.fams.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final UserService userService;
 
 //    @GetMapping("/testMail")
 //    public void testMail(){
@@ -50,9 +54,13 @@ public class AuthenticationController {
         return authenticationService.generateAndSendOTP(email);
     }
 
-    @PostMapping("/validate")
-    public ResponseEntity<?> validateOTP(@RequestParam String otp){
-        return authenticationService.verifyOTP(otp);
+    @PostMapping("/validate/{id}")
+    public ResponseEntity<?> validateOTP(@RequestParam String otp,
+                                         @PathVariable(name = "id") Long id) {
+        if (userService.checkExist(id)) {
+            return authenticationService.verifyOTP(otp, id);
+        }
+        return ResponseUtil.error("Cannot validate otp", "User not found", HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/resetPassword")

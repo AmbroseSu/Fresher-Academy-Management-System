@@ -7,8 +7,10 @@ import com.example.fams.dto.response.JwtAuthenticationRespone;
 import com.example.fams.dto.request.RefreshTokenRequest;
 import com.example.fams.dto.request.SigninRequest;
 import com.example.fams.entities.FamsClass;
+import com.example.fams.entities.OtpToken;
 import com.example.fams.entities.User;
 import com.example.fams.repository.ClassUserRepository;
+import com.example.fams.repository.OtpTokenRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.services.AuthenticationService;
 import com.example.fams.services.EmailService;
@@ -17,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +52,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailService emailService;
 
     private final ClassUserRepository classUserRepository;
+
+    private final OtpTokenRepository otpTokenRepository;
+
 
     public ResponseEntity<?> signin(SigninRequest signinRequest) {
         // * method authenticate() của AuthenticationManager dùng để tạo ra một object Authentication object
@@ -87,14 +93,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public ResponseEntity<?> generateAndSendOTP(String userEmail) {
-        if (userRepository.findByEmail(userEmail).isPresent()) {
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        if (user.isPresent()) {
             // Generate a random OTP
             String otp = generateOTP();
-
-            // Store the OTP in the session or database for verification
-            httpSession.setAttribute("otp", otp);
-            httpSession.setAttribute("otpUserEmail", userEmail);
-            httpSession.setAttribute("expirationTime", LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+            OtpToken otpToken = otpTokenRepository.findByUserId(user.get().getId());
+            if (otpToken != null) {
+                otpTokenRepository.delete(otpToken);
+            }
+            OtpToken newOtpToken = new OtpToken();
+            newOtpToken.setUserId(user.get().getId());
+            newOtpToken.setOtpSecret(otp);
+            newOtpToken.setCreationTime(LocalDateTime.now());
+            newOtpToken.setExpirationTime(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES));
+            otpTokenRepository.save(newOtpToken);
             emailService.sendOTPByEmail(userEmail, otp);
             return ResponseUtil.getObject(null, HttpStatus.OK, "OTP sent successfully");
         }
@@ -111,19 +123,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return otp.toString();
     }
 
-    public ResponseEntity<?> verifyOTP(String enteredOTP) {
-        String storedOTP = (String) httpSession.getAttribute("otp");
-        LocalDateTime expirationTime = (LocalDateTime) httpSession.getAttribute("expirationTime");
-        if(storedOTP == null){
-            ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
-        }
-        if(enteredOTP.equals(storedOTP)){
-            if (LocalDateTime.now().isBefore(expirationTime)) {
-                httpSession.removeAttribute("otp");
-                httpSession.removeAttribute("otpUserEmail");
-                httpSession.removeAttribute("expirationTime");
-                ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
-            } else {
+    public ResponseEntity<?> verifyOTP(String enteredOTP, Long requestId) {
+        OtpToken otpToken = otpTokenRepository.findByUserId(requestId);
+        if (otpToken != null) {
+            String storedOTP = otpToken.getOtpSecret();
+            LocalDateTime expirationTime = otpToken.getExpirationTime();
+            if(enteredOTP.equals(storedOTP)){
+                if (LocalDateTime.now().isBefore(expirationTime)) {
+                    otpTokenRepository.deleteByUserId(requestId);
+                    return ResponseUtil.getObject(null, HttpStatus.OK, "Valid OTP");
+                }
                 return ResponseUtil.error("Invalid OTP", "OTP Expired", HttpStatus.NOT_ACCEPTABLE);
             }
         }
@@ -155,6 +164,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         }
         return newUserDTO;
+    }
+
+    @Scheduled(fixedRate = 3600000) // Run every hour
+    private void deleteExpiredTokens() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        otpTokenRepository.deleteExpiredTokens(currentDateTime);
     }
 
 }

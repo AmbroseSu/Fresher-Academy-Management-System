@@ -25,7 +25,6 @@ public class UserDTO {
     private Boolean status;
     private Boolean gender;
     private String avatarUrl;
-    private MultipartFile avatar;
     private List<Long> classIds;
     @NotNull(message = "User Role Id must not be null")
     private Long userRoleId;
