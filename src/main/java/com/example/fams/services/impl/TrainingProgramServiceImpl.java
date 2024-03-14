@@ -48,8 +48,8 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAllByStatusIsTrue(pageable);
 
-        List<TrainingProgramDTO> dtos = new ArrayList<>();
-        convertListTpToListTpDTO(trainingPrograms, dtos);
+
+        convertListTpToListTpDTO(trainingPrograms, result);
 
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
