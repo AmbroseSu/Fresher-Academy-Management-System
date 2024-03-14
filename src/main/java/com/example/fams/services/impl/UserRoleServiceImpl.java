@@ -1,6 +1,7 @@
 package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.UserRoleDTO;
 import com.example.fams.entities.UserRole;
 import com.example.fams.entities.enums.Permission;
 import com.example.fams.entities.enums.Role;
@@ -33,11 +34,16 @@ public class UserRoleServiceImpl {
     }
 
     public ResponseEntity<?> findAllUserRole(){
-        List<UserRole> userRole = userRoleRepository.findAllBy();
-        List<Role> roles = userRole.stream()
-                .map(UserRole::getRole)
+        List<UserRole> userRoles = userRoleRepository.findAllBy();
+        List<UserRoleDTO> userRoleDTOs = userRoles.stream()
+                .map(userRole -> {
+                    UserRoleDTO userRoleDTO = new UserRoleDTO(userRole.getId(), userRole.getRole(), userRole.getSyllabusPermission(), userRole.getMaterialPermission(),
+                            userRole.getTrainingProgramPermission(), userRole.getLearningObjectivePermission(),
+                            userRole.getUnitPermission(),userRole.getClassPermission(), userRole.getContentPermission(),userRole.getUserPermission());
+                    return userRoleDTO;
+                })
                 .toList();
-        return ResponseUtil.getCollection(roles,
+        return ResponseUtil.getCollection(userRoleDTOs,
                 HttpStatus.OK,
                 "Fetched successfully", 1, 10, 3);
     }

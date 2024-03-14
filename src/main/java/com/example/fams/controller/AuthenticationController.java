@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin
+@CrossOrigin("http://famschickenreact.fun/")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserService userService;
