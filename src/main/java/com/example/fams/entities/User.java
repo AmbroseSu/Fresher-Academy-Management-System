@@ -25,7 +25,6 @@ public class User extends BaseEntity implements UserDetails {
 
     private String lastName;
 
-    @ValidEmail
     private String email;
     private String password;
 
@@ -36,7 +35,6 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "uuid", nullable = false, unique = true)
     private String uuid;
 
-    @ValidPhone
     private String phone;
     private Long dob;
     private Boolean gender;
