@@ -67,19 +67,24 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/{id}")
-    public ResponseEntity<?> updateUser(@Valid @ModelAttribute UserDTO userDTO,
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO,
                                         @PathVariable(name = "id") Long id) {
-        if (userService.checkExist(id)) {
-            userDTO.setId(id);
-            if (userDTO.getAvatar() != null) {
-                String avatarUrl = storageService.uploadFile(userDTO.getAvatar());
-                if (!avatarUrl.isBlank()) {
-                    userDTO.setAvatarUrl(avatarUrl);
-                }
-            }
-            return userService.save(userDTO);
-        }
+
         return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);
+    }
+
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
+    @PutMapping("user/updateImage/{id}")
+    public ResponseEntity<?> updateImage(@PathVariable(name = "id") Long id,
+                                         @RequestParam(value = "image") MultipartFile image) {
+        if (userService.checkExist(id)) {
+            String avatarUrl = storageService.uploadFile(image);
+            if (!avatarUrl.isBlank()) {
+                return userService.updateUserImage(id, avatarUrl);
+            }
+            return ResponseUtil.error("Cannot update image", "Cannot save image", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseUtil.error("Cannot update image", "User not found", HttpStatus.NOT_FOUND);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
