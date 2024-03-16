@@ -38,39 +38,31 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('unit:Full_Access')")
     @GetMapping("/user/search/hidden")
-    public ResponseEntity<?> searchUserADMIN(@RequestBody UserDTO userDTO,
-                                             @RequestParam(required = false) String sortById,
-                                             @RequestParam(defaultValue = "1") int page,
-                                             @RequestParam(defaultValue = "10") int limit){
+    public ResponseEntity<?> searchUserADMIN(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortById, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
         return userService.searchSortFilterADMIN(userDTO, sortById, page, limit);
     }
 
     @PreAuthorize("hasAuthority('unit:Full_Access')")
     @GetMapping("/user/search")
-    public ResponseEntity<?> searchUser(@RequestBody UserDTO userDTO,
-                                             @RequestParam(required = false) String sortById,
-                                             @RequestParam(defaultValue = "1") int page,
-                                             @RequestParam(defaultValue = "10") int limit){
+    public ResponseEntity<?> searchUser(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortById, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
         return userService.searchSortFilter(userDTO, sortById, page, limit);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access')")
     @GetMapping("/user/role")
-    public ResponseEntity<?> getAllUserRoles(){
+    public ResponseEntity<?> getAllUserRoles() {
         return userRoleService.findAllUserRole();
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
     @GetMapping("/user")
-    public ResponseEntity<?> getAllActiveUser(@RequestParam(defaultValue = "1") int page,
-                                              @RequestParam(defaultValue = "10") int limit){
+    public ResponseEntity<?> getAllActiveUser(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
         return userService.findAllByStatusTrue(page, limit);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access')")
     @GetMapping("/user/hidden")
-    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "1") int page,
-                                    @RequestParam(defaultValue = "10") int limit){
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
         return userService.findAll(page, limit);
     }
 
@@ -78,6 +70,12 @@ public class UserController {
     @GetMapping("/user/{uuid}")
     public ResponseEntity<?> getInfo(@PathVariable String uuid) {
         return userService.findByUuid(uuid);
+    }
+
+    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getInfo(@PathVariable Long id) {
+        return userService.findById(id);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access')")
@@ -89,19 +87,17 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/{id}")
-    public ResponseEntity<?> updateUser(@Validated(PasswordValidationGroup.class) @RequestBody UserDTO userDTO,
-                                        @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateUser(@Validated(PasswordValidationGroup.class) @RequestBody UserDTO userDTO, @PathVariable(name = "id") Long id) {
         if (userService.checkExist(id)) {
             userDTO.setId(id);
             return userService.save(userDTO);
         }
-        return ResponseUtil.error("Not found","User does not exist", HttpStatus.NOT_FOUND);
+        return ResponseUtil.error("Not found", "User does not exist", HttpStatus.NOT_FOUND);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/updateImage/{id}")
-    public ResponseEntity<?> updateImage(@PathVariable(name = "id") Long id,
-                                         @RequestParam(value = "image") MultipartFile image) {
+    public ResponseEntity<?> updateImage(@PathVariable(name = "id") Long id, @RequestParam(value = "image") MultipartFile image) {
         if (userService.checkExist(id)) {
             String avatarUrl = storageService.uploadFile(image);
             if (!avatarUrl.isBlank()) {
@@ -114,15 +110,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/permission/{userId}")
-    public ResponseEntity<?> updateUserRolePermissions(@PathVariable Long userId,
-                                                       @RequestParam("syllabusPermission") Permission syllabusPermission,
-                                                       @RequestParam("materialPermission") Permission materialPermission,
-                                                       @RequestParam("trainingProgramPermission") Permission trainingProgramPermission,
-                                                       @RequestParam("learningObjectivePermission") Permission learningObjectivePermission,
-                                                       @RequestParam("unitPermission") Permission unitPermission,
-                                                       @RequestParam("classPermission") Permission classPermission,
-                                                       @RequestParam("contentPermission") Permission contentPermission,
-                                                       @RequestParam("userPermission") Permission userPermission) {
+    public ResponseEntity<?> updateUserRolePermissions(@PathVariable Long userId, @RequestParam("syllabusPermission") Permission syllabusPermission, @RequestParam("materialPermission") Permission materialPermission, @RequestParam("trainingProgramPermission") Permission trainingProgramPermission, @RequestParam("learningObjectivePermission") Permission learningObjectivePermission, @RequestParam("unitPermission") Permission unitPermission, @RequestParam("classPermission") Permission classPermission, @RequestParam("contentPermission") Permission contentPermission, @RequestParam("userPermission") Permission userPermission) {
         userRoleService.updateUserRoleByUserId(userId, syllabusPermission, materialPermission, trainingProgramPermission, learningObjectivePermission, unitPermission, classPermission, contentPermission, userPermission);
         return new ResponseEntity<>("User role permissions updated successfully", HttpStatus.ACCEPTED);
     }

@@ -1,5 +1,6 @@
 package com.example.fams.entities;
 
+import com.example.fams.entities.enums.Gender;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.validation.ValidEmail;
 import com.example.fams.validation.ValidPhone;
@@ -37,7 +38,7 @@ public class User extends BaseEntity implements UserDetails {
 
     private String phone;
     private Long dob;
-    private Boolean gender;
+    private Gender gender;
     private String avatarUrl;
 
 //    @ManyToMany(mappedBy = "user")
