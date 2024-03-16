@@ -2,6 +2,7 @@ package com.example.fams.dto;
 
 import com.example.fams.controller.AllFieldValidationGroup;
 import com.example.fams.controller.PasswordValidationGroup;
+import com.example.fams.entities.enums.Gender;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.validation.ValidPhone;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,7 +48,7 @@ public class UserDTO {
     private Boolean status;
 
     @NotNull(message = "Gender cannot be null", groups = {AllFieldValidationGroup.class, PasswordValidationGroup.class})
-    private Boolean gender;
+    private Gender gender;
 
     private String avatarUrl;
 
