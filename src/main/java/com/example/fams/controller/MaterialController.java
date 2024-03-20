@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -20,6 +21,7 @@ public class MaterialController {
     @Autowired
     @Qualifier("MaterialService")
     private IMaterialService materialService;
+
 
     @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:View')")
     @GetMapping("/material")
@@ -40,6 +42,16 @@ public class MaterialController {
     public ResponseEntity<?> getById(@PathVariable("id") Long id){
 
         return  materialService.findById(id);
+    }
+
+    @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:Create')")
+    @PutMapping("material/upload/{id}")
+    public ResponseEntity<?> uploadMaterial(@RequestParam MultipartFile multipartFile,
+                                            @PathVariable(name = "id") Long materialId) {
+        if (materialService.checkExist(materialId)) {
+            return materialService.upload(multipartFile, materialId);
+        }
+        return ResponseUtil.error("Not found", "Material not exist", HttpStatus.NOT_FOUND);
     }
 
     @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:Create')")

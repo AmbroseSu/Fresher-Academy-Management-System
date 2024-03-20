@@ -14,6 +14,8 @@ public class Material extends BaseEntity{
 
     private String description;
 
+    private String url;
+
     @OneToMany(mappedBy="material")
     private List<SyllabusMaterial> syllabusMaterial;
 
