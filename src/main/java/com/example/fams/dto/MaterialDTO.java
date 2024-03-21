@@ -17,6 +17,7 @@ public class MaterialDTO {
     private String name;
     @NotBlank(message = "Description must not be blank")
     private String description;
+    private String url;
     private Boolean status;
     private List<Long> syllabusIds;
 }

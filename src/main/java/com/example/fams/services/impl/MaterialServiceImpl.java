@@ -9,6 +9,7 @@ import com.example.fams.dto.MaterialDTO;
 import com.example.fams.entities.*;
 import com.example.fams.repository.*;
 import com.example.fams.services.IMaterialService;
+import com.example.fams.services.IStorageService;
 import com.example.fams.services.ServiceUtils;
 
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +32,15 @@ public class MaterialServiceImpl implements IMaterialService {
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
 
-    public MaterialServiceImpl(MaterialRepository materialRepository,SyllabusMaterialRepository syllabusMaterialRepository,SyllabusRepository syllabusRepository, GenericConverter genericConverter,
-                               LearningObjectiveRepository learningObjectiveRepository) {
+    private final IStorageService storageService;
+
+    public MaterialServiceImpl(MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, SyllabusRepository syllabusRepository, GenericConverter genericConverter,
+                               LearningObjectiveRepository learningObjectiveRepository, IStorageService storageService) {
         this.materialRepository = materialRepository;
         this.genericConverter = genericConverter;
         this.syllabusMaterialRepository = syllabusMaterialRepository;
         this.syllabusRepository = syllabusRepository;
+        this.storageService = storageService;
     }
 
     @Override
@@ -184,6 +189,18 @@ public class MaterialServiceImpl implements IMaterialService {
                 limit,
                 count);
     }
+
+    @Override
+    public ResponseEntity<?> upload(MultipartFile multipartFile, Long materialId) {
+        String url = storageService.uploadFile(multipartFile);
+        Material entity = materialRepository.findById(materialId);
+        entity.setUrl(url);
+        entity.markModified();
+        materialRepository.save(entity);
+        MaterialDTO result = convertMaterialToMaterialDTO(entity);
+        return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
+    }
+
     private void convertListMaterialToMaterialDTO(List<Material> entities,List<MaterialDTO> result){
         for (Material entity : entities){
             MaterialDTO newMaterialDTO = convertMaterialToMaterialDTO(entity);
