@@ -1,6 +1,7 @@
 package com.example.fams.repository;
 
 import com.example.fams.entities.*;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,6 +22,15 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Modifying
     @Query("UPDATE Syllabus sl SET sl.status = ?1 WHERE sl.id = ?2")
     void changeStatus(Boolean status, Long id);
+
+    @Query("SELECT S FROM Syllabus S WHERE S.name = :name AND S.status = TRUE ")
+    List<Syllabus> getAllSyllabusByName(@Param("name") String name);
+
+    @Query("SELECT S FROM Syllabus S WHERE S.code = :code AND S.status = TRUE ")
+    List<Syllabus> getAllSyllabusByCode(@Param("code") String code);
+
+    @Query("SELECT S FROM Syllabus S WHERE S.name = :name AND S.code = :code AND S.status = TRUE ")
+    List<Syllabus> getAllSyllabusByNameAndCode(@Param("name") String name, @Param("code") String code);
 
     @Query("SELECT tp FROM TrainingProgram tp " +
             "JOIN SyllabusTrainingProgram stp ON tp.id = stp.trainingProgram.id " +

@@ -72,6 +72,17 @@ public class ResponseUtil {
         );
     }
 
+    public static ResponseEntity<?> getError(Object result, HttpStatus status, String response) {
+        return new ResponseEntity<>(
+            ResponseDTO.builder()
+                .statusCode(status.value())
+                .details(ExceptionUtils.getResponseString(response))
+                .content(result)
+                .build()
+            , status
+        );
+    }
+
     public static ResponseEntity<?> error(List<String> errors, String message, HttpStatus status) {
         return new ResponseEntity<> (
                 ResponseDTO.builder()
