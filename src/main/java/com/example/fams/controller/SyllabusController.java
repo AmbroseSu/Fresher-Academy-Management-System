@@ -2,8 +2,7 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.dto.TrainingProgramDTO;
-import com.example.fams.services.IGenericService;
+import com.example.fams.entities.enums.SyllabusDuplicateHandle;
 import com.example.fams.services.ISyllabusService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -14,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -84,19 +81,59 @@ public class SyllabusController {
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return syllabusService.changeStatus(id);
     }
-    @PostMapping("admin/syllabus/update")
-    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
+//    @PostMapping("syllabus/update")
+//    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
+//
+//
+//        try {
+//            List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
+//            for(SyllabusDTO syllabusDTO : syllabusDTOS) {
+//                syllabusService.save(syllabusDTO);
+//            }
+//            return ResponseUtil.getObject(syllabusDTOS,HttpStatus.CREATED,"Upload Successfully!");
+//        } catch (Exception e) {
+//            String result = e.getMessage().toString();
+//            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
+//        }
+//    }
+
+    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
+    @PostMapping("syllabus/updatee")
+    public /*@ResponseBody*/ ResponseEntity<?> uploadFileReplace(/*@RequestParam("file")*/@RequestBody MultipartFile file,
+        @RequestParam Boolean name, @RequestParam Boolean code, @RequestParam
+        SyllabusDuplicateHandle syllabusDuplicateHandle) {
 
 
         try {
-            List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
-            for(SyllabusDTO syllabusDTO : syllabusDTOS) {
-                syllabusService.save(syllabusDTO);
+            if(syllabusDuplicateHandle.toString().equals("REPLACE")){
+                return syllabusService.checkSyllabusReplace(file, name, code);
+            }else{
+                if(syllabusDuplicateHandle.toString().equals("SKIP")){
+                    return syllabusService.checkSyllabusSkip(file, name, code);
+                }else{
+                    if(syllabusDuplicateHandle.toString().equals("ALLOW")){
+                        List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
+                        for(SyllabusDTO syllabusDTO : syllabusDTOS) {
+                            syllabusService.save(syllabusDTO);
+                        }
+                        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+                    }
+                }
             }
-            return ResponseUtil.getObject(syllabusDTOS,HttpStatus.CREATED,"Upload Successfully!");
+
+            return ResponseUtil.error("Import False", "Import Syllabus False",HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             String result = e.getMessage().toString();
             return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
+    @DeleteMapping("/syllabus/upload/{id}")
+    public ResponseEntity<?> changeStatusForUpload(@PathVariable Long id,@RequestParam Boolean name, @RequestParam Boolean code) {
+        return syllabusService.changeStatusforUpload(id, name, code);
+    }
+
+
+
 }
