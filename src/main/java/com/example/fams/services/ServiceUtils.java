@@ -1,5 +1,7 @@
 package com.example.fams.services;
 
+import com.example.fams.dto.ClassDTO;
+import com.example.fams.entities.FamsClass;
 import com.example.fams.repository.*;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -8,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ServiceUtils {
     public static List<String> errors = new ArrayList<>();
@@ -121,6 +124,25 @@ public class ServiceUtils {
             if (classRepository.findById(classId) == null) {
                 errors.add("Class with id " + classId + " does not exist");
             }
+        }
+    }
+
+    public static void validateStartDateBeforeEndDate(ClassDTO classDTO) {
+        Long startDate = classDTO.getStartDate();
+        Long endDate = classDTO.getEndDate();
+        if (endDate <= startDate){
+            errors.add("Class start Date must be before end date");
+        }
+    }
+
+    public static void validateStartDateWhenSameTimeFrame(ClassDTO classDTO, ClassRepository classRepository) {
+        List<FamsClass> conflictDateRangeClasses = classRepository.findFamsClassWithStartDateInRange(classDTO.getStartDate());
+        if (conflictDateRangeClasses != null){
+            conflictDateRangeClasses.forEach(famsClass -> {
+                if (Objects.equals(famsClass.getStartTimeFrame(), classDTO.getStartTimeFrame())){
+                    errors.add(famsClass.getName() + " with this time frame has existed!");
+                }
+            });
         }
     }
 }
