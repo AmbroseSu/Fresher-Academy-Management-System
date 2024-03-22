@@ -11,4 +11,7 @@ public interface IClassService extends IGenericService<ClassDTO>{
   ResponseEntity<?> searchSortFilterADMIN(ClassDTO classDTO,
       String sortById,
       int page, int limit);
+
+
+  ResponseEntity<?> searchBetweenStartDateAndEndDate(Long startDate, Long endDate, int page, int limit);
 }

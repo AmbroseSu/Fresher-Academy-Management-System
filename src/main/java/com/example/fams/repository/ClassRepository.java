@@ -22,6 +22,8 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
   FamsClass findByStatusIsTrueAndId(Long id);
   //FamsClass findByStatusIsTrueAndCode(String code);
   Long countAllByStatusIsTrue();
+  @Query("SELECT f FROM FamsClass f WHERE f.startDate <= :inputStartDate AND f.endDate >= :inputStartDate")
+  List<FamsClass> findFamsClassWithStartDateInRange(Long inputStartDate);
   @Transactional
   @Modifying
   @Query("UPDATE FamsClass cl SET cl.status = ?1 WHERE cl.code = ?2")
@@ -56,6 +58,9 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
                                         @Param("sortById") String sortById,
                                         Pageable pageable);
 
+  @Query("SELECT f FROM FamsClass f WHERE f.startDate >= :inputStartDate AND f.endDate <= :inputEndDate")
+  List<FamsClass> searchBetweenStartDateAndEndDate(Long inputStartDate, Long inputEndDate, Pageable pageable);
 
-
+  @Query("SELECT COUNT(f) FROM FamsClass f WHERE f.startDate >= :inputStartDate AND f.endDate <= :inputEndDate")
+  Long countSearchBetweenStartDateAndEndDate(Long inputStartDate, Long inputEndDate);
 }
