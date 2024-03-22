@@ -79,12 +79,14 @@ public class UserServiceImpl implements UserService {
         String email = userDTO.getEmail();
         String uuid = userDTO.getUuid();
         String phone = userDTO.getPhone();
+        String createdBy=userDTO.getCreateBy();
+        String modifiedBy=userDTO.getModifiedBy();
         Long dob = userDTO.getDob();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<User> users = userRepository.searchSortFilterADMIN(firstName, lastName, email, uuid, phone, dob, sortById, pageable);
+        List<User> users = userRepository.searchSortFilterADMIN(firstName, lastName, email, uuid,createdBy,modifiedBy, phone,dob, sortById, pageable);
         List<UserDTO> userDTOList = new ArrayList<>();
         convertListUserToListUserDTO(users, userDTOList);
-        Long count = userRepository.countSearchSortFilterADMIN(firstName, lastName, email, uuid, phone, dob);
+        Long count = userRepository.countSearchSortFilterADMIN(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob);
         return ResponseUtil.getCollection(userDTOList,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -97,14 +99,16 @@ public class UserServiceImpl implements UserService {
         String firstName = userDTO.getFirstName();
         String lastName = userDTO.getLastName();
         String email = userDTO.getEmail();
+        String createdBy = userDTO.getCreateBy();
+        String modifiedBy = userDTO.getModifiedBy();
         String uuid = userDTO.getUuid();
         String phone = userDTO.getPhone();
         Long dob = userDTO.getDob();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<User> users = userRepository.searchSortFilter(firstName, lastName, email, uuid, phone, dob, sortById, pageable);
+        List<User> users = userRepository.searchSortFilter(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob, sortById, pageable);
         List<UserDTO> userDTOList = new ArrayList<>();
         convertListUserToListUserDTO(users, userDTOList);
-        Long count = userRepository.countSearchSortFilter(firstName, lastName, email, uuid, phone, dob);
+        Long count = userRepository.countSearchSortFilter(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob);
         return ResponseUtil.getCollection(userDTOList,
                 HttpStatus.OK,
                 "Fetched successfully",
@@ -181,7 +185,7 @@ public class UserServiceImpl implements UserService {
             if (userDTO.getId() != null) {
                 User oldEntity = userRepository.findById(userDTO.getId());
                 User tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-                user = convertDtoToEntity(userDTO);
+                user = convertDtoToEntity(userDTO, false);
                 ServiceUtils.fillMissingAttribute(user, tempOldEntity);
                 loadClassUserFromListClassId(requestClassIds, user.getId());
                 user.markModified();
@@ -189,7 +193,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 // * For create new user
 
-                user = convertDtoToEntity(userDTO);
+                user = convertDtoToEntity(userDTO, true);
                 // * Set UUID lần đầu tiên tạo
                 user.setUuid(UUID.randomUUID().toString());
                 user.markModified();
@@ -261,12 +265,14 @@ public class UserServiceImpl implements UserService {
         return newUserDTO;
     }
 
-    public User convertDtoToEntity(UserDTO userDTO) {
+    public User convertDtoToEntity(UserDTO userDTO,boolean isNewUser) {
         User user = new User();
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
-        if (userDTO.getPassword() != null){
+        if (isNewUser) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPhone()));
+        } else {
             user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
         user.setUserRole(userRoleRepository.findById(userDTO.getUserRoleId()).get());

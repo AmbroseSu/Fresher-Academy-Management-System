@@ -32,4 +32,6 @@ public class LearningObjectiveDTO {
 
     private List<Long> contentIds;
     private List<Long> syllabusIds;
+    private String createBy;
+    private String modifiedBy;
 }

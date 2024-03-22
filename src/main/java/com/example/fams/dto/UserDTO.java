@@ -33,7 +33,6 @@ public class UserDTO {
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Invalid email format", groups = {AllFieldValidationGroup.class, PasswordValidationGroup.class})
     private String email;
 
-    @NotBlank(message = "Password must not be blank", groups = AllFieldValidationGroup.class)
     private String password;
 
     private String uuid;
@@ -56,4 +55,6 @@ public class UserDTO {
 
     @NotNull(message = "User Role Id must not be null", groups = {AllFieldValidationGroup.class, PasswordValidationGroup.class})
     private Long userRoleId;
+    private String createBy;
+    private String modifiedBy;
 }

@@ -30,4 +30,6 @@ public class TrainingProgramDTO {
     private Boolean status;
 
     private List<Long> syllabusIds;
+    private String createBy;
+    private String modifiedBy;
 }
