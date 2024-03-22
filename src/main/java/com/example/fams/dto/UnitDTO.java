@@ -26,4 +26,6 @@ public class UnitDTO {
     private Boolean status;
 
     private List<Long> contentIds;
+    private String createBy;
+    private String modifiedBy;
 }

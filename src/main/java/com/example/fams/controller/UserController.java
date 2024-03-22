@@ -119,8 +119,8 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Create')")
     @PostMapping("/user")
     public ResponseEntity<?> create(@Validated(AllFieldValidationGroup.class) @RequestBody UserDTO userDTO) {
-        if (userDTO.getEmail() == null || userDTO.getEmail().isBlank() || userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
-            return ResponseUtil.error("Missing attribute", "email and password must not be null", HttpStatus.BAD_REQUEST);
+        if (userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
+            return ResponseUtil.error("Missing attribute", "email must not be null", HttpStatus.BAD_REQUEST);
         }
         return userService.save(userDTO);
     }

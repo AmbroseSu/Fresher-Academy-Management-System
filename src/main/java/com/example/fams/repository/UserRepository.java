@@ -37,6 +37,8 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:lastName IS NULL OR  LOWER(u.last_name) LIKE LOWER(CONCAT('%', :lastName,'%')))"+
             "AND (:email IS NULL OR  LOWER(u.email) LIKE LOWER(CONCAT('%', :email,'%')))"+
             "AND (:uuid IS NULL OR  LOWER(u.uuid) LIKE LOWER(CONCAT('%', :uuid,'%')))"+
+            "AND (:createBy IS NULL OR  LOWER(u.create_By) LIKE LOWER(CONCAT('%', :createBy,'%')))"+
+            "AND (:modifiedBy IS NULL OR  LOWER(u.modified_By) LIKE LOWER(CONCAT('%', :modifiedBy,'%')))"+
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) " +
             "ORDER BY  " +
@@ -47,6 +49,8 @@ public interface UserRepository extends JpaRepository<User, String> {
                                      @Param("lastName") String lastName,
                                      @Param("email") String email,
                                      @Param("uuid") String uuid,
+                                     @Param("createBy") String createBy,
+                                     @Param("modifiedBy") String modifiedBy,
                                      @Param("phone") String phone,
                                      @Param("dob") Long dob,
                                      @Param("sortById") String sortById,
@@ -57,6 +61,8 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:lastName IS NULL OR  LOWER(u.last_name) LIKE LOWER(CONCAT('%', :lastName,'%')))"+
             "AND (:email IS NULL OR  LOWER(u.email) LIKE LOWER(CONCAT('%', :email,'%')))"+
             "AND (:uuid IS NULL OR  LOWER(u.uuid) LIKE LOWER(CONCAT('%', :uuid,'%')))"+
+            "AND (:createBy IS NULL OR  LOWER(u.create_By) LIKE LOWER(CONCAT('%', :createBy,'%')))"+
+            "AND (:modifiedBy IS NULL OR  LOWER(u.modified_By) LIKE LOWER(CONCAT('%', :modifiedBy,'%')))"+
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) " +
             "ORDER BY  " +
@@ -67,6 +73,8 @@ public interface UserRepository extends JpaRepository<User, String> {
                                      @Param("lastName") String lastName,
                                      @Param("email") String email,
                                      @Param("uuid") String uuid,
+                                     @Param("createBy") String createBy,
+                                     @Param("modifiedBy") String modifiedBy,
                                      @Param("phone") String phone,
                                      @Param("dob") Long dob,
                                      @Param("sortById") String sortById,
@@ -78,12 +86,16 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:lastName IS NULL OR  LOWER(u.last_name) LIKE LOWER(CONCAT('%', :lastName,'%')))"+
             "AND (:email IS NULL OR  LOWER(u.email) LIKE LOWER(CONCAT('%', :email,'%')))"+
             "AND (:uuid IS NULL OR  LOWER(u.uuid) LIKE LOWER(CONCAT('%', :uuid,'%')))"+
+            "AND (:createBy IS NULL OR  LOWER(u.create_By) LIKE LOWER(CONCAT('%', :createBy,'%')))"+
+            "AND (:modifiedBy IS NULL OR  LOWER(u.modified_By) LIKE LOWER(CONCAT('%', :modifiedBy,'%')))"+
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) ", nativeQuery = true)
     Long countSearchSortFilterADMIN(@Param("firstName") String firstName,
                                      @Param("lastName") String lastName,
                                      @Param("email") String email,
                                      @Param("uuid") String uuid,
+                                     @Param("createBy") String createBy,
+                                     @Param("modifiedBy") String modifiedBy,
                                      @Param("phone") String phone,
                                      @Param("dob") Long dob);
 
@@ -92,12 +104,16 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:lastName IS NULL OR  LOWER(u.last_name) LIKE LOWER(CONCAT('%', :lastName,'%')))"+
             "AND (:email IS NULL OR  LOWER(u.email) LIKE LOWER(CONCAT('%', :email,'%')))"+
             "AND (:uuid IS NULL OR  LOWER(u.uuid) LIKE LOWER(CONCAT('%', :uuid,'%')))"+
+            "AND (:createBy IS NULL OR  LOWER(u.create_By) LIKE LOWER(CONCAT('%', :createBy,'%')))"+
+            "AND (:modifiedBy IS NULL OR  LOWER(u.modified_By) LIKE LOWER(CONCAT('%', :modifiedBy,'%')))"+
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) ", nativeQuery = true)
     Long countSearchSortFilter(@Param("firstName") String firstName,
                                     @Param("lastName") String lastName,
                                     @Param("email") String email,
                                     @Param("uuid") String uuid,
+                                    @Param("createBy") String createBy,
+                                    @Param("modifiedBy") String modifiedBy,
                                     @Param("phone") String phone,
                                     @Param("dob") Long dob);
 

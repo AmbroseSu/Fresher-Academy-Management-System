@@ -44,4 +44,6 @@ public class SyllabusDTO {
     private List<Long> learningObjectiveIds;
     private List<Long> materialIds;
     private List<Long> trainingProgramIds;
+    private String createBy;
+    private String modifiedBy;
 }
