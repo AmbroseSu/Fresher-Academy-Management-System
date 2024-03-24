@@ -109,8 +109,13 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
     @Override
     public ResponseEntity<?> findById(Long id) {
         LearningObjective entity = learningObjectiveRepository.findByStatusIsTrueAndId(id);
-        LearningObjectiveDTO result = convertLoToLoDTO(entity);
-        return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        if (entity != null) {
+            LearningObjectiveDTO result = convertLoToLoDTO(entity);
+            return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        }
+        else {
+            return ResponseUtil.error("Learning Objective not found", "Cannot Find Content", HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override

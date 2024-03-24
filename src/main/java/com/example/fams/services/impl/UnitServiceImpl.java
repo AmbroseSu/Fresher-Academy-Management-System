@@ -197,15 +197,16 @@ public class UnitServiceImpl implements IUnitService {
 
         // Fetch the Content objects using the provided contentIds
         List<Content> contents = new ArrayList<>();
-        for (Long id : unitDTO.getContentIds()) {
-            Content content = contentRepository.findById(id);
-            if (content != null){
-                content.setUnit(unit);
-                contents.add(content);
+        if (unitDTO.getContentIds() != null){
+            for (Long id : unitDTO.getContentIds()) {
+                Content content = contentRepository.findById(id);
+                if (content != null){
+                    content.setUnit(unit);
+                    contents.add(content);
+                }
             }
         }
         unit.setContents(contents);
-
         return unit;
     }
 

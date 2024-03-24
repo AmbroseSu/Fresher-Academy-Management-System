@@ -73,8 +73,10 @@ public class ClassServiceImpl implements IClassService {
     if (requestTrainingProgramId != null){
       ServiceUtils.validateTrainingProgramIds(List.of(requestTrainingProgramId), trainingProgramRepository);
     }
-    ServiceUtils.validateStartDateBeforeEndDate(classDTO);
-    ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
+    if (classDTO.getId() == null){
+      ServiceUtils.validateStartDateBeforeEndDate(classDTO);
+      ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
+    }
     if (!ServiceUtils.errors.isEmpty()) {
       throw new CustomValidationException(ServiceUtils.errors);
     }
