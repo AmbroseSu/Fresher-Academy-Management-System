@@ -28,14 +28,16 @@ public class TrainingProgramController {
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
     @GetMapping("/trainingProgram")
     public ResponseEntity<?> getAllTrainingProgramByStatusTrue(@RequestParam(defaultValue = "1") int page,
-                                                               @RequestParam(defaultValue = "10") int limit) {
-        return trainingProgramService.findAllByStatusTrue(page, limit);
+                                                               @RequestParam(defaultValue = "10") int limit,
+                                                               @RequestParam(required = false) String orderBy) {
+        return trainingProgramService.findAllByStatusTrue(page, limit, orderBy);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
     @GetMapping("/trainingProgram/hidden")
     public ResponseEntity<?> getAllTrainingProgram(@RequestParam(defaultValue = "1") int page,
-                                                   @RequestParam(defaultValue = "10") int limit) {
-        return trainingProgramService.findAll(page, limit);
+                                                   @RequestParam(defaultValue = "10") int limit,
+                                                   @RequestParam(required = false) String orderBy) {
+        return trainingProgramService.findAll(page, limit, orderBy);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
     @GetMapping("/trainingProgram/search")

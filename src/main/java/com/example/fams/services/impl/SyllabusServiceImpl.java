@@ -97,6 +97,35 @@ public class SyllabusServiceImpl implements ISyllabusService {
     }
 
     @Override
+    public ResponseEntity<?> findAllByStatusTrue(int page, int limit, String orderBy) {
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        List<Syllabus> entities = syllabusRepository.findAllByStatusIsTrue(pageable, orderBy);
+        List<SyllabusDTO> result = new ArrayList<>();
+        convertListSyllabusToListSyllabusDTO(entities, result);
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                syllabusRepository.count());
+    }
+
+    @Override
+    public ResponseEntity<?> findAll(int page, int limit, String orderBy) {
+        Pageable pageable = PageRequest.of(page - 1, limit);
+//        Page<Syllabus> entities = syllabusRepository.findAll(pageable);
+        List<Syllabus> entities = syllabusRepository.findAll(pageable, orderBy);
+        List<SyllabusDTO> result = new ArrayList<>();
+        convertListSyllabusToListSyllabusDTO(entities, result);
+        return ResponseUtil.getCollection(result,
+                HttpStatus.OK,
+                "Fetched successfully",
+                page,
+                limit,
+                syllabusRepository.count());
+    }
+
+    @Override
     public ResponseEntity<?> save(SyllabusDTO syllabusDTO) {
         ServiceUtils.errors.clear();
         List<Long> unitIds = syllabusDTO.getUnitIds();
@@ -372,10 +401,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
         if (trainingProgramList == null) newDTO.setTrainingProgramIds(null);
         else {
+            Long duration = trainingProgramList.stream()
+                    .mapToLong(TrainingProgram::getDuration)
+                    .sum();
             List<Long> trainingProgramIds = trainingProgramList.stream()
                     .map(TrainingProgram::getId)
                     .toList();
             newDTO.setTrainingProgramIds(trainingProgramIds);
+            newDTO.setDuration(duration);
         }
         if (materialList == null) newDTO.setMaterialIds(null);
         else {

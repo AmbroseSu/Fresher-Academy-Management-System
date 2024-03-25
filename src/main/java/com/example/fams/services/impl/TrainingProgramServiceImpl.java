@@ -43,10 +43,10 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     @Autowired
     private GenericConverter genericConverter;
     @Override
-    public ResponseEntity<?> findAllByStatusTrue(int page, int limit) {
+    public ResponseEntity<?> findAllByStatusTrue(int page, int limit, String orderBy) {
         List<TrainingProgramDTO> result = new ArrayList<>();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAllByStatusIsTrue(pageable);
+        List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAllByStatusIsTrue(pageable, orderBy);
 
 
         convertListTpToListTpDTO(trainingPrograms, result);
@@ -60,10 +60,10 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     }
 
     @Override
-    public ResponseEntity<?> findAll(int page, int limit) {
+    public ResponseEntity<?> findAll(int page, int limit, String orderBy) {
         try {
             Pageable pageable = PageRequest.of(page - 1, limit);
-            List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAll(pageable).getContent();
+            List<TrainingProgram> trainingPrograms = trainingProgramRepository.findAll(pageable, orderBy);
 
             List<TrainingProgramDTO> dtos = new ArrayList<>();
             convertListTpToListTpDTO(trainingPrograms, dtos);

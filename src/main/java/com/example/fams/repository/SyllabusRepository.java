@@ -12,7 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
+
     List<Syllabus> findAllByStatusIsTrue(Pageable pageable);
+    @Query("SELECT sy FROM Syllabus sy " +
+            "WHERE sy.status = TRUE " +
+            "ORDER BY " +
+            "CASE WHEN :orderBy ='cDESC' THEN sy.createdDate END DESC, " +
+            "CASE WHEN :orderBy ='cASC' THEN sy.createdDate END ASC, " +
+            "sy.createdDate DESC")
+    List<Syllabus> findAllByStatusIsTrue(Pageable pageable, String orderBy);
+
+    @Query("SELECT sy FROM Syllabus sy " +
+            "ORDER BY " +
+            "CASE WHEN :orderBy ='cDESC' THEN sy.createdDate END DESC, " +
+            "CASE WHEN :orderBy ='cASC' THEN sy.createdDate END ASC, " +
+            "sy.createdDate DESC")
+    List<Syllabus> findAll(Pageable pageable, String orderBy);
     List<Syllabus> findAllByOrderByIdDesc(Pageable pageable);
     Syllabus findOneById(Long id);
     Syllabus findByStatusIsTrueAndId(Long id);

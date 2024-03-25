@@ -35,15 +35,17 @@ public class SyllabusController {
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
     @GetMapping("/syllabus")
     public ResponseEntity<?> getAllSyllabusByStatusTrue(@RequestParam(defaultValue = "1") int page,
-                                                        @RequestParam(defaultValue = "10") int limit) {
-        return syllabusService.findAllByStatusTrue(page, limit);
+                                                        @RequestParam(defaultValue = "10") int limit,
+                                                        @RequestParam(required = false) String orderBy) {
+        return syllabusService.findAllByStatusTrue(page, limit, orderBy);
     }
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access')")
     @GetMapping("/syllabus/hidden")
     public ResponseEntity<?> getAllSyllabus(@RequestParam(defaultValue = "1") int page,
-                                            @RequestParam(defaultValue = "10") int limit) {
-        return syllabusService.findAll(page, limit);
+                                            @RequestParam(defaultValue = "10") int limit,
+                                            @RequestParam(required = false) String orderBy) {
+        return syllabusService.findAll(page, limit, orderBy);
     }
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
@@ -83,6 +85,7 @@ public class SyllabusController {
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return syllabusService.changeStatus(id);
     }
+
 //    @PostMapping("syllabus/update")
 //    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
 //

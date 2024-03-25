@@ -14,7 +14,20 @@ import java.util.List;
 
 @Repository
 public interface TrainingProgramRepository extends JpaRepository<TrainingProgram, Long> {
-    List<TrainingProgram> findAllByStatusIsTrue(Pageable pageable);
+    @Query("SELECT tp FROM TrainingProgram tp " +
+            "WHERE tp.status = TRUE " +
+            "ORDER BY " +
+            "CASE WHEN :orderBy ='cDESC' THEN tp.createdDate END DESC, " +
+            "CASE WHEN :orderBy ='cASC' THEN tp.createdDate END ASC, " +
+            "tp.createdDate DESC")
+    List<TrainingProgram> findAllByStatusIsTrue(Pageable pageable, String orderBy);
+
+    @Query("SELECT tp FROM TrainingProgram tp " +
+            "ORDER BY " +
+            "CASE WHEN :orderBy ='cDESC' THEN tp.createdDate END DESC, " +
+            "CASE WHEN :orderBy ='cASC' THEN tp.createdDate END ASC, " +
+            "tp.createdDate DESC")
+    List<TrainingProgram> findAll(Pageable pageable, String orderBy);
     List<TrainingProgram> findAllByOrderByIdDesc(Pageable pageable);
     TrainingProgram findOneById(Long id);
     TrainingProgram findByStatusIsTrueAndId(Long id);

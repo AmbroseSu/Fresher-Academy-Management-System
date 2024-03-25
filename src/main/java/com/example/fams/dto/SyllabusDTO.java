@@ -39,11 +39,14 @@ public class SyllabusDTO {
     private String version;
 
     private Boolean status;
+    private Long duration;
+    private String outputStandard;
 
     private List<Long> unitIds;
     private List<Long> learningObjectiveIds;
     private List<Long> materialIds;
     private List<Long> trainingProgramIds;
     private String createBy;
+    private String createdDate;
     private String modifiedBy;
 }
