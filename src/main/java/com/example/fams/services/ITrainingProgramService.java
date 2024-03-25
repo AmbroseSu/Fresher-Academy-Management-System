@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ITrainingProgramService   {
-    ResponseEntity<?> findAllByStatusTrue(int page, int limit, String orderBy);
+    ResponseEntity<?> findAllByStatusTrue(int page, int limit);
 
-    ResponseEntity<?> findAll(int page, int limit, String orderBy);
+    ResponseEntity<?> findAll(int page, int limit);
 
     ResponseEntity<?> findById(Long id);
 
@@ -20,7 +20,8 @@ public interface ITrainingProgramService   {
 
     Boolean checkEixst(Long id);
     ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO,
-                                       int page, int limit);
+                                            String sortByCreatedDate,
+                                            int page, int limit);
 
     ResponseEntity<?> searchSortFilterADMIN(TrainingProgramDTO trainingProgramDTO,
                                             String sortById,

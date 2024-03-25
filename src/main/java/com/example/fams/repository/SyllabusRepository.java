@@ -14,20 +14,6 @@ import java.util.List;
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
 
     List<Syllabus> findAllByStatusIsTrue(Pageable pageable);
-    @Query("SELECT sy FROM Syllabus sy " +
-            "WHERE sy.status = TRUE " +
-            "ORDER BY " +
-            "CASE WHEN :orderBy ='cDESC' THEN sy.createdDate END DESC, " +
-            "CASE WHEN :orderBy ='cASC' THEN sy.createdDate END ASC, " +
-            "sy.createdDate DESC")
-    List<Syllabus> findAllByStatusIsTrue(Pageable pageable, String orderBy);
-
-    @Query("SELECT sy FROM Syllabus sy " +
-            "ORDER BY " +
-            "CASE WHEN :orderBy ='cDESC' THEN sy.createdDate END DESC, " +
-            "CASE WHEN :orderBy ='cASC' THEN sy.createdDate END ASC, " +
-            "sy.createdDate DESC")
-    List<Syllabus> findAll(Pageable pageable, String orderBy);
     List<Syllabus> findAllByOrderByIdDesc(Pageable pageable);
     Syllabus findOneById(Long id);
     Syllabus findByStatusIsTrueAndId(Long id);
@@ -69,7 +55,11 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
             "AND (:description IS NULL OR sl.description = :description) " +
             "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
             "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
-            "AND (:version IS NULL OR sl.version = :version) ", nativeQuery = true )
+            "AND (:version IS NULL OR sl.version = :version) " +
+            "ORDER BY " +
+            "CASE WHEN :sort_by_created_date ='cDESC' THEN sl.created_date END DESC, " +
+            "CASE WHEN :sort_by_created_date ='cASC' THEN sl.created_date END ASC, " +
+            "sl.created_date DESC", nativeQuery = true)
     List<Syllabus> searchSortFilter(@Param("name") String name,
                                     @Param("code") String code,
                                     @Param("timeAllocation") Long timeAllocation,
@@ -77,6 +67,7 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
                                     @Param("isApproved") Boolean isApproved,
                                     @Param("isActive") Boolean isActive,
                                     @Param("version") String version,
+                                    @Param("sort_by_created_date") String sortByCreatedDate,
                                     Pageable pageable);
 
     @Query(value = "SELECT COUNT(*) FROM tbl_syllabus sl " +

@@ -28,23 +28,22 @@ public class TrainingProgramController {
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
     @GetMapping("/trainingProgram")
     public ResponseEntity<?> getAllTrainingProgramByStatusTrue(@RequestParam(defaultValue = "1") int page,
-                                                               @RequestParam(defaultValue = "10") int limit,
-                                                               @RequestParam(required = false) String orderBy) {
-        return trainingProgramService.findAllByStatusTrue(page, limit, orderBy);
+                                                               @RequestParam(defaultValue = "10") int limit) {
+        return trainingProgramService.findAllByStatusTrue(page, limit);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
     @GetMapping("/trainingProgram/hidden")
     public ResponseEntity<?> getAllTrainingProgram(@RequestParam(defaultValue = "1") int page,
-                                                   @RequestParam(defaultValue = "10") int limit,
-                                                   @RequestParam(required = false) String orderBy) {
-        return trainingProgramService.findAll(page, limit, orderBy);
+                                                   @RequestParam(defaultValue = "10") int limit) {
+        return trainingProgramService.findAll(page, limit);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
     @GetMapping("/trainingProgram/search")
     public ResponseEntity<?> searchTrainingProgram(@RequestBody TrainingProgramDTO trainingProgramDTO,
+                                                   @RequestParam(required = false) String sortByCreatedDate,
                                                    @RequestParam(defaultValue = "1") int page,
                                                    @RequestParam(defaultValue = "10") int limit){
-        return trainingProgramService.searchSortFilter(trainingProgramDTO, page, limit);
+        return trainingProgramService.searchSortFilter(trainingProgramDTO, sortByCreatedDate, page, limit);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
     @GetMapping("/trainingProgram/search/hidden")

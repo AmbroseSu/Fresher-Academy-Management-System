@@ -97,35 +97,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
     }
 
     @Override
-    public ResponseEntity<?> findAllByStatusTrue(int page, int limit, String orderBy) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Syllabus> entities = syllabusRepository.findAllByStatusIsTrue(pageable, orderBy);
-        List<SyllabusDTO> result = new ArrayList<>();
-        convertListSyllabusToListSyllabusDTO(entities, result);
-        return ResponseUtil.getCollection(result,
-                HttpStatus.OK,
-                "Fetched successfully",
-                page,
-                limit,
-                syllabusRepository.count());
-    }
-
-    @Override
-    public ResponseEntity<?> findAll(int page, int limit, String orderBy) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
-//        Page<Syllabus> entities = syllabusRepository.findAll(pageable);
-        List<Syllabus> entities = syllabusRepository.findAll(pageable, orderBy);
-        List<SyllabusDTO> result = new ArrayList<>();
-        convertListSyllabusToListSyllabusDTO(entities, result);
-        return ResponseUtil.getCollection(result,
-                HttpStatus.OK,
-                "Fetched successfully",
-                page,
-                limit,
-                syllabusRepository.count());
-    }
-
-    @Override
     public ResponseEntity<?> save(SyllabusDTO syllabusDTO) {
         ServiceUtils.errors.clear();
         List<Long> unitIds = syllabusDTO.getUnitIds();
@@ -306,7 +277,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
 
     @Override
-    public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, int page, int limit) {
+    public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, String sortByCreatedDate, int page, int limit) {
         String name = syllabusDTO.getName();
         String code = syllabusDTO.getCode();
         Long timeAllocation = syllabusDTO.getTimeAllocation();
@@ -315,7 +286,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         Boolean isActive = syllabusDTO.getIsActive();
         String version = syllabusDTO.getVersion();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, pageable);
+        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, sortByCreatedDate, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
         Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
         convertListSyllabusToListSyllabusDTO(entities, result);

@@ -14,20 +14,15 @@ import java.util.List;
 
 @Repository
 public interface TrainingProgramRepository extends JpaRepository<TrainingProgram, Long> {
-    @Query("SELECT tp FROM TrainingProgram tp " +
-            "WHERE tp.status = TRUE " +
-            "ORDER BY " +
-            "CASE WHEN :orderBy ='cDESC' THEN tp.createdDate END DESC, " +
-            "CASE WHEN :orderBy ='cASC' THEN tp.createdDate END ASC, " +
-            "tp.createdDate DESC")
-    List<TrainingProgram> findAllByStatusIsTrue(Pageable pageable, String orderBy);
 
-    @Query("SELECT tp FROM TrainingProgram tp " +
-            "ORDER BY " +
-            "CASE WHEN :orderBy ='cDESC' THEN tp.createdDate END DESC, " +
-            "CASE WHEN :orderBy ='cASC' THEN tp.createdDate END ASC, " +
-            "tp.createdDate DESC")
-    List<TrainingProgram> findAll(Pageable pageable, String orderBy);
+    List<TrainingProgram> findAllByStatusIsTrue(Pageable pageable);
+
+//    @Query("SELECT tp FROM TrainingProgram tp " +
+//            "ORDER BY " +
+//            "CASE WHEN :orderBy ='cDESC' THEN tp.createdDate END DESC, " +
+//            "CASE WHEN :orderBy ='cASC' THEN tp.createdDate END ASC, " +
+//            "tp.createdDate DESC")
+//    List<TrainingProgram> findAll(Pageable pageable, String orderBy);
     List<TrainingProgram> findAllByOrderByIdDesc(Pageable pageable);
     TrainingProgram findOneById(Long id);
     TrainingProgram findByStatusIsTrueAndId(Long id);
@@ -43,11 +38,16 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
             "WHERE (:name IS NULL OR tp.name = :name) AND tp.status = TRUE " +
             "AND (:startTime IS NULL OR tp.startTime = :startTime) " +
             "AND (:duration IS NULL OR tp.duration = :duration) " +
-            "AND (:training_status IS NULL OR tp.training_status = :training_status)")
+            "AND (:training_status IS NULL OR tp.training_status = :training_status)" +
+            "ORDER BY " +
+            "CASE WHEN :sort_by_created_date ='cDESC' THEN tp.createdDate END DESC, " +
+            "CASE WHEN :sort_by_created_date ='cASC' THEN tp.createdDate END ASC, " +
+            "tp.createdDate DESC")
     List<TrainingProgram> searchSortFilter(@Param("name") String name,
                                            @Param("startTime") Long startTime,
                                            @Param("duration") Long duration,
                                            @Param("training_status") Integer training_status,
+                                           @Param("sort_by_created_date") String sortByCreatedDate,
                                            Pageable pageable);
 
     @Query("SELECT COUNT(tp) FROM TrainingProgram tp " +

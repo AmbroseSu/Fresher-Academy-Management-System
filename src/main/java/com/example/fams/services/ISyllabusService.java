@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ISyllabusService extends IGenericService<SyllabusDTO> {
-    ResponseEntity<?> findAllByStatusTrue(int page, int limit, String orderBy);
+//    ResponseEntity<?> findAllByStatusTrue(int page, int limit);
 //
-    ResponseEntity<?> findAll(int page, int limit, String orderBy);
+//    ResponseEntity<?> findAll(int page, int limit);
 //
 //    ResponseEntity<?> findById(Long id);
 //
@@ -25,6 +25,7 @@ public interface ISyllabusService extends IGenericService<SyllabusDTO> {
 //    ResponseEntity<?> changeStatus(Long id);
 //
     ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO,
+                                       String sortByCreatedDate,
                                        int page, int limit);
 
     ResponseEntity<?> searchSortFilterADMIN(SyllabusDTO syllabusDTO,
