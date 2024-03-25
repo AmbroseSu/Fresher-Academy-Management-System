@@ -73,9 +73,14 @@ public class ClassServiceImpl implements IClassService {
     if (requestTrainingProgramId != null){
       ServiceUtils.validateTrainingProgramIds(List.of(requestTrainingProgramId), trainingProgramRepository);
     }
+    if (classDTO.getId() == null){
+      ServiceUtils.validateStartDateBeforeEndDate(classDTO);
+      ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
+    }
     if (!ServiceUtils.errors.isEmpty()) {
       throw new CustomValidationException(ServiceUtils.errors);
     }
+
 
     // * For update request
     if (classDTO.getId() != null){
@@ -204,6 +209,21 @@ public class ClassServiceImpl implements IClassService {
         count);
   }
 
+  @Override
+  public ResponseEntity<?> searchBetweenStartDateAndEndDate(Long startDate, Long endDate, int page, int limit) {
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    List<FamsClass> entities = classRepository.searchBetweenStartDateAndEndDate(startDate, endDate, pageable);
+    List<ClassDTO> result = new ArrayList<>();
+    Long count = classRepository.countSearchBetweenStartDateAndEndDate(startDate, endDate);
+    convertListClassToListClassDTO(entities, result);
+    return ResponseUtil.getCollection(result,
+            HttpStatus.OK,
+            "Fetched successfully",
+            page,
+            limit,
+            count);
+  }
+
   private void convertListClassToListClassDTO(List<FamsClass> entities, List<ClassDTO> result) {
     for (FamsClass famsClass : entities){
       ClassDTO newClassDTO = convertClassToClassDTO(famsClass);
@@ -236,6 +256,10 @@ public class ClassServiceImpl implements IClassService {
     famsClass.setCode(classDTO.getCode());
     famsClass.setStatus(classDTO.getStatus());
     famsClass.setFsu(classDTO.getFsu());
+    famsClass.setStartDate(classDTO.getStartDate());
+    famsClass.setEndDate(classDTO.getEndDate());
+    famsClass.setStartTimeFrame(classDTO.getStartTimeFrame());
+    famsClass.setEndTimeFrame(classDTO.getEndTimeFrame());
 
     TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
     famsClass.setTrainingProgram(trainingProgram);

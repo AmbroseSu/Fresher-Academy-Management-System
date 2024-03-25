@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Table(name="tbl_syllabus")
 public class Syllabus extends BaseEntity{
-    //private Long id;
+
     private Long attendee;
     private String name;
 

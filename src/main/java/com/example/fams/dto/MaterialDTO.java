@@ -20,4 +20,6 @@ public class MaterialDTO {
     private String url;
     private Boolean status;
     private List<Long> syllabusIds;
+    private String createBy;
+    private String modifiedBy;
 }

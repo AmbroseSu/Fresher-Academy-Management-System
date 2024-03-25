@@ -30,4 +30,6 @@ public class ContentDTO {
 
   private Boolean status;
   private List<Long> learningObjectiveIds;
+  private String createBy;
+  private String modifiedBy;
 }

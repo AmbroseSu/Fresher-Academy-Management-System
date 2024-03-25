@@ -3,6 +3,7 @@ package com.example.fams.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Date;
 import java.util.List;
 
 @Data
@@ -27,8 +28,11 @@ public class FamsClass extends BaseEntity{
     @Column(name="end_date")
     private Long endDate;
 
-//    @ManyToMany
-//    private List<User> users;
+    @Column(name="start_time_frame")
+    private Float startTimeFrame;
+
+    @Column(name="end_time_frame")
+    private Float endTimeFrame;
 
     @OneToMany(mappedBy = "famsClass")
     private List<ClassUser> classUsers;

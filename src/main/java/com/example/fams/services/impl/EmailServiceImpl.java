@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
 
+    @Async
     public void sendOTPByEmail(String userEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(userEmail);
@@ -22,6 +24,7 @@ public class EmailServiceImpl implements EmailService {
         javaMailSender.send(message);
     }
 
+    @Async
     public void sendWelcomeEmail(String userEmail, String name, String password) throws MessagingException {
         String subject = "Welcome to Our Website!";
         String body = "<html><body style='font-family: Arial, sans-serif;'>"
