@@ -2,9 +2,11 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.SyllabusDTO;
+import com.example.fams.dto.request.DeleteReplaceSyllabus;
 import com.example.fams.entities.enums.SyllabusDuplicateHandle;
 import com.example.fams.services.ISyllabusService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -128,12 +130,63 @@ public class SyllabusController {
         }
     }
 
-    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
-    @DeleteMapping("/syllabus/upload/{id}")
-    public ResponseEntity<?> changeStatusForUpload(@PathVariable Long id,@RequestParam Boolean name, @RequestParam Boolean code) {
-        return syllabusService.changeStatusforUpload(id, name, code);
+
+
+    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
+    @PostMapping("syllabus/updatecsv")
+    public ResponseEntity<?> uploadFileReplaceNew(@RequestParam("file") MultipartFile file,
+        @RequestParam Boolean name,
+        @RequestParam Boolean code,
+        @RequestParam SyllabusDuplicateHandle syllabusDuplicateHandle
+    ) throws IOException {
+        String s = syllabusService.checkCsvFile(file).getStatusCode().toString();
+
+        try {
+            if(syllabusDuplicateHandle.toString().equals("REPLACE")){
+                return syllabusService.checkSyllabusReplace(file, name, code);
+            }else{
+                if(syllabusDuplicateHandle.toString().equals("SKIP")){
+                    return syllabusService.checkSyllabusSkip(file, name, code);
+                }else{
+                    if(syllabusDuplicateHandle.toString().equals("ALLOW")){
+
+                        if(syllabusService.checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+                            List<SyllabusDTO> syllabusDTOS = syllabusService.parseCsvFile(file);
+                            for(SyllabusDTO syllabusDTO : syllabusDTOS) {
+                                syllabusService.save(syllabusDTO);
+                            }
+                            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+                        }else{
+                            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+
+            return ResponseUtil.error("Import False", "Import Syllabus False",HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            String result = e.getMessage().toString();
+            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
+        }
     }
 
+    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
+    @DeleteMapping("/syllabus/delete")
+    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplaceSyllabus ids,
+        @RequestParam(value = "name") Boolean name,
+        @RequestParam(value = "code") Boolean code) {
+
+        return syllabusService.changeStatusforUpload(ids, name, code);
+    }
+
+
+//    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
+//    @DeleteMapping("/syllabus/delete")
+//    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplaceSyllabus ids,
+//        @RequestParam(value = "name") boolean name,
+//        @RequestParam(value = "code") boolean code) {
+//        return syllabusService.changeStatusforUpload(ids, name, code);
+//    }
 
 
 }

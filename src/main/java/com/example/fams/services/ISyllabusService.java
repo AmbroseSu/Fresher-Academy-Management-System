@@ -3,6 +3,7 @@ package com.example.fams.services;
 import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
+import com.example.fams.dto.request.DeleteReplaceSyllabus;
 import com.example.fams.entities.enums.SyllabusDuplicateHandle;
 import java.io.IOException;
 import java.util.List;
@@ -31,8 +32,13 @@ public interface ISyllabusService extends IGenericService<SyllabusDTO> {
                                             int page, int limit);
     List<SyllabusDTO> parseExcelFile(MultipartFile file) throws IOException;
 
+    ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException;
+
+    List<SyllabusDTO> parseCsvFile(MultipartFile file) throws IOException;
+
+
     //ResponseEntity<?> checkSyllabus(MultipartFile file, Boolean name, Boolean code) throws IOException;
     ResponseEntity<?> checkSyllabusReplace(MultipartFile file, Boolean name, Boolean code) throws IOException;
     ResponseEntity<?> checkSyllabusSkip(MultipartFile file, Boolean name, Boolean code) throws IOException;
-    ResponseEntity<?> changeStatusforUpload(Long id, @RequestParam Boolean name, @RequestParam Boolean code);
+    ResponseEntity<?> changeStatusforUpload(DeleteReplaceSyllabus ids, @RequestParam Boolean name, @RequestParam Boolean code);
 }

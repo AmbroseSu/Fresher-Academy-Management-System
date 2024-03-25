@@ -4,11 +4,16 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.SyllabusDTO;
+import com.example.fams.dto.request.DeleteReplaceSyllabus;
 import com.example.fams.entities.*;
 import com.example.fams.entities.enums.SyllabusDuplicateHandle;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
 import com.example.fams.services.ServiceUtils;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -42,6 +47,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
     private final MaterialRepository materialRepository;
     private final SyllabusMaterialRepository syllabusMaterialRepository;
     private final UnitRepository unitRepository;
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^\\d+$");
 
     public SyllabusServiceImpl(SyllabusRepository syllabusRepository, SyllabusObjectiveRepository syllabusObjectiveRepository, GenericConverter genericConverter, TrainingProgramRepository trainingProgramRepository, LearningObjectiveRepository learningObjectiveRepository, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository, MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, UnitRepository unitRepository) {
         this.syllabusRepository = syllabusRepository;
@@ -457,6 +463,181 @@ public class SyllabusServiceImpl implements ISyllabusService {
         return syllabusDTOS;
     }
 
+
+
+    public List<SyllabusDTO> parseCsvFile(MultipartFile file) throws IOException {
+        List<SyllabusDTO> syllabusList = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirstLine = true;
+            while (!(line = reader.readLine()).equals("")) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // Bỏ qua dòng đầu tiên
+                }
+
+                String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
+
+                SyllabusDTO syllabusDTO = new SyllabusDTO();
+                syllabusDTO.setName(data[0]);
+                syllabusDTO.setCode(data[1]);
+                syllabusDTO.setTimeAllocation(Long.parseLong(data[2]));
+                syllabusDTO.setDescription(data[3]);
+                syllabusDTO.setIsApproved(Boolean.parseBoolean(data[4]));
+                syllabusDTO.setIsActive(Boolean.parseBoolean(data[5]));
+                syllabusDTO.setVersion(data[6]);
+                syllabusDTO.setAttendee(Long.parseLong(data[7]));
+
+
+                if(!data[8].equals("null")){
+                        String[] unitIds = data[8].split("/");
+                        List<Long> unitId = new ArrayList<>();
+                        for(String un : unitIds){
+                            unitId.add(Long.valueOf(un));
+                        }
+
+                        syllabusDTO.setUnitIds(unitId);
+
+                }
+                if(!data[9].equals("null")){
+                    String[] learningObjectiveIds = data[9].split("/");
+                    List<Long> leobId = new ArrayList<>();
+                    for(String leob : learningObjectiveIds){
+                        leobId.add(Long.valueOf(leob));
+                    }
+                    syllabusDTO.setLearningObjectiveIds(leobId);
+                }
+                if(!data[10].equals("null")){
+                    String[] materialIds = data[10].split("/");
+                    List<Long> maId = new ArrayList<>();
+                    for(String ma : materialIds){
+                        maId.add(Long.valueOf(ma));
+                    }
+                    syllabusDTO.setMaterialIds(maId);
+                }
+                if(!data[11].equals("null")){
+                    String[] trainingProgramIds = data[11].split("/");
+                    List<Long> trpoId = new ArrayList<>();
+                    for(String trpo : trainingProgramIds){
+                        trpoId.add(Long.valueOf(trpo));
+                    }
+                    syllabusDTO.setTrainingProgramIds(trpoId);
+                }
+
+                syllabusList.add(syllabusDTO);
+
+            }
+            return syllabusList;
+        } catch (Exception e) {
+            // Xử lý các trường hợp ngoại lệ nếu có
+             e.printStackTrace();
+             for( SyllabusDTO sy : syllabusList){
+                 syllabusList.remove(sy);
+             }
+             return syllabusList;
+        }
+
+
+    }
+
+    @Override
+    public ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException {
+    List<SyllabusDTO> syllabusList = new ArrayList<>();
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+        String line;
+        boolean isFirstLine = true;
+        while (!(line = reader.readLine()).equals("")) {
+            if (isFirstLine) {
+                isFirstLine = false;
+                continue; // Bỏ qua dòng đầu tiên
+            }
+
+            String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
+
+            SyllabusDTO syllabusDTO = new SyllabusDTO();
+            syllabusDTO.setName(data[0]);
+            syllabusDTO.setCode(data[1]);
+            syllabusDTO.setTimeAllocation(Long.parseLong(data[2]));
+            syllabusDTO.setDescription(data[3]);
+            syllabusDTO.setIsApproved(Boolean.parseBoolean(data[4]));
+            syllabusDTO.setIsActive(Boolean.parseBoolean(data[5]));
+            syllabusDTO.setVersion(data[6]);
+            syllabusDTO.setAttendee(Long.parseLong(data[7]));
+
+
+            if(!data[8].equals("null")){
+
+                try{
+                    String[] unitIds = data[8].split("/");
+                    List<Long> unitId = new ArrayList<>();
+                    for(String un : unitIds){
+                        unitId.add(Long.valueOf(un));
+                    }
+
+                    syllabusDTO.setUnitIds(unitId);
+                }catch (Exception e){
+                    return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+            }
+            if(!data[9].equals("null")){
+                try {
+                    String[] learningObjectiveIds = data[9].split("/");
+                    List<Long> leobId = new ArrayList<>();
+                    for(String leob : learningObjectiveIds){
+                        leobId.add(Long.valueOf(leob));
+                    }
+                    syllabusDTO.setLearningObjectiveIds(leobId);
+                }catch (Exception e){
+                    return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+            }
+            if(!data[10].equals("null")){
+                try{
+                    String[] materialIds = data[10].split("/");
+                    List<Long> maId = new ArrayList<>();
+                    for(String ma : materialIds){
+                        maId.add(Long.valueOf(ma));
+                    }
+                    syllabusDTO.setMaterialIds(maId);
+                }catch (Exception e){
+                    return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+            }
+            if(!data[11].equals("null")){
+                try{
+                    String[] trainingProgramIds = data[11].split("/");
+                    List<Long> trpoId = new ArrayList<>();
+                    for(String trpo : trainingProgramIds){
+                        trpoId.add(Long.valueOf(trpo));
+                    }
+                    syllabusDTO.setTrainingProgramIds(trpoId);
+                }catch (Exception e){
+                    return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+            }
+
+            syllabusList.add(syllabusDTO);
+        }
+        return ResponseUtil.getObject(syllabusList, HttpStatus.OK, "");
+    } catch (Exception e) {
+        // Xử lý các trường hợp ngoại lệ nếu có
+        return ResponseUtil.getError(syllabusList,HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+}
+
+
+
+
+
+
+
 //    @Override
 //    public ResponseEntity<?> checkSyllabus(MultipartFile file, Boolean name, Boolean code) throws IOException {
 //        Integer count = 0;
@@ -488,39 +669,21 @@ public class SyllabusServiceImpl implements ISyllabusService {
     public ResponseEntity<?> checkSyllabusReplace(MultipartFile file, Boolean name, Boolean code) throws IOException {
         //Integer count = 0;
         List<SyllabusDTO> errorSyllabus = new ArrayList<>();
-        List<SyllabusDTO> syllabusList = parseExcelFile(file);
-        List<Syllabus> syllabusShow = new ArrayList<>();
-        if(name.toString().equals("true") && code.toString().equals("false")){
-            for(SyllabusDTO syllabusDTO : syllabusList) {
-                List<Syllabus> listNameSyllabus = syllabusRepository.getAllSyllabusByName(syllabusDTO.getName());
-                if(listNameSyllabus.size() == 0){
-                    save(syllabusDTO); //add them luon
-                }else if( listNameSyllabus.size() == 1){
-                    syllabusDTO.setId(listNameSyllabus.get(0).getId());
-                    save(syllabusDTO); // update
-                }else if(listNameSyllabus.size() > 1){
-                    syllabusShow.addAll(listNameSyllabus);
+        if(checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+            List<SyllabusDTO> syllabusList = parseCsvFile(file);
+            List<Syllabus> syllabusShow = new ArrayList<>();
+            if(name.toString().equals("true") && code.toString().equals("false")){
+                for(SyllabusDTO syllabusDTO : syllabusList) {
+                    List<Syllabus> listNameSyllabus = syllabusRepository.getAllSyllabusByName(syllabusDTO.getName());
+                    if(listNameSyllabus.size() == 0){
+                        save(syllabusDTO); //add them luon
+                    }else if( listNameSyllabus.size() == 1){
+                        syllabusDTO.setId(listNameSyllabus.get(0).getId());
+                        save(syllabusDTO); // update
+                    }else if(listNameSyllabus.size() > 1){
+                        syllabusShow.addAll(listNameSyllabus);
 //                    convertListSyllabusToListSyllabusDTO(listNameSyllabus, errorSyllabus);
 //                    return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-                }
-            }
-            if(syllabusShow.size() !=0){
-                convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
-                return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-            }
-        }else{
-            if(name.toString().equals("false") && code.toString().equals("true")){
-                for(SyllabusDTO syllabusDTO : syllabusList){
-                    List<Syllabus> listCodeSyllabus = syllabusRepository.getAllSyllabusByCode(syllabusDTO.getCode());
-                    if(listCodeSyllabus.size() == 0){
-                        save(syllabusDTO); //add them luon
-                    }else if( listCodeSyllabus.size() == 1){
-                        syllabusDTO.setId(listCodeSyllabus.get(0).getId());
-                        save(syllabusDTO); // update
-                    }else if(listCodeSyllabus.size() > 1){
-                        syllabusShow.addAll(listCodeSyllabus);
-//                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
-//                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                     }
                 }
                 if(syllabusShow.size() !=0){
@@ -528,16 +691,16 @@ public class SyllabusServiceImpl implements ISyllabusService {
                     return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                 }
             }else{
-                if(name.toString().equals("true") && code.toString().equals("true")) {
+                if(name.toString().equals("false") && code.toString().equals("true")){
                     for(SyllabusDTO syllabusDTO : syllabusList){
-                        List<Syllabus> listNameAndCodeSyllabus = syllabusRepository.getAllSyllabusByNameAndCode(syllabusDTO.getName(), syllabusDTO.getCode());
-                        if(listNameAndCodeSyllabus.size() == 0){
+                        List<Syllabus> listCodeSyllabus = syllabusRepository.getAllSyllabusByCode(syllabusDTO.getCode());
+                        if(listCodeSyllabus.size() == 0){
                             save(syllabusDTO); //add them luon
-                        }else if( listNameAndCodeSyllabus.size() == 1){
-                            syllabusDTO.setId(listNameAndCodeSyllabus.get(0).getId());
+                        }else if( listCodeSyllabus.size() == 1){
+                            syllabusDTO.setId(listCodeSyllabus.get(0).getId());
                             save(syllabusDTO); // update
-                        }else if(listNameAndCodeSyllabus.size() > 1){
-                            syllabusShow.addAll(listNameAndCodeSyllabus);
+                        }else if(listCodeSyllabus.size() > 1){
+                            syllabusShow.addAll(listCodeSyllabus);
 //                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
 //                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                         }
@@ -546,46 +709,74 @@ public class SyllabusServiceImpl implements ISyllabusService {
                         convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
                         return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                     }
+                }else{
+                    if(name.toString().equals("true") && code.toString().equals("true")) {
+                        for(SyllabusDTO syllabusDTO : syllabusList){
+                            List<Syllabus> listNameAndCodeSyllabus = syllabusRepository.getAllSyllabusByNameAndCode(syllabusDTO.getName(), syllabusDTO.getCode());
+                            if(listNameAndCodeSyllabus.size() == 0){
+                                save(syllabusDTO); //add them luon
+                            }else if( listNameAndCodeSyllabus.size() == 1){
+                                syllabusDTO.setId(listNameAndCodeSyllabus.get(0).getId());
+                                save(syllabusDTO); // update
+                            }else if(listNameAndCodeSyllabus.size() > 1){
+                                syllabusShow.addAll(listNameAndCodeSyllabus);
+//                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
+//                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                            }
+                        }
+                        if(syllabusShow.size() !=0){
+                            convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
+                            return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                        }
+                    }
                 }
             }
+            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+        }else {
+            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
         }
-        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+
     }
 
     @Override
     public ResponseEntity<?> checkSyllabusSkip(MultipartFile file, Boolean name, Boolean code) throws IOException {
         //Integer count = 0;
         //List<SyllabusDTO> errorSyllabus = new ArrayList<>();
-        List<SyllabusDTO> syllabusList = parseExcelFile(file);
-        //List<Syllabus> syllabusShow = new ArrayList<>();
-        if(name.toString().equals("true") && code.toString().equals("false")){
-            for(SyllabusDTO syllabusDTO : syllabusList) {
-                List<Syllabus> listNameSyllabus = syllabusRepository.getAllSyllabusByName(syllabusDTO.getName());
-                if(listNameSyllabus.size() == 0){
-                    save(syllabusDTO); //add them luon
-                }
-            }
-        }else{
-            if(name.toString().equals("false") && code.toString().equals("true")){
+        if(checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+            List<SyllabusDTO> syllabusList = parseCsvFile(file);
+            //List<Syllabus> syllabusShow = new ArrayList<>();
+            if(name.toString().equals("true") && code.toString().equals("false")){
                 for(SyllabusDTO syllabusDTO : syllabusList) {
-                    List<Syllabus> listCodeSyllabus = syllabusRepository.getAllSyllabusByCode(
-                        syllabusDTO.getCode());
-                    if (listCodeSyllabus.size() == 0 ) {
+                    List<Syllabus> listNameSyllabus = syllabusRepository.getAllSyllabusByName(syllabusDTO.getName());
+                    if(listNameSyllabus.size() == 0){
                         save(syllabusDTO); //add them luon
                     }
                 }
             }else{
-                if(name.toString().equals("true") && code.toString().equals("true")) {
-                    for(SyllabusDTO syllabusDTO : syllabusList){
-                        List<Syllabus> listNameAndCodeSyllabus = syllabusRepository.getAllSyllabusByNameAndCode(syllabusDTO.getName(), syllabusDTO.getCode());
-                        if(listNameAndCodeSyllabus.size() == 0 ){
+                if(name.toString().equals("false") && code.toString().equals("true")){
+                    for(SyllabusDTO syllabusDTO : syllabusList) {
+                        List<Syllabus> listCodeSyllabus = syllabusRepository.getAllSyllabusByCode(
+                            syllabusDTO.getCode());
+                        if (listCodeSyllabus.size() == 0 ) {
                             save(syllabusDTO); //add them luon
+                        }
+                    }
+                }else{
+                    if(name.toString().equals("true") && code.toString().equals("true")) {
+                        for(SyllabusDTO syllabusDTO : syllabusList){
+                            List<Syllabus> listNameAndCodeSyllabus = syllabusRepository.getAllSyllabusByNameAndCode(syllabusDTO.getName(), syllabusDTO.getCode());
+                            if(listNameAndCodeSyllabus.size() == 0 ){
+                                save(syllabusDTO); //add them luon
+                            }
                         }
                     }
                 }
             }
+            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+        }else{
+            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
         }
-        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+
     }
 
 
@@ -607,63 +798,86 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
 
     @Override
-    public ResponseEntity<?> changeStatusforUpload(Long id, Boolean name, Boolean code) {
-        Syllabus entity = syllabusRepository.findOneById(id);
-        if (entity != null) {
-            if(name.toString().equals("true") && code.toString().equals("false")){
-                List<Syllabus> syllabusListName = syllabusRepository.getAllSyllabusByName(entity.getName());
-                if(syllabusListName.size() != 1){
-                    if (entity.getStatus()) {
-                        entity.setStatus(false);
-                    } else {
-                        entity.setStatus(true);
+    public ResponseEntity<?> changeStatusforUpload(DeleteReplaceSyllabus ids, Boolean name, Boolean code) {
+
+        for (Long id : ids.getId()) {
+            Syllabus entity = syllabusRepository.findOneById(id);
+            if (entity != null) {
+                if (name.toString().equals("true") && code.toString().equals("false")) {
+                    List<Syllabus> syllabusListName = syllabusRepository.getAllSyllabusByName(
+                        entity.getName());
+                    if(ids.getId().size() == syllabusListName.size()){
+                        return ResponseUtil.error("false",
+                            "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
                     }
-                    syllabusRepository.save(entity);
-                }else{
-                    return ResponseUtil.error("false", "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
-                }
-
-
-            }else{
-                if(name.toString().equals("false") && code.toString().equals("true")){
-                    List<Syllabus> syllabusListCode = syllabusRepository.getAllSyllabusByCode(entity.getCode());
-                    if(syllabusListCode.size() != 1){
+                    if (syllabusListName.size() != 1) {
                         if (entity.getStatus()) {
                             entity.setStatus(false);
                         } else {
                             entity.setStatus(true);
                         }
                         syllabusRepository.save(entity);
-                    }else{
-                        return ResponseUtil.error("false", "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
+                    } else {
+                        return ResponseUtil.error("false",
+                            "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
                     }
 
 
-                }else{
-                    if(name.toString().equals("true") && code.toString().equals("true")){
-                        List<Syllabus> syllabusListNameAndCode = syllabusRepository.getAllSyllabusByNameAndCode(entity.getName(),entity.getCode());
-                        if(syllabusListNameAndCode.size() != 1){
+                } else {
+                    if (name.toString().equals("false") && code.toString().equals("true")) {
+                        List<Syllabus> syllabusListCode = syllabusRepository.getAllSyllabusByCode(
+                            entity.getCode());
+                        if(ids.getId().size() == syllabusListCode.size()){
+                            return ResponseUtil.error("false",
+                                "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
+                        }
+                        if (syllabusListCode.size() != 1) {
                             if (entity.getStatus()) {
                                 entity.setStatus(false);
                             } else {
                                 entity.setStatus(true);
                             }
                             syllabusRepository.save(entity);
-                        }else{
-                            return ResponseUtil.error("false", "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
+                        } else {
+                            return ResponseUtil.error("false",
+                                "Cannot change status of non-existing Syllabus",
+                                HttpStatus.NOT_FOUND);
                         }
 
 
+                    } else {
+                        if (name.toString().equals("true") && code.toString().equals("true")) {
+                            List<Syllabus> syllabusListNameAndCode = syllabusRepository.getAllSyllabusByNameAndCode(
+                                entity.getName(), entity.getCode());
+                            if(ids.getId().size() == syllabusListNameAndCode.size()){
+                                return ResponseUtil.error("false",
+                                    "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
+                            }
+                            if (syllabusListNameAndCode.size() != 1) {
+                                if (entity.getStatus()) {
+                                    entity.setStatus(false);
+                                } else {
+                                    entity.setStatus(true);
+                                }
+                                syllabusRepository.save(entity);
+                            } else {
+                                return ResponseUtil.error("false",
+                                    "Cannot change status of non-existing Syllabus",
+                                    HttpStatus.NOT_FOUND);
+                            }
+
+
+                        }
                     }
                 }
+            } else {
+                return ResponseUtil.error("Syllabus not found",
+                    "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
             }
-
-            return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
-
-
-        } else {
-            return ResponseUtil.error("Syllabus not found", "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
         }
+
+        return null;
+
     }
 
 
