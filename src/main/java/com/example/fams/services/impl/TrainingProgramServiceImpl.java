@@ -189,13 +189,13 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     }
 
     @Override
-    public ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO, int page, int limit) {
+    public ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO, String sortByCreatedDate, int page, int limit) {
         String name = trainingProgramDTO.getName();
         Long startTime = trainingProgramDTO.getStartTime();
         Long duration = trainingProgramDTO.getDuration();
         Integer training_status = trainingProgramDTO.getTraining_status();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilter(name, startTime, duration, training_status, pageable);
+        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilter(name, startTime, duration, training_status, sortByCreatedDate, pageable);
         List<TrainingProgramDTO> result = new ArrayList<>();
         convertListTpToListTpDTO(entities, result);
         return ResponseUtil.getCollection(result,

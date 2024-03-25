@@ -38,5 +38,6 @@ public class ClassDTO {
   private List<Long> userIds;
   private Long trainingProgramId;
   private String createBy;
+  private String createdDate;
   private String modifiedBy;
 }

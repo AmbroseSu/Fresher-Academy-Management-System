@@ -25,6 +25,7 @@ public interface ISyllabusService extends IGenericService<SyllabusDTO> {
 //    ResponseEntity<?> changeStatus(Long id);
 //
     ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO,
+                                       String sortByCreatedDate,
                                        int page, int limit);
 
     ResponseEntity<?> searchSortFilterADMIN(SyllabusDTO syllabusDTO,

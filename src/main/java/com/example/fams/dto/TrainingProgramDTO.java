@@ -31,5 +31,6 @@ public class TrainingProgramDTO {
 
     private List<Long> syllabusIds;
     private String createBy;
+    private String createdDate;
     private String modifiedBy;
 }

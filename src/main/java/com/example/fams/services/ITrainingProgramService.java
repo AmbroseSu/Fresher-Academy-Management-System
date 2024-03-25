@@ -20,7 +20,8 @@ public interface ITrainingProgramService   {
 
     Boolean checkEixst(Long id);
     ResponseEntity<?> searchSortFilter(TrainingProgramDTO trainingProgramDTO,
-                                       int page, int limit);
+                                            String sortByCreatedDate,
+                                            int page, int limit);
 
     ResponseEntity<?> searchSortFilterADMIN(TrainingProgramDTO trainingProgramDTO,
                                             String sortById,

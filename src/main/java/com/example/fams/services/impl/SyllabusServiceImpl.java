@@ -277,7 +277,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
 
     @Override
-    public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, int page, int limit) {
+    public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, String sortByCreatedDate, int page, int limit) {
         String name = syllabusDTO.getName();
         String code = syllabusDTO.getCode();
         Long timeAllocation = syllabusDTO.getTimeAllocation();
@@ -286,7 +286,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         Boolean isActive = syllabusDTO.getIsActive();
         String version = syllabusDTO.getVersion();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, pageable);
+        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, sortByCreatedDate, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
         Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
         convertListSyllabusToListSyllabusDTO(entities, result);
@@ -372,10 +372,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
         if (trainingProgramList == null) newDTO.setTrainingProgramIds(null);
         else {
+            Long duration = trainingProgramList.stream()
+                    .mapToLong(TrainingProgram::getDuration)
+                    .sum();
             List<Long> trainingProgramIds = trainingProgramList.stream()
                     .map(TrainingProgram::getId)
                     .toList();
             newDTO.setTrainingProgramIds(trainingProgramIds);
+            newDTO.setDuration(duration);
         }
         if (materialList == null) newDTO.setMaterialIds(null);
         else {

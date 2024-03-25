@@ -49,17 +49,18 @@ public class SyllabusController {
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
     @GetMapping("/syllabus/search")
     public ResponseEntity<?> searchSyllabus(@RequestBody SyllabusDTO syllabusDTO,
-                                                   @RequestParam(defaultValue = "1") int page,
-                                                   @RequestParam(defaultValue = "10") int limit){
-        return syllabusService.searchSortFilter(syllabusDTO, page, limit);
+                                            @RequestParam(required = false) String sortByCreatedDate,
+                                            @RequestParam(defaultValue = "1") int page,
+                                            @RequestParam(defaultValue = "10") int limit){
+        return syllabusService.searchSortFilter(syllabusDTO, sortByCreatedDate, page, limit);
     }
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access')")
     @GetMapping("/syllabus/search/hidden")
     public ResponseEntity<?> searchSyllabusADMIN(@RequestBody SyllabusDTO syllabusDTO,
-                                                        @RequestParam(required = false) String sortById,
-                                                        @RequestParam(defaultValue = "1") int page,
-                                                        @RequestParam(defaultValue = "10") int limit){
+                                                 @RequestParam(required = false) String sortById,
+                                                 @RequestParam(defaultValue = "1") int page,
+                                                 @RequestParam(defaultValue = "10") int limit){
         return syllabusService.searchSortFilterADMIN(syllabusDTO, sortById, page, limit);
     }
 
@@ -83,6 +84,7 @@ public class SyllabusController {
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
         return syllabusService.changeStatus(id);
     }
+
 //    @PostMapping("syllabus/update")
 //    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
 //
