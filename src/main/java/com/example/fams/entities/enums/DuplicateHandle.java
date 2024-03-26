@@ -1,6 +1,6 @@
 package com.example.fams.entities.enums;
 
-public enum SyllabusDuplicateHandle {
+public enum DuplicateHandle {
   ALLOW,
   REPLACE,
   SKIP

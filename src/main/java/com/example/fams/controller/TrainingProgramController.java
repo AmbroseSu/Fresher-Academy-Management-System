@@ -2,8 +2,11 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.TrainingProgramDTO;
+import com.example.fams.dto.request.DeleteReplace;
+import com.example.fams.entities.enums.DuplicateHandle;
 import com.example.fams.services.ITrainingProgramService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -92,6 +95,54 @@ public class TrainingProgramController {
             String result = e.getMessage().toString();
             return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
+    @PostMapping("trainingProgram/updatecsv")
+    public ResponseEntity<?> uploadFileReplaceNew(@RequestParam("file") MultipartFile file,
+        @RequestParam Boolean id,
+        @RequestParam Boolean name,
+        @RequestParam DuplicateHandle duplicateHandle
+    ) throws IOException {
+        //String s = syllabusService.checkCsvFile(file).getStatusCode().toString();
+
+        try {
+            if(duplicateHandle.toString().equals("REPLACE")){
+                return trainingProgramService.checkTrainingProgramReplace(file, id, name);
+            }else{
+                if(duplicateHandle.toString().equals("SKIP")){
+                    return trainingProgramService.checkTrainingProgramSkip(file, id, name);
+                }else{
+                    if(duplicateHandle.toString().equals("ALLOW")){
+
+                        if(trainingProgramService.checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+                            List<TrainingProgramDTO> trainingProgramDTOS = trainingProgramService.parseCsvFile(file);
+                            for(TrainingProgramDTO trainingProgramDTO : trainingProgramDTOS) {
+                                trainingProgramService.save(trainingProgramDTO);
+                            }
+                            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+                        }else{
+                            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+
+            return ResponseUtil.error("Import False", "Import Syllabus False",HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            String result = e.getMessage().toString();
+            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
+    @DeleteMapping("/trainingProgram/delete")
+    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplace ids,
+        @RequestParam(value = "id") Boolean id,
+        @RequestParam(value = "name") Boolean name
+        ) {
+
+        return trainingProgramService.changeStatusforUpload(ids, id, name);
     }
 
 }

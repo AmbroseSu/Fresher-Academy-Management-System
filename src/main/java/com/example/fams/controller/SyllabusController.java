@@ -2,8 +2,8 @@ package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.dto.request.DeleteReplaceSyllabus;
-import com.example.fams.entities.enums.SyllabusDuplicateHandle;
+import com.example.fams.dto.request.DeleteReplace;
+import com.example.fams.entities.enums.DuplicateHandle;
 import com.example.fams.services.ISyllabusService;
 import jakarta.validation.Valid;
 import java.io.IOException;
@@ -103,17 +103,17 @@ public class SyllabusController {
     @PostMapping("syllabus/updatee")
     public /*@ResponseBody*/ ResponseEntity<?> uploadFileReplace(/*@RequestParam("file")*/@RequestBody MultipartFile file,
         @RequestParam Boolean name, @RequestParam Boolean code, @RequestParam
-        SyllabusDuplicateHandle syllabusDuplicateHandle) {
+    DuplicateHandle duplicateHandle) {
 
 
         try {
-            if(syllabusDuplicateHandle.toString().equals("REPLACE")){
+            if(duplicateHandle.toString().equals("REPLACE")){
                 return syllabusService.checkSyllabusReplace(file, name, code);
             }else{
-                if(syllabusDuplicateHandle.toString().equals("SKIP")){
+                if(duplicateHandle.toString().equals("SKIP")){
                     return syllabusService.checkSyllabusSkip(file, name, code);
                 }else{
-                    if(syllabusDuplicateHandle.toString().equals("ALLOW")){
+                    if(duplicateHandle.toString().equals("ALLOW")){
                         List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
                         for(SyllabusDTO syllabusDTO : syllabusDTOS) {
                             syllabusService.save(syllabusDTO);
@@ -137,18 +137,18 @@ public class SyllabusController {
     public ResponseEntity<?> uploadFileReplaceNew(@RequestParam("file") MultipartFile file,
         @RequestParam Boolean name,
         @RequestParam Boolean code,
-        @RequestParam SyllabusDuplicateHandle syllabusDuplicateHandle
+        @RequestParam DuplicateHandle duplicateHandle
     ) throws IOException {
         String s = syllabusService.checkCsvFile(file).getStatusCode().toString();
 
         try {
-            if(syllabusDuplicateHandle.toString().equals("REPLACE")){
+            if(duplicateHandle.toString().equals("REPLACE")){
                 return syllabusService.checkSyllabusReplace(file, name, code);
             }else{
-                if(syllabusDuplicateHandle.toString().equals("SKIP")){
+                if(duplicateHandle.toString().equals("SKIP")){
                     return syllabusService.checkSyllabusSkip(file, name, code);
                 }else{
-                    if(syllabusDuplicateHandle.toString().equals("ALLOW")){
+                    if(duplicateHandle.toString().equals("ALLOW")){
 
                         if(syllabusService.checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
                             List<SyllabusDTO> syllabusDTOS = syllabusService.parseCsvFile(file);
@@ -172,7 +172,7 @@ public class SyllabusController {
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access')")
     @DeleteMapping("/syllabus/delete")
-    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplaceSyllabus ids,
+    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplace ids,
         @RequestParam(value = "name") Boolean name,
         @RequestParam(value = "code") Boolean code) {
 

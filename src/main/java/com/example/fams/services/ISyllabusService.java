@@ -1,10 +1,7 @@
 package com.example.fams.services;
 
-import com.example.fams.dto.LearningObjectiveDTO;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.dto.TrainingProgramDTO;
-import com.example.fams.dto.request.DeleteReplaceSyllabus;
-import com.example.fams.entities.enums.SyllabusDuplicateHandle;
+import com.example.fams.dto.request.DeleteReplace;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +37,5 @@ public interface ISyllabusService extends IGenericService<SyllabusDTO> {
     //ResponseEntity<?> checkSyllabus(MultipartFile file, Boolean name, Boolean code) throws IOException;
     ResponseEntity<?> checkSyllabusReplace(MultipartFile file, Boolean name, Boolean code) throws IOException;
     ResponseEntity<?> checkSyllabusSkip(MultipartFile file, Boolean name, Boolean code) throws IOException;
-    ResponseEntity<?> changeStatusforUpload(DeleteReplaceSyllabus ids, @RequestParam Boolean name, @RequestParam Boolean code);
+    ResponseEntity<?> changeStatusforUpload(DeleteReplace ids, @RequestParam Boolean name, @RequestParam Boolean code);
 }
