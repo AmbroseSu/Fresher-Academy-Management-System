@@ -1,5 +1,6 @@
 package com.example.fams.repository;
 
+import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.TrainingProgram;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +34,17 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
     @Modifying
     @Query("UPDATE TrainingProgram tp SET tp.status = ?1 WHERE tp.id = ?2")
     void changeStatus(Boolean status, Long id);
+
+
+    @Query("SELECT TP FROM TrainingProgram TP WHERE TP.id = :id AND TP.status = TRUE ")
+    List<TrainingProgram> getAllTrainingProgramById(@Param("id") Long id);
+
+    @Query("SELECT TP FROM TrainingProgram TP WHERE TP.name = :name AND TP.status = TRUE ")
+    List<TrainingProgram> getAllTrainingProgramByName(@Param("name") String name);
+
+    @Query("SELECT TP FROM TrainingProgram TP WHERE TP.id = :id AND TP.name = :name AND TP.status = TRUE ")
+    List<TrainingProgram> getAllSyllabusByNameAndCode(@Param("id") Long id, @Param("name") String name);
+
 
     @Query("SELECT tp FROM TrainingProgram tp " +
             "WHERE (:name IS NULL OR tp.name = :name) AND tp.status = TRUE " +

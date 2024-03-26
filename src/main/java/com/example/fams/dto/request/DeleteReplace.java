@@ -4,6 +4,6 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class DeleteReplaceSyllabus {
+public class DeleteReplace {
   List<Long> id;
 }

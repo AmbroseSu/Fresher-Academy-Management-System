@@ -4,16 +4,14 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.SyllabusDTO;
-import com.example.fams.dto.request.DeleteReplaceSyllabus;
+import com.example.fams.dto.request.DeleteReplace;
 import com.example.fams.entities.*;
-import com.example.fams.entities.enums.SyllabusDuplicateHandle;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
 import com.example.fams.services.ServiceUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -25,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -686,14 +683,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
                         save(syllabusDTO); // update
                     }else if(listNameSyllabus.size() > 1){
                         syllabusShow.addAll(listNameSyllabus);
+                        if(syllabusShow.size() !=0){
+                            convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
+                            return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                        }
 //                    convertListSyllabusToListSyllabusDTO(listNameSyllabus, errorSyllabus);
 //                    return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                     }
                 }
-                if(syllabusShow.size() !=0){
-                    convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
-                    return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-                }
+
             }else{
                 if(name.toString().equals("false") && code.toString().equals("true")){
                     for(SyllabusDTO syllabusDTO : syllabusList){
@@ -705,14 +703,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
                             save(syllabusDTO); // update
                         }else if(listCodeSyllabus.size() > 1){
                             syllabusShow.addAll(listCodeSyllabus);
+                            if(syllabusShow.size() !=0){
+                                convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
+                                return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                            }
 //                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
 //                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                         }
                     }
-                    if(syllabusShow.size() !=0){
-                        convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
-                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-                    }
+
                 }else{
                     if(name.toString().equals("true") && code.toString().equals("true")) {
                         for(SyllabusDTO syllabusDTO : syllabusList){
@@ -724,14 +723,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
                                 save(syllabusDTO); // update
                             }else if(listNameAndCodeSyllabus.size() > 1){
                                 syllabusShow.addAll(listNameAndCodeSyllabus);
+                                if(syllabusShow.size() !=0){
+                                    convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
+                                    return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                                }
 //                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
 //                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
                             }
                         }
-                        if(syllabusShow.size() !=0){
-                            convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
-                            return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-                        }
+
                     }
                 }
             }
@@ -802,18 +802,20 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
 
     @Override
-    public ResponseEntity<?> changeStatusforUpload(DeleteReplaceSyllabus ids, Boolean name, Boolean code) {
+    public ResponseEntity<?> changeStatusforUpload(DeleteReplace ids, Boolean name, Boolean code) {
 
+        boolean flag = false;
         for (Long id : ids.getId()) {
             Syllabus entity = syllabusRepository.findOneById(id);
             if (entity != null) {
                 if (name.toString().equals("true") && code.toString().equals("false")) {
                     List<Syllabus> syllabusListName = syllabusRepository.getAllSyllabusByName(
                         entity.getName());
-                    if(ids.getId().size() == syllabusListName.size()){
+                    if(ids.getId().size() == syllabusListName.size() && flag == false){
                         return ResponseUtil.error("false",
                             "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
                     }
+                    flag = true;
                     if (syllabusListName.size() != 1) {
                         if (entity.getStatus()) {
                             entity.setStatus(false);
@@ -831,10 +833,11 @@ public class SyllabusServiceImpl implements ISyllabusService {
                     if (name.toString().equals("false") && code.toString().equals("true")) {
                         List<Syllabus> syllabusListCode = syllabusRepository.getAllSyllabusByCode(
                             entity.getCode());
-                        if(ids.getId().size() == syllabusListCode.size()){
+                        if(ids.getId().size() == syllabusListCode.size() && flag == false){
                             return ResponseUtil.error("false",
                                 "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
                         }
+                        flag = true;
                         if (syllabusListCode.size() != 1) {
                             if (entity.getStatus()) {
                                 entity.setStatus(false);
@@ -853,10 +856,11 @@ public class SyllabusServiceImpl implements ISyllabusService {
                         if (name.toString().equals("true") && code.toString().equals("true")) {
                             List<Syllabus> syllabusListNameAndCode = syllabusRepository.getAllSyllabusByNameAndCode(
                                 entity.getName(), entity.getCode());
-                            if(ids.getId().size() == syllabusListNameAndCode.size()){
+                            if(ids.getId().size() == syllabusListNameAndCode.size() && flag == false){
                                 return ResponseUtil.error("false",
                                     "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
                             }
+                            flag = true;
                             if (syllabusListNameAndCode.size() != 1) {
                                 if (entity.getStatus()) {
                                     entity.setStatus(false);
@@ -880,7 +884,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
             }
         }
 
-        return null;
+        return ResponseUtil.getObject(null, HttpStatus.CREATED, "Delete Susscessfully");
 
     }
 

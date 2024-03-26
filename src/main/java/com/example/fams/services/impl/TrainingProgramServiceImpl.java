@@ -2,9 +2,8 @@ package com.example.fams.services.impl;
 
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.ClassDTO;
-import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.TrainingProgramDTO;
+import com.example.fams.dto.request.DeleteReplace;
 import com.example.fams.entities.*;
 
 import com.example.fams.repository.SyllabusRepository;
@@ -12,7 +11,9 @@ import com.example.fams.repository.SyllabusTrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramRepository;
 import com.example.fams.services.ITrainingProgramService;
 import com.example.fams.services.ServiceUtils;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service("TrainingProgramService")
@@ -299,6 +299,344 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
         workbook.close();
         return trainingProgramDTOS;
+    }
+
+//    @Override
+//    public ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException {
+//        List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
+//
+//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+//            String line;
+//            boolean isFirstLine = true;
+//            while (!(line = reader.readLine()).equals("")) {
+//                if (isFirstLine) {
+//                    isFirstLine = false;
+//                    continue; // Bỏ qua dòng đầu tiên
+//                }
+//
+//                String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
+//
+//                TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+//                trainingProgramDTO.setName(data[0]);
+//                trainingProgramDTO.setDuration(Long.valueOf(data[1]));
+//                trainingProgramDTO.setTraining_status(Integer.valueOf(data[2]));
+//
+//
+//                if(!data[3].equals("null")){
+//
+//                    try{
+//                        String[] syllabusIds = data[3].split("/");
+//                        List<Long> syllabusId = new ArrayList<>();
+//                        for(String sy : syllabusIds){
+//                            syllabusId.add(Long.valueOf(sy));
+//                        }
+//
+//                        trainingProgramDTO.setSyllabusIds(syllabusId);
+//                    }catch (Exception e){
+//                        return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+//                    }
+//
+//                }
+//
+//                trainingProgramList.add(trainingProgramDTO);
+//            }
+//            return ResponseUtil.getObject(trainingProgramList, HttpStatus.OK, "");
+//        } catch (Exception e) {
+//            // Xử lý các trường hợp ngoại lệ nếu có
+//            return ResponseUtil.getError(trainingProgramList,HttpStatus.BAD_REQUEST, e.getMessage());
+//        }
+//
+//    }
+
+
+    @Override
+    public ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException {
+        List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+        String line = reader.readLine(); // Đọc dòng đầu tiên
+        boolean isFirstLine = true;
+
+        while (line != null && !line.equals("")) {
+            if (isFirstLine) {
+                isFirstLine = false;
+                line = reader.readLine(); // Đọc dòng tiếp theo nếu dòng đầu tiên là tiêu đề
+                continue; // Bỏ qua dòng đầu tiên
+            }
+
+            String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
+
+            TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+            trainingProgramDTO.setName(data[0]);
+            trainingProgramDTO.setDuration(Long.valueOf(data[1]));
+            trainingProgramDTO.setTraining_status(Integer.valueOf(data[2]));
+
+            if (!data[3].equals("null")) {
+                String[] syllabusIds = data[3].split("/");
+                List<Long> syllabusId = new ArrayList<>();
+                for (String sy : syllabusIds) {
+                    try {
+                        syllabusId.add(Long.valueOf(sy));
+                    } catch (NumberFormatException e) {
+                        return ResponseUtil.error("Please check format file", "Invalid format for syllabusIds: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+                    }
+                }
+                trainingProgramDTO.setSyllabusIds(syllabusId);
+            }
+
+            trainingProgramList.add(trainingProgramDTO);
+            line = reader.readLine(); // Đọc dòng tiếp theo
+        }
+
+        reader.close(); // Đóng luồng đọc tập tin
+
+        return ResponseUtil.getObject(trainingProgramList, HttpStatus.OK, "");
+    }
+
+
+    @Override
+    public List<TrainingProgramDTO> parseCsvFile(MultipartFile file) throws IOException {
+        List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean isFirstLine = true;
+            while ((line = reader.readLine()) != null && !line.equals("")) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue; // Bỏ qua dòng đầu tiên
+                }
+
+                String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
+
+                TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+                trainingProgramDTO.setName(data[0]);
+                trainingProgramDTO.setDuration(Long.parseLong(data[1]));
+                trainingProgramDTO.setTraining_status(Integer.parseInt(data[2]));
+
+
+                if(!data[3].equals("null")){
+                    String[] syllabusIds = data[8].split("/");
+                    List<Long> syllabusId = new ArrayList<>();
+                    for(String sy : syllabusIds){
+                        syllabusId.add(Long.valueOf(sy));
+                    }
+
+                    trainingProgramDTO.setSyllabusIds(syllabusId);
+
+                }
+
+                trainingProgramList.add(trainingProgramDTO);
+            }
+            return trainingProgramList;
+        } catch (Exception e) {
+            // Xử lý các trường hợp ngoại lệ nếu có
+            e.printStackTrace();
+            for( TrainingProgramDTO sy : trainingProgramList){
+                trainingProgramList.remove(sy);
+            }
+            return trainingProgramList;
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> checkTrainingProgramReplace(MultipartFile file, Boolean id, Boolean name)
+        throws IOException {
+        List<TrainingProgramDTO> errorTraningProgram = new ArrayList<>();
+        if(checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+            List<TrainingProgramDTO> trainingProgramList = parseCsvFile(file);
+            List<TrainingProgram> tranProgShow = new ArrayList<>();
+            if(name.toString().equals("true") && id.toString().equals("false")){
+                for(TrainingProgramDTO trainingProgramDTO : trainingProgramList) {
+                    List<TrainingProgram> listNameTranPro = trainingProgramRepository.getAllTrainingProgramByName(trainingProgramDTO.getName());
+                    if(listNameTranPro.size() == 0){
+                        save(trainingProgramDTO); //add them luon
+                    }else if( listNameTranPro.size() == 1){
+                        trainingProgramDTO.setId(listNameTranPro.get(0).getId());
+                        save(trainingProgramDTO); // update
+                    }else if(listNameTranPro.size() > 1){
+                        tranProgShow.addAll(listNameTranPro);
+                        if(tranProgShow.size() !=0){
+                            convertListTpToListTpDTO(tranProgShow, errorTraningProgram);
+                            return ResponseUtil.getError(errorTraningProgram,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                        }
+//                    convertListSyllabusToListSyllabusDTO(listNameSyllabus, errorSyllabus);
+//                    return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                    }
+                }
+
+            }else{
+                if(name.toString().equals("false") && id.toString().equals("true")){
+                    for(TrainingProgramDTO trainingProgramDTO : trainingProgramList){
+                        List<TrainingProgram> listCodeTranPro = trainingProgramRepository.getAllTrainingProgramById(trainingProgramDTO.getId());
+                        if(listCodeTranPro.size() == 0){
+                            save(trainingProgramDTO); //add them luon
+                        }else if( listCodeTranPro.size() == 1){
+                            trainingProgramDTO.setId(listCodeTranPro.get(0).getId());
+                            save(trainingProgramDTO); // update
+                        }else if(listCodeTranPro.size() > 1){
+                            tranProgShow.addAll(listCodeTranPro);
+                            if(tranProgShow.size() !=0){
+                                convertListTpToListTpDTO(tranProgShow, errorTraningProgram);
+                                return ResponseUtil.getError(errorTraningProgram,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                            }
+//                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
+//                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                        }
+                    }
+
+                }else{
+                    if(name.toString().equals("true") && id.toString().equals("true")) {
+                        for(TrainingProgramDTO trainingProgramDTO : trainingProgramList){
+                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndCode(trainingProgramDTO.getId(), trainingProgramDTO.getName());
+                            if(listNameAndCodeTranPro.size() == 0){
+                                save(trainingProgramDTO); //add them luon
+                            }else if( listNameAndCodeTranPro.size() == 1){
+                                trainingProgramDTO.setId(listNameAndCodeTranPro.get(0).getId());
+                                save(trainingProgramDTO); // update
+                            }else if(listNameAndCodeTranPro.size() > 1){
+                                tranProgShow.addAll(listNameAndCodeTranPro);
+                                if(tranProgShow.size() !=0){
+                                    convertListTpToListTpDTO(tranProgShow, errorTraningProgram);
+                                    return ResponseUtil.getError(errorTraningProgram,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                                }
+//                        convertListSyllabusToListSyllabusDTO(listCodeSyllabus, errorSyllabus);
+//                        return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
+                            }
+                        }
+
+                    }
+                }
+            }
+            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+        }else {
+            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> checkTrainingProgramSkip(MultipartFile file, Boolean name, Boolean id)
+        throws IOException {
+        if(checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
+            List<TrainingProgramDTO> trainingProgramList = parseCsvFile(file);
+            //List<Syllabus> syllabusShow = new ArrayList<>();
+            if(name.toString().equals("true") && id.toString().equals("false")){
+                for(TrainingProgramDTO trainingProgramDTO : trainingProgramList) {
+                    List<TrainingProgram> listNameTranPro = trainingProgramRepository.getAllTrainingProgramByName(trainingProgramDTO.getName());
+                    if(listNameTranPro.size() == 0){
+                        save(trainingProgramDTO); //add them luon
+                    }
+                }
+            }else{
+                if(name.toString().equals("false") && id.toString().equals("true")){
+                    for(TrainingProgramDTO trainingProgramDTO : trainingProgramList) {
+                        List<TrainingProgram> listCodeSyllabus = trainingProgramRepository.getAllTrainingProgramById(
+                            trainingProgramDTO.getId());
+                        if (listCodeSyllabus.size() == 0 ) {
+                            save(trainingProgramDTO); //add them luon
+                        }
+                    }
+                }else{
+                    if(name.toString().equals("true") && id.toString().equals("true")) {
+                        for(TrainingProgramDTO trainingProgramDTO : trainingProgramList){
+                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndCode(trainingProgramDTO.getId(), trainingProgramDTO.getName());
+                            if(listNameAndCodeTranPro.size() == 0 ){
+                                save(trainingProgramDTO); //add them luon
+                            }
+                        }
+                    }
+                }
+            }
+            return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+        }else{
+            return ResponseUtil.error("Please check format file", "", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> changeStatusforUpload(DeleteReplace ids, Boolean id,
+        Boolean name) {
+        boolean flag =false;
+        for (Long idd : ids.getId()) {
+            TrainingProgram entity = trainingProgramRepository.findOneById(idd);
+            if (entity != null) {
+                if (name.toString().equals("true") && id.toString().equals("false")) {
+                    List<TrainingProgram> trainingProgramListName = trainingProgramRepository.getAllTrainingProgramByName(
+                        entity.getName());
+                    if(ids.getId().size() == trainingProgramListName.size() && flag == false){
+                        return ResponseUtil.error("false",
+                            "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
+                    }
+                    flag = true;
+                    if (trainingProgramListName.size() != 1) {
+                        if (entity.getStatus()) {
+                            entity.setStatus(false);
+                        } else {
+                            entity.setStatus(true);
+                        }
+                        trainingProgramRepository.save(entity);
+                    } else {
+                        return ResponseUtil.error("false",
+                            "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
+                    }
+
+
+                } else {
+                    if (name.toString().equals("false") && id.toString().equals("true")) {
+                        List<TrainingProgram> trainingProgramListId = trainingProgramRepository.getAllTrainingProgramById(
+                            entity.getId());
+                        if(ids.getId().size() == trainingProgramListId.size() && flag == false){
+                            return ResponseUtil.error("false",
+                                "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
+                        }
+                        flag =true;
+                        if (trainingProgramListId.size() != 1) {
+                            if (entity.getStatus()) {
+                                entity.setStatus(false);
+                            } else {
+                                entity.setStatus(true);
+                            }
+                            trainingProgramRepository.save(entity);
+                        } else {
+                            return ResponseUtil.error("false",
+                                "Cannot change status of non-existing Syllabus",
+                                HttpStatus.NOT_FOUND);
+                        }
+
+
+                    } else {
+                        if (name.toString().equals("true") && id.toString().equals("true")) {
+                            List<TrainingProgram> trainingProgramListNameAndId = trainingProgramRepository.getAllSyllabusByNameAndCode(
+                                entity.getId(), entity.getName());
+                            if(ids.getId().size() == trainingProgramListNameAndId.size() && flag == false){
+                                return ResponseUtil.error("false",
+                                    "Don't remove all, leave one id", HttpStatus.NOT_FOUND);
+                            }
+                            flag=true;
+                            if (trainingProgramListNameAndId.size() != 1) {
+                                if (entity.getStatus()) {
+                                    entity.setStatus(false);
+                                } else {
+                                    entity.setStatus(true);
+                                }
+                                trainingProgramRepository.save(entity);
+                            } else {
+                                return ResponseUtil.error("false",
+                                    "Cannot change status of non-existing Syllabus",
+                                    HttpStatus.NOT_FOUND);
+                            }
+
+
+                        }
+                    }
+                }
+            } else {
+                return ResponseUtil.error("Syllabus not found",
+                    "Cannot change status of non-existing Syllabus", HttpStatus.NOT_FOUND);
+            }
+        }
+
+        return ResponseUtil.getObject(null, HttpStatus.CREATED, "Delete Susscessfully");
     }
 
     private String getCellValueAsString(XSSFCell cell) {
