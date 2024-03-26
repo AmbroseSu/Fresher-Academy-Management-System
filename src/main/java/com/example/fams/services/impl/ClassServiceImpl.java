@@ -104,8 +104,10 @@ public class ClassServiceImpl implements IClassService {
 
 
     ClassDTO result = convertClassToClassDTO(entity);
-/*    result.setUserIds(requestUserIds);
-    result.setTrainingProgramId(requestTrainingProgramId);*/
+    if (classDTO.getId() == null){
+      result.setUserIds(requestUserIds);
+    }
+    result.setTrainingProgramId(requestTrainingProgramId);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 

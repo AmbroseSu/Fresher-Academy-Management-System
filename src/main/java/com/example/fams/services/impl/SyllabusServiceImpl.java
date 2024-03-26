@@ -61,8 +61,13 @@ public class SyllabusServiceImpl implements ISyllabusService {
     @Override
     public ResponseEntity<?> findById(Long id) {
         Syllabus entity = syllabusRepository.findByStatusIsTrueAndId(id);
-        SyllabusDTO result = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
-        return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        if (entity != null){
+            SyllabusDTO result = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
+            return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        }
+        else{
+            return ResponseUtil.error("Syllabus not found", "Cannot Find Syllabus", HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override
@@ -153,10 +158,12 @@ public class SyllabusServiceImpl implements ISyllabusService {
             loadListMaterialFromSyllabusId(requestMaterialIds, entity.getId());
         }
         SyllabusDTO result = convertSyllabusToSyllabusDTO(entity);
-//        result.setUnitIds(unitIds);
-//        result.setTrainingProgramIds(requestTrainingProgramIds);
-//        result.setLearningObjectiveIds(requestLearningObjectiveIds);
-//        result.setMaterialIds(requestMaterialIds);
+        if (syllabusDTO.getId() == null){
+            result.setUnitIds(unitIds);
+            result.setTrainingProgramIds(requestTrainingProgramIds);
+            result.setLearningObjectiveIds(requestLearningObjectiveIds);
+            result.setMaterialIds(requestMaterialIds);
+        }
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 

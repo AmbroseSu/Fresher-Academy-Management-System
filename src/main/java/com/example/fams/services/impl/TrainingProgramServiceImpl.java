@@ -152,7 +152,9 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             }
 
             TrainingProgramDTO result = convertTpToTpDTO(entity);
-
+            if (trainingProgramDTO.getId() == null){
+                result.setSyllabusIds(requestSyllabusIds);
+            }
             // Return a success response with the saved entity
             return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
 

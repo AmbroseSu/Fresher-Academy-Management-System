@@ -98,8 +98,10 @@ public class ContentServiceImpl implements IContentService {
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
     }
 
-
     ContentDTO result = convertContentToContentDTO(entity);
+    if (contentDTO.getId() == null){
+      result.setLearningObjectiveIds(requestLearningObjectiveIds);
+    }
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
   }
 

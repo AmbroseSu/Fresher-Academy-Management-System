@@ -106,8 +106,13 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     public ResponseEntity<?> findById(Long id) {
         Unit entity = unitRepository.findById(id);
-        UnitDTO result = convertUnitToUnitDTO(entity);
-        return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        if (entity != null) {
+            UnitDTO result = convertUnitToUnitDTO(entity);
+            return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
+        }
+        else {
+            return ResponseUtil.error("Unit not found", "Cannot Find Unit", HttpStatus.NOT_FOUND);
+        }
     }
 
     @Override

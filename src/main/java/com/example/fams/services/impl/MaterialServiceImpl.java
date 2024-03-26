@@ -115,9 +115,10 @@ public class MaterialServiceImpl implements IMaterialService {
             materialRepository.save(entity);
             loadSyllabusMaterialFromListSyllabusId(requestSyllabusIds, entity.getId());
         }
-
-
         MaterialDTO result = convertMaterialToMaterialDTO(entity);
+        if (materialDTO.getId() == null){
+            result.setSyllabusIds(requestSyllabusIds);
+        }
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 

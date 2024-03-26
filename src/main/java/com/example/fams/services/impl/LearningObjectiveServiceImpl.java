@@ -114,7 +114,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
             return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
         }
         else {
-            return ResponseUtil.error("Learning Objective not found", "Cannot Find Content", HttpStatus.NOT_FOUND);
+            return ResponseUtil.error("Learning Objective not found", "Cannot Find Learning Objective", HttpStatus.NOT_FOUND);
         }
     }
 

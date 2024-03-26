@@ -205,6 +205,9 @@ public class UserServiceImpl implements UserService {
             }
 
             UserDTO result = convertUserToUserDTO(user);
+            if (userDTO.getId() == null){
+                result.setClassIds(requestClassIds);
+            }
             return ResponseUtil.getObject(result, HttpStatus.OK, "Update successful");
         } catch (ConstraintViolationException e) {
             return ConstraintViolationExceptionHandler.handleConstraintViolation(e);
