@@ -354,14 +354,23 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-        String line = reader.readLine(); // Đọc dòng đầu tiên
+        String line; // Đọc dòng đầu tiên
         boolean isFirstLine = true;
 
-        while (line != null && !line.equals("")) {
+        while ((line = reader.readLine()) != null) {
             if (isFirstLine) {
                 isFirstLine = false;
-                line = reader.readLine(); // Đọc dòng tiếp theo nếu dòng đầu tiên là tiêu đề
-                continue; // Bỏ qua dòng đầu tiên
+                continue; // Skip the first line
+            }
+
+            // If the line is "end", stop the loop
+            if (line.equals("end")) {
+                break;
+            }
+
+            // If the line is empty, continue to the next line
+            if (line.isEmpty()) {
+                continue;
             }
 
             String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
@@ -385,7 +394,6 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             }
 
             trainingProgramList.add(trainingProgramDTO);
-            line = reader.readLine(); // Đọc dòng tiếp theo
         }
 
         reader.close(); // Đóng luồng đọc tập tin
@@ -401,10 +409,20 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             boolean isFirstLine = true;
-            while ((line = reader.readLine()) != null && !line.equals("")) {
+            while ((line = reader.readLine()) != null) {
                 if (isFirstLine) {
                     isFirstLine = false;
-                    continue; // Bỏ qua dòng đầu tiên
+                    continue; // Skip the first line
+                }
+
+                // If the line is "end", stop the loop
+                if (line.equals("end")) {
+                    break;
+                }
+
+                // If the line is empty, continue to the next line
+                if (line.isEmpty()) {
+                    continue;
                 }
 
                 String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
