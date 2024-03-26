@@ -515,7 +515,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 }else{
                     if(name.toString().equals("true") && id.toString().equals("true")) {
                         for(TrainingProgramDTO trainingProgramDTO : trainingProgramList){
-                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndCode(trainingProgramDTO.getId(), trainingProgramDTO.getName());
+                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndId(trainingProgramDTO.getId(), trainingProgramDTO.getName());
                             if(listNameAndCodeTranPro.size() == 0){
                                 save(trainingProgramDTO); //add them luon
                             }else if( listNameAndCodeTranPro.size() == 1){
@@ -542,7 +542,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     }
 
     @Override
-    public ResponseEntity<?> checkTrainingProgramSkip(MultipartFile file, Boolean name, Boolean id)
+    public ResponseEntity<?> checkTrainingProgramSkip(MultipartFile file, Boolean id, Boolean name)
         throws IOException {
         if(checkCsvFile(file).getStatusCode().toString().equals("200 OK")){
             List<TrainingProgramDTO> trainingProgramList = parseCsvFile(file);
@@ -566,7 +566,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 }else{
                     if(name.toString().equals("true") && id.toString().equals("true")) {
                         for(TrainingProgramDTO trainingProgramDTO : trainingProgramList){
-                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndCode(trainingProgramDTO.getId(), trainingProgramDTO.getName());
+                            List<TrainingProgram> listNameAndCodeTranPro = trainingProgramRepository.getAllSyllabusByNameAndId(trainingProgramDTO.getId(), trainingProgramDTO.getName());
                             if(listNameAndCodeTranPro.size() == 0 ){
                                 save(trainingProgramDTO); //add them luon
                             }
@@ -633,7 +633,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
                     } else {
                         if (name.toString().equals("true") && id.toString().equals("true")) {
-                            List<TrainingProgram> trainingProgramListNameAndId = trainingProgramRepository.getAllSyllabusByNameAndCode(
+                            List<TrainingProgram> trainingProgramListNameAndId = trainingProgramRepository.getAllSyllabusByNameAndId(
                                 entity.getId(), entity.getName());
                             if(ids.getId().size() == trainingProgramListNameAndId.size() && flag == false){
                                 return ResponseUtil.error("false",

@@ -35,7 +35,7 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
     List<TrainingProgram> getAllTrainingProgramByName(@Param("name") String name);
 
     @Query("SELECT TP FROM TrainingProgram TP WHERE TP.id = :id AND TP.name = :name AND TP.status = TRUE ")
-    List<TrainingProgram> getAllSyllabusByNameAndCode(@Param("id") Long id, @Param("name") String name);
+    List<TrainingProgram> getAllSyllabusByNameAndId(@Param("id") Long id, @Param("name") String name);
 
 
     @Query("SELECT tp FROM TrainingProgram tp " +
