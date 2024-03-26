@@ -1,5 +1,6 @@
 package com.example.fams.services.impl;
 
+import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.TrainingProgramDTO;
@@ -106,12 +107,24 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
     @Override
     public ResponseEntity<?> save(TrainingProgramDTO trainingProgramDTO) {
-        try {
+
+
+
+            ServiceUtils.errors.clear();
             // Extract content DTOs from training program DTO
             List<Long> requestSyllabusIds = trainingProgramDTO.getSyllabusIds();
 
             // Initialize entity
             TrainingProgram entity;
+
+            // * Validate requestDTO ( if left null, then can be updated later )
+            if (requestSyllabusIds != null){
+                ServiceUtils.validateSyllabusIds(requestSyllabusIds, syllabusRepository);
+            }
+            if (!ServiceUtils.errors.isEmpty()) {
+                throw new CustomValidationException(ServiceUtils.errors);
+            }
+
 
             // Check if the training program already exists (for update request)
             if (trainingProgramDTO.getId() != null) {
@@ -142,11 +155,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
             // Return a success response with the saved entity
             return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
-        } catch (Exception e) {
-            // Return an error response if an exception occurs
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while saving training program: " + e.getMessage());
-        }
+
     }
 
     private void loadTrainingProgramSyllabusFromListSyllabus(List<Long> requestyllabusIds, Long trainingProgramId) {
@@ -434,7 +443,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
 
 
                 if(!data[3].equals("null")){
-                    String[] syllabusIds = data[8].split("/");
+                    String[] syllabusIds = data[3].split("/");
                     List<Long> syllabusId = new ArrayList<>();
                     for(String sy : syllabusIds){
                         syllabusId.add(Long.valueOf(sy));
