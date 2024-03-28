@@ -106,23 +106,25 @@ class LearningObjectiveServiceImplTest {
 
     @Test
     void testFindById_ExistingLearningObjective() {
-        // Arrange
+        // * Tạo mock data thay thế database
         Long id = 1L;
         LearningObjective learningObjective = new LearningObjective();
         learningObjective.setId(id);
         learningObjective.setStatus(true);
-        when(learningObjectiveRepository.findByStatusIsTrueAndId(id)).thenReturn(learningObjective);
 
         LearningObjectiveDTO learningObjectiveDTO = new LearningObjectiveDTO();
         learningObjectiveDTO.setId(id);
+
+        // * Mock các method trong service ( nghĩa là khi chạy các hàm này th return ra giá trị mock data )
+        when(learningObjectiveRepository.findByStatusIsTrueAndId(id)).thenReturn(learningObjective);
         when(genericConverter.toDTO(learningObjective, LearningObjectiveDTO.class)).thenReturn(learningObjectiveDTO);
 
-        // Act
+        // * Test hàm trong service
         ResponseEntity<?> response = learningObjectiveService.findById(id);
         ResponseDTO responseDTO = (ResponseDTO) response.getBody();
         LearningObjectiveDTO result = (LearningObjectiveDTO) responseDTO.getContent();
 
-        // Assert
+        // * Kiểm tra kết quả trả về
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
         assertEquals(id, result.getId());
@@ -134,11 +136,11 @@ class LearningObjectiveServiceImplTest {
         Long id = 1L;
         when(learningObjectiveRepository.findByStatusIsTrueAndId(id)).thenReturn(null);
 
-        // Act
+        // * Test hàm trong service
         ResponseEntity<?> response = learningObjectiveService.findById(id);
         ResponseDTO responseDTO = (ResponseDTO) response.getBody();
 
-        // Assert
+        // * Kiểm tra kết quả trả về
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Learning Objective not found", responseDTO.getDetails().get(0));
     }
