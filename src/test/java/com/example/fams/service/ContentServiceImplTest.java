@@ -105,7 +105,7 @@ public class ContentServiceImplTest {
 
 
   @Test
-  void testFindById_ExistingClass() {
+  void testFindById_ExistingContent() {
     // * Tạo mock data thay thế database
     Long id = 1L;
     Content content = new Content();
@@ -131,7 +131,7 @@ public class ContentServiceImplTest {
   }
 
   @Test
-  void testFindById_NonExistingClass() {
+  void testFindById_NonExistingContent() {
     // Arrange
     Long id = 1L;
     when(contentRepository.findByStatusIsTrueAndId(id)).thenReturn(null);
