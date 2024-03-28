@@ -194,13 +194,13 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
                 count);
     }
 
-    private void convertListLoToListLoDTO(List<LearningObjective> entities, List<LearningObjectiveDTO> result) {
+    public void convertListLoToListLoDTO(List<LearningObjective> entities, List<LearningObjectiveDTO> result) {
         for (LearningObjective lo : entities){
             result.add(convertLoToLoDTO(lo));
         }
     }
 
-    private LearningObjectiveDTO convertLoToLoDTO(LearningObjective entity) {
+    public LearningObjectiveDTO convertLoToLoDTO(LearningObjective entity) {
         LearningObjectiveDTO newLoDTO = (LearningObjectiveDTO) genericConverter.toDTO(entity, LearningObjectiveDTO.class);
         List<Content> contents = learningObjectiveContentRepository.findContentsByLearningObjectiveId(entity.getId());
         List<Syllabus> syllabus = syllabusObjectiveRepository.findSyllabusByLearningObjectiveId(entity.getId());
