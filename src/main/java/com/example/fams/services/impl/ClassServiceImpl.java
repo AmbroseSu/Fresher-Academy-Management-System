@@ -258,6 +258,8 @@ public class ClassServiceImpl implements IClassService {
     famsClass.setCode(classDTO.getCode());
     famsClass.setStatus(classDTO.getStatus());
     famsClass.setFsu(classDTO.getFsu());
+    famsClass.setClassStatus(classDTO.getClassStatus());
+    famsClass.setLocation(classDTO.getLocation());
     famsClass.setStartDate(classDTO.getStartDate());
     famsClass.setEndDate(classDTO.getEndDate());
     famsClass.setStartTimeFrame(classDTO.getStartTimeFrame());
