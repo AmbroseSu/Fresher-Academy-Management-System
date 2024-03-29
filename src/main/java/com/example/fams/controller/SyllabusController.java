@@ -47,7 +47,7 @@ public class SyllabusController {
     }
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
-    @GetMapping("/syllabus/search")
+    @PostMapping("/syllabus/search")
     public ResponseEntity<?> searchSyllabus(@RequestBody SyllabusDTO syllabusDTO,
                                             @RequestParam(required = false) String sortByCreatedDate,
                                             @RequestParam(defaultValue = "1") int page,
@@ -56,7 +56,7 @@ public class SyllabusController {
     }
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access')")
-    @GetMapping("/syllabus/search/hidden")
+    @PostMapping("/syllabus/search/hidden")
     public ResponseEntity<?> searchSyllabusADMIN(@RequestBody SyllabusDTO syllabusDTO,
                                                  @RequestParam(required = false) String sortById,
                                                  @RequestParam(defaultValue = "1") int page,

@@ -38,14 +38,14 @@ public class LearningObjectiveController {
         return learningObjectiveService.findById(id);
     }
     @PreAuthorize("hasAuthority('learningObjective:Full_Access') || hasAuthority('learningObjective:View')")
-    @GetMapping("/learningObjective/search")
+    @PostMapping("/learningObjective/search")
     public ResponseEntity<?> searchLearningObjective(@RequestBody LearningObjectiveDTO learningObjectiveDTO,
                                                      @RequestParam(defaultValue = "1") int page,
                                                      @RequestParam(defaultValue = "10") int limit){
         return learningObjectiveService.searchSortFilter(learningObjectiveDTO, page, limit);
     }
     @PreAuthorize("hasAuthority('learningObjective:Full_Access')")
-    @GetMapping("/learningObjective/search/hidden")
+    @PostMapping("/learningObjective/search/hidden")
     public ResponseEntity<?> searchLearningObjectiveADMIN(@RequestBody LearningObjectiveDTO learningObjectiveDTO,
                                                           @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,

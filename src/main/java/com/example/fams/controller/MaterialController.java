@@ -78,7 +78,7 @@ public class MaterialController {
     }
 
     @PreAuthorize("hasAuthority('material:Full_Access') || hasAuthority('material:View')")
-    @GetMapping("material/search")
+    @PostMapping("material/search")
     public ResponseEntity<?> searchMaterial(@RequestBody MaterialDTO materialDTO,
                                                      @RequestParam(defaultValue = "1") int page,
                                                      @RequestParam(defaultValue = "10") int limit){
@@ -86,7 +86,7 @@ public class MaterialController {
     }
 
     @PreAuthorize("hasAuthority('material:Full_Access')")
-    @GetMapping("material/search/hidden")
+    @PostMapping("material/search/hidden")
     public ResponseEntity<?> searchMaterialADMIN(@RequestBody MaterialDTO materialDTO,
                                                           @RequestParam(required = false) String sortById,
                                                           @RequestParam(defaultValue = "1") int page,

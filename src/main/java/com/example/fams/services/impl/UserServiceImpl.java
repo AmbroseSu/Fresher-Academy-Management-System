@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
     }
 
-    public ResponseEntity<?> searchSortFilterADMIN(UserDTO userDTO, String sortById, int page, int limit){
+    public ResponseEntity<?> searchSortFilterADMIN(UserDTO userDTO, String sortByFirstName, int page, int limit){
         String firstName = userDTO.getFirstName();
         String lastName = userDTO.getLastName();
         String email = userDTO.getEmail();
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         String modifiedBy=userDTO.getModifiedBy();
         Long dob = userDTO.getDob();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<User> users = userRepository.searchSortFilterADMIN(firstName, lastName, email, uuid,createdBy,modifiedBy, phone,dob, sortById, pageable);
+        List<User> users = userRepository.searchSortFilterADMIN(firstName, lastName, email, uuid,createdBy,modifiedBy, phone,dob, sortByFirstName, pageable);
         List<UserDTO> userDTOList = new ArrayList<>();
         convertListUserToListUserDTO(users, userDTOList);
         Long count = userRepository.countSearchSortFilterADMIN(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob);
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 count);
     }
 
-    public ResponseEntity<?> searchSortFilter(UserDTO userDTO, String sortById, int page, int limit){
+    public ResponseEntity<?> searchSortFilter(UserDTO userDTO, String sortByFirstName, int page, int limit){
         String firstName = userDTO.getFirstName();
         String lastName = userDTO.getLastName();
         String email = userDTO.getEmail();
@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
         String phone = userDTO.getPhone();
         Long dob = userDTO.getDob();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<User> users = userRepository.searchSortFilter(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob, sortById, pageable);
+        List<User> users = userRepository.searchSortFilter(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob, sortByFirstName, pageable);
         List<UserDTO> userDTOList = new ArrayList<>();
         convertListUserToListUserDTO(users, userDTOList);
         Long count = userRepository.countSearchSortFilter(firstName, lastName, email, uuid,createdBy,modifiedBy, phone, dob);

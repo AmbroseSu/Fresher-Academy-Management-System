@@ -41,7 +41,7 @@ public class TrainingProgramController {
         return trainingProgramService.findAll(page, limit);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:View')")
-    @GetMapping("/trainingProgram/search")
+    @PostMapping("/trainingProgram/search")
     public ResponseEntity<?> searchTrainingProgram(@RequestBody TrainingProgramDTO trainingProgramDTO,
                                                    @RequestParam(required = false) String sortByCreatedDate,
                                                    @RequestParam(defaultValue = "1") int page,
@@ -49,7 +49,7 @@ public class TrainingProgramController {
         return trainingProgramService.searchSortFilter(trainingProgramDTO, sortByCreatedDate, page, limit);
     }
     @PreAuthorize("hasAuthority('trainingProgram:Full_Access')")
-    @GetMapping("/trainingProgram/search/hidden")
+    @PostMapping("/trainingProgram/search/hidden")
     public ResponseEntity<?> searchTrainingProgramADMIN(@RequestBody TrainingProgramDTO trainingProgramDTO,
                                                         @RequestParam(required = false) String sortById,
                                                         @RequestParam(defaultValue = "1") int page,

@@ -43,7 +43,7 @@ public class ContentController {
   }
 
   @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
-  @GetMapping("/content/search")
+  @PostMapping("/content/search")
   public ResponseEntity<?> searchContent(@RequestBody ContentDTO contentDTO,
       @RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "10") int limit){
@@ -51,7 +51,7 @@ public class ContentController {
   }
 
   @PreAuthorize("hasAuthority('content:Full_Access')")
-  @GetMapping("/content/search/hidden")
+  @PostMapping("/content/search/hidden")
   public ResponseEntity<?> searchContentADMIN(@RequestBody ContentDTO contentDTO,
       @RequestParam(required = false) String sortById,
       @RequestParam(defaultValue = "1") int page,
