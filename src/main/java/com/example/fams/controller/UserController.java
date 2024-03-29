@@ -66,11 +66,11 @@ public class UserController {
         return userService.findAll(page, limit);
     }
 
-    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
-    @GetMapping("/user/{uuid}")
-    public ResponseEntity<?> getInfo(@PathVariable String uuid) {
-        return userService.findByUuid(uuid);
-    }
+//    @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
+//    @GetMapping("/user/{uuid}")
+//    public ResponseEntity<?> getInfo(@PathVariable String uuid) {
+//        return userService.findByUuid(uuid);
+//    }
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:View')")
     @GetMapping("/user/{id}")
@@ -87,7 +87,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:Full_Access') || hasAuthority('user:Modify')")
     @PutMapping("user/{id}")
-    public ResponseEntity<?> updateUser(@Validated(PasswordValidationGroup.class) @RequestBody UserDTO userDTO, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateUser(@Validated(AllFieldValidationGroup.class) @RequestBody UserDTO userDTO, @PathVariable(name = "id") Long id) {
         if (userService.checkExist(id)) {
             userDTO.setId(id);
             return userService.save(userDTO);

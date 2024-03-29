@@ -3,6 +3,7 @@ package com.example.fams.repository;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Unit;
 import com.example.fams.entities.User;
+import com.example.fams.entities.enums.Gender;
 import com.example.fams.entities.enums.Role;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,6 +32,11 @@ public interface UserRepository extends JpaRepository<User, String> {
     User findByStatusIsTrueAndId(Long id);
 
     User findByStatusIsTrueAndUuid(String uuid);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE tbl_user SET first_name = :firstName, last_name = :lastName, email = :email, phone = :phone, dob = :dob, status = :status, gender = :gender, role_id = :userRoleId, modified_by = :modifiedBy, modified_date = EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) WHERE id = :id", nativeQuery = true)
+    void updateUserById(@Param("id") Long id, @Param("firstName") String firstName, @Param("lastName") String lastName, @Param("email") String email, @Param("phone") String phone, @Param("dob") Long dob, @Param("status") Boolean status, @Param("gender") Gender gender, @Param("userRoleId") Long userRoleId, @Param("modifiedBy") String modifiedBy);
 
     @Query(value = "SELECT * FROM tbl_user u " +
             "WHERE (:firstName IS NULL OR  LOWER(u.first_name) LIKE LOWER(CONCAT('%', :firstName,'%')))" +
