@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,10 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -176,23 +175,35 @@ public class UserServiceImpl implements UserService {
             if (!ServiceUtils.errors.isEmpty()) {
                 throw new CustomValidationException(ServiceUtils.errors);
             }
-            Optional<User> tempUser = userRepository.findByEmail(userDTO.getEmail());
 
-            if (tempUser.isPresent()) {
-                return ResponseUtil.error("Create failed", "Email already exists!", HttpStatus.NOT_FOUND);
-            }
             // * For update request (if applicable)
             if (userDTO.getId() != null) {
+                ServiceUtils.validateUserIds(List.of(userDTO.getId()), userRepository);
+                if (!ServiceUtils.errors.isEmpty()) {
+                    throw new CustomValidationException(ServiceUtils.errors);
+                }
                 User oldEntity = userRepository.findById(userDTO.getId());
                 User tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
                 user = convertDtoToEntity(userDTO, false);
                 ServiceUtils.fillMissingAttribute(user, tempOldEntity);
                 loadClassUserFromListClassId(requestClassIds, user.getId());
                 user.markModified();
-                userRepository.save(user);
+                userRepository.updateUserById(userDTO.getId(),
+                        userDTO.getFirstName(),
+                        userDTO.getLastName(),
+                        userDTO.getEmail(),
+                        userDTO.getPhone(),
+                        userDTO.getDob(),
+                        userDTO.getStatus(),
+                        userDTO.getGender(),
+                        userDTO.getUserRoleId(),
+                        userDTO.getModifiedBy());
             } else {
+                Optional<User> tempUser = userRepository.findByEmail(userDTO.getEmail());
+                if (tempUser.isPresent()) {
+                    return ResponseUtil.error("Create failed", "Email already exists!", HttpStatus.NOT_FOUND);
+                }
                 // * For create new user
-
                 user = convertDtoToEntity(userDTO, true);
                 // * Set UUID lần đầu tiên tạo
                 user.setUuid(UUID.randomUUID().toString());
@@ -275,7 +286,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDTO.getEmail());
         if (isNewUser) {
             user.setPassword(passwordEncoder.encode(userDTO.getPhone()));
-        } else {
+        } else if (userDTO.getPassword() != null){
             user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
         user.setUserRole(userRoleRepository.findById(userDTO.getUserRoleId()).get());
