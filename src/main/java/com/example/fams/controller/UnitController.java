@@ -67,7 +67,7 @@ public class UnitController {
     }
 
     @PreAuthorize("hasAuthority('unit:Full_Access') || hasAuthority('unit:View')")
-    @GetMapping("/unit/search")
+    @PostMapping("/unit/search")
     public ResponseEntity<?> searchUnit(@RequestBody UnitDTO unitDTO,
                                                      @RequestParam(defaultValue = "1") int page,
                                                      @RequestParam(defaultValue = "10") int limit){
@@ -75,7 +75,7 @@ public class UnitController {
     }
 
     @PreAuthorize("hasAuthority('unit:Full_Access')")
-    @GetMapping("/unit/search/hidden")
+    @PostMapping("/unit/search/hidden")
     public ResponseEntity<?> searchUnitADMIN(@RequestBody UnitDTO unitDTO,
                                              @RequestParam(required = false) String sortById,
                                         @RequestParam(defaultValue = "1") int page,

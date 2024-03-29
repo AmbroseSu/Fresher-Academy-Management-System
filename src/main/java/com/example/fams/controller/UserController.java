@@ -37,15 +37,15 @@ public class UserController {
     private StorageServiceImpl storageService;
 
     @PreAuthorize("hasAuthority('unit:Full_Access')")
-    @GetMapping("/user/search/hidden")
-    public ResponseEntity<?> searchUserADMIN(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortById, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
-        return userService.searchSortFilterADMIN(userDTO, sortById, page, limit);
+    @PostMapping("/user/search/hidden")
+    public ResponseEntity<?> searchUserADMIN(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortByFirstName, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
+        return userService.searchSortFilterADMIN(userDTO, sortByFirstName, page, limit);
     }
 
     @PreAuthorize("hasAuthority('unit:Full_Access')")
-    @GetMapping("/user/search")
-    public ResponseEntity<?> searchUser(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortById, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
-        return userService.searchSortFilter(userDTO, sortById, page, limit);
+    @PostMapping("/user/search")
+    public ResponseEntity<?> searchUser(@RequestBody UserDTO userDTO, @RequestParam(required = false) String sortByFirstName, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit) {
+        return userService.searchSortFilter(userDTO, sortByFirstName, page, limit);
     }
 
     @PreAuthorize("hasAuthority('user:Full_Access')")

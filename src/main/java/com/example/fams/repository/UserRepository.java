@@ -42,9 +42,9 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) " +
             "ORDER BY  " +
-            "CASE WHEN :sortById ='iDESC' THEN u.id  END DESC ," +
-            "CASE WHEN :sortById ='iASC' THEN u.id  END ASC ,"+
-            "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN u.id END DESC", nativeQuery = true)
+            "CASE WHEN :sortByFirstName ='iDESC' THEN u.first_name  END DESC ," +
+            "CASE WHEN :sortByFirstName ='iASC' THEN u.first_name  END ASC ,"+
+            "CASE WHEN :sortByFirstName NOT IN ('iDESC', 'iASC') THEN u.first_name END DESC", nativeQuery = true)
     List<User> searchSortFilterADMIN(@Param("firstName") String firstName,
                                      @Param("lastName") String lastName,
                                      @Param("email") String email,
@@ -53,7 +53,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                                      @Param("modifiedBy") String modifiedBy,
                                      @Param("phone") String phone,
                                      @Param("dob") Long dob,
-                                     @Param("sortById") String sortById,
+                                     @Param("sortByFirstName") String sortByFirstName,
                                      Pageable pageable);
 
     @Query(value = "SELECT * FROM tbl_user u " +
@@ -66,9 +66,9 @@ public interface UserRepository extends JpaRepository<User, String> {
             "AND (:phone IS NULL OR  LOWER(u.phone) LIKE LOWER(CONCAT('%', :phone,'%')))"+
             "AND (:dob IS NULL OR u.dob = :dob) " +
             "ORDER BY  " +
-            "CASE WHEN :sortById ='iDESC' THEN u.id  END DESC ," +
-            "CASE WHEN :sortById ='iASC' THEN u.id  END ASC ,"+
-            "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN u.id END DESC", nativeQuery = true)
+            "CASE WHEN :sortByFirstName ='iDESC' THEN u.first_name  END DESC ," +
+            "CASE WHEN :sortByFirstName ='iASC' THEN u.first_name  END ASC ,"+
+            "CASE WHEN :sortByFirstName NOT IN ('iDESC', 'iASC') THEN u.first_name END DESC", nativeQuery = true)
     List<User> searchSortFilter(@Param("firstName") String firstName,
                                      @Param("lastName") String lastName,
                                      @Param("email") String email,
@@ -77,7 +77,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                                      @Param("modifiedBy") String modifiedBy,
                                      @Param("phone") String phone,
                                      @Param("dob") Long dob,
-                                     @Param("sortById") String sortById,
+                                     @Param("sortByFirstName") String sortByFirstName,
                                      Pageable pageable);
 
 

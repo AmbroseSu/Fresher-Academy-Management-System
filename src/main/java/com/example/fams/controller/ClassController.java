@@ -34,7 +34,7 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
-    @GetMapping("/class/search/between")
+    @PostMapping("/class/search/between")
     public ResponseEntity<?> searchBetweenStartDateAndEndDate(@RequestParam Long startDate,
                                               @RequestParam Long endDate,
                                               @RequestParam(defaultValue = "1") int page,
@@ -49,7 +49,7 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
-    @GetMapping("/class/search")
+    @PostMapping("/class/search")
     public ResponseEntity<?> searchClass(@RequestBody ClassDTO classDTO,
                                          @RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "10") int limit) {
@@ -57,7 +57,7 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
-    @GetMapping("/class/search/hidden")
+    @PostMapping("/class/search/hidden")
     public ResponseEntity<?> searchClassADMIN(@RequestBody ClassDTO classDTO,
                                               @RequestParam(required = false) String sortById,
                                               @RequestParam(defaultValue = "1") int page,
