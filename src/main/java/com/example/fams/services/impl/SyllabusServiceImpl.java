@@ -479,14 +479,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             boolean isFirstLine = true;
-            while (!(line = reader.readLine()).equals("end")) {
+            while ((line = reader.readLine()) != null) {
                 if (isFirstLine) {
                     isFirstLine = false;
                     continue; // Bỏ qua dòng đầu tiên
                 }
-                if((line).equals("")){
-                    continue;
-                }
+//                if((line).equals("")){
+//                    continue;
+//                }
 
                 String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
 
@@ -559,14 +559,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
         String line;
         boolean isFirstLine = true;
-        while (!(line = reader.readLine()).equals("end")) {
+        while ((line = reader.readLine()) != null) {
             if (isFirstLine) {
                 isFirstLine = false;
                 continue; // Bỏ qua dòng đầu tiên
             }
-            if((line).equals("")){
-                continue;
-            }
+//            if((line).equals("")){
+//                continue;
+//            }
 
             String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
 
