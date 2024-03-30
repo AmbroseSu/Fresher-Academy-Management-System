@@ -25,9 +25,6 @@ public class SyllabusDTO {
     @NotBlank(message = "Syllabus Code must not be blank")
     private String code;
 
-    @NotNull(message = "Time Allocation must not be null")
-    private Long timeAllocation;
-
     @NotBlank(message = "Syllabus Description must not be blank")
     private String description;
 

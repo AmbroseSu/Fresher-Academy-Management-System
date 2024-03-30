@@ -1,7 +1,6 @@
 package com.example.fams.repository;
 
 import com.example.fams.entities.*;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -54,7 +53,6 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Query(value = "SELECT * FROM tbl_syllabus sl " +
             "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND sl.status = TRUE " +
             "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
-            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
             "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
             "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
@@ -65,7 +63,6 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
             "sl.created_date DESC", nativeQuery = true)
     List<Syllabus> searchSortFilter(@Param("name") String name,
                                     @Param("code") String code,
-                                    @Param("timeAllocation") Long timeAllocation,
                                     @Param("description") String description,
                                     @Param("isApproved") Boolean isApproved,
                                     @Param("isActive") Boolean isActive,
@@ -76,14 +73,12 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Query(value = "SELECT COUNT(*) FROM tbl_syllabus sl " +
             "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND sl.status = TRUE " +
             "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
-            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
             "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
             "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
             "AND (:version IS NULL OR sl.version = :version) ", nativeQuery = true )
     Long countSearchSortFilter(@Param("name") String name,
                                @Param("code") String code,
-                               @Param("timeAllocation") Long timeAllocation,
                                @Param("description") String description,
                                @Param("isApproved") Boolean isApproved,
                                @Param("isActive") Boolean isActive,
@@ -94,7 +89,6 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Query(value = "SELECT * FROM tbl_syllabus sl " +
             "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
             "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
-            "AND (:timeAllocation IS NULL OR sl.time_allocation = :timeAllocation) " +
             "AND (:description IS NULL OR sl.description = :description) " +
             "AND (:isApproved IS NULL OR sl.is_approved = :isApproved) " +
             "AND (:isActive IS NULL OR sl.is_active = :isActive) " +
@@ -105,7 +99,6 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
             "CASE WHEN :sortById NOT IN ('iDESC', 'iASC') THEN sl.id END DESC", nativeQuery = true)
     List<Syllabus> searchSortFilterADMIN(@Param("name") String name,
                                          @Param("code") String code,
-                                         @Param("timeAllocation") Long timeAllocation,
                                          @Param("description") String description,
                                          @Param("isApproved") Boolean isApproved,
                                          @Param("isActive") Boolean isActive,

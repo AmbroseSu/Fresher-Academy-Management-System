@@ -294,15 +294,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
     public ResponseEntity<?> searchSortFilter(SyllabusDTO syllabusDTO, String sortByCreatedDate, int page, int limit) {
         String name = syllabusDTO.getName();
         String code = syllabusDTO.getCode();
-        Long timeAllocation = syllabusDTO.getTimeAllocation();
+
         String description = syllabusDTO.getDescription();
         Boolean isApproved = syllabusDTO.getIsApproved();
         Boolean isActive = syllabusDTO.getIsActive();
         String version = syllabusDTO.getVersion();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version, sortByCreatedDate, pageable);
+        List<Syllabus> entities = syllabusRepository.searchSortFilter(name, code, description, isApproved, isActive, version, sortByCreatedDate, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
-        Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
+        Long count = syllabusRepository.countSearchSortFilter(name, code, description, isApproved, isActive, version);
         convertListSyllabusToListSyllabusDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -316,15 +316,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
     public ResponseEntity<?> searchSortFilterADMIN(SyllabusDTO syllabusDTO, String sortById, int page, int limit) {
         String name = syllabusDTO.getName();
         String code = syllabusDTO.getCode();
-        Long timeAllocation = syllabusDTO.getTimeAllocation();
         String description = syllabusDTO.getDescription();
         Boolean isApproved = syllabusDTO.getIsApproved();
         Boolean isActive = syllabusDTO.getIsActive();
         String version = syllabusDTO.getVersion();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Syllabus> entities = syllabusRepository.searchSortFilterADMIN(name, code, timeAllocation, description, isApproved, isActive, version, sortById, pageable);
+        List<Syllabus> entities = syllabusRepository.searchSortFilterADMIN(name, code, description, isApproved, isActive, version, sortById, pageable);
         List<SyllabusDTO> result = new ArrayList<>();
-        Long count = syllabusRepository.countSearchSortFilter(name, code, timeAllocation, description, isApproved, isActive, version);
+        Long count = syllabusRepository.countSearchSortFilter(name, code, description, isApproved, isActive, version);
         convertListSyllabusToListSyllabusDTO(entities, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -341,7 +340,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
         syllabus.setId(dto.getId());
         syllabus.setName(dto.getName());
         syllabus.setCode(dto.getCode());
-        syllabus.setTimeAllocation(dto.getTimeAllocation());
         syllabus.setDescription(dto.getDescription());
         syllabus.setIsApproved(dto.getIsApproved());
         syllabus.setIsActive(dto.getIsActive());
@@ -452,49 +450,54 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
                     syllabusDTO.setName(getCellValueAsString(row.getCell(0)));
                     syllabusDTO.setCode(getCellValueAsString(row.getCell(1)));
-                    syllabusDTO.setTimeAllocation(Long.valueOf(getCellValueAsString(row.getCell(2))));
-                    syllabusDTO.setDescription(getCellValueAsString(row.getCell(3)));
-                    syllabusDTO.setIsApproved(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
-                    syllabusDTO.setIsActive(Boolean.valueOf(getCellValueAsString(row.getCell(5))));
-                    syllabusDTO.setVersion(getCellValueAsString(row.getCell(6)));
-                    syllabusDTO.setAttendee(Long.valueOf(getCellValueAsString(row.getCell(7))));
+                    syllabusDTO.setDescription(getCellValueAsString(row.getCell(2)));
+                    syllabusDTO.setIsApproved(Boolean.valueOf(getCellValueAsString(row.getCell(3))));
+                    syllabusDTO.setIsActive(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
+                    syllabusDTO.setVersion(getCellValueAsString(row.getCell(5)));
+                    syllabusDTO.setAttendee(Long.valueOf(getCellValueAsString(row.getCell(6))));
 
-                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
-                        String[] unitIds = getCellValueAsString(row.getCell(8)).split(",");
+                    if(!getCellValueAsString(row.getCell(7)).isEmpty()){
+                        String[] unitIds = getCellValueAsString(row.getCell(7)).split(",");
                         List<Long> unitId = new ArrayList<>();
                         for(String un : unitIds){
                             unitId.add(Long.valueOf(un));
                         }
                         syllabusDTO.setUnitIds(unitId);
                     }
-                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
-                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(9)).split(",");
+                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
+                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(8)).split(",");
                         List<Long> leobId = new ArrayList<>();
                         for(String leob : learningObjectiveIds){
                             leobId.add(Long.valueOf(leob));
                         }
                         syllabusDTO.setLearningObjectiveIds(leobId);
                     }
-                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
-                        String[] materialIds = getCellValueAsString(row.getCell(10)).split(",");
+                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
+                        String[] materialIds = getCellValueAsString(row.getCell(9)).split(",");
                         List<Long> maId = new ArrayList<>();
                         for(String ma : materialIds){
                             maId.add(Long.valueOf(ma));
                         }
                         syllabusDTO.setMaterialIds(maId);
                     }
-                    if(!getCellValueAsString(row.getCell(11)).isEmpty()){
-                        String[] trainingProgramIds = getCellValueAsString(row.getCell(11)).split(",");
+                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
+                        String[] trainingProgramIds = getCellValueAsString(row.getCell(10)).split(",");
                         List<Long> trpoId = new ArrayList<>();
                         for(String trpo : trainingProgramIds){
                             trpoId.add(Long.valueOf(trpo));
                         }
                         syllabusDTO.setTrainingProgramIds(trpoId);
                     }
+
+                    if(!getCellValueAsString(row.getCell(11)).isEmpty()){
+                        String[] outputStandardIds = getCellValueAsString(row.getCell(11)).split(",");
+                        List<Long> outputStdIds = new ArrayList<>();
+                        for(String outputStd : outputStandardIds){
+                            outputStdIds.add(Long.valueOf(outputStd));
+                        }
+                        syllabusDTO.setOutputStandardIds(outputStdIds);
+                    }
                     syllabusDTOS.add(syllabusDTO);
-
-
-
 
 
             }
@@ -526,16 +529,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 SyllabusDTO syllabusDTO = new SyllabusDTO();
                 syllabusDTO.setName(data[0]);
                 syllabusDTO.setCode(data[1]);
-                syllabusDTO.setTimeAllocation(Long.parseLong(data[2]));
-                syllabusDTO.setDescription(data[3]);
-                syllabusDTO.setIsApproved(Boolean.parseBoolean(data[4]));
-                syllabusDTO.setIsActive(Boolean.parseBoolean(data[5]));
-                syllabusDTO.setVersion(data[6]);
-                syllabusDTO.setAttendee(Long.parseLong(data[7]));
+                syllabusDTO.setDescription(data[2]);
+                syllabusDTO.setIsApproved(Boolean.parseBoolean(data[3]));
+                syllabusDTO.setIsActive(Boolean.parseBoolean(data[4]));
+                syllabusDTO.setVersion(data[5]);
+                syllabusDTO.setAttendee(Long.parseLong(data[6]));
 
 
-                if(!data[8].equals("null")){
-                        String[] unitIds = data[8].split("/");
+                if(!data[7].equals("null")){
+                        String[] unitIds = data[7].split("/");
                         List<Long> unitId = new ArrayList<>();
                         for(String un : unitIds){
                             unitId.add(Long.valueOf(un));
@@ -544,31 +546,38 @@ public class SyllabusServiceImpl implements ISyllabusService {
                         syllabusDTO.setUnitIds(unitId);
 
                 }
-                if(!data[9].equals("null")){
-                    String[] learningObjectiveIds = data[9].split("/");
+                if(!data[8].equals("null")){
+                    String[] learningObjectiveIds = data[8].split("/");
                     List<Long> leobId = new ArrayList<>();
                     for(String leob : learningObjectiveIds){
                         leobId.add(Long.valueOf(leob));
                     }
                     syllabusDTO.setLearningObjectiveIds(leobId);
                 }
-                if(!data[10].equals("null")){
-                    String[] materialIds = data[10].split("/");
+                if(!data[9].equals("null")){
+                    String[] materialIds = data[9].split("/");
                     List<Long> maId = new ArrayList<>();
                     for(String ma : materialIds){
                         maId.add(Long.valueOf(ma));
                     }
                     syllabusDTO.setMaterialIds(maId);
                 }
-                if(!data[11].equals("null")){
-                    String[] trainingProgramIds = data[11].split("/");
+                if(!data[10].equals("null")){
+                    String[] trainingProgramIds = data[10].split("/");
                     List<Long> trpoId = new ArrayList<>();
                     for(String trpo : trainingProgramIds){
                         trpoId.add(Long.valueOf(trpo));
                     }
                     syllabusDTO.setTrainingProgramIds(trpoId);
                 }
-
+                if(!data[11].equals("null")){
+                    String[] outputStandardIds = data[11].split("/");
+                    List<Long> outputStdIds = new ArrayList<>();
+                    for(String outputStd : outputStandardIds){
+                        outputStdIds.add(Long.valueOf(outputStd));
+                    }
+                    syllabusDTO.setOutputStandardIds(outputStdIds);
+                }
                 syllabusList.add(syllabusDTO);
 
             }
@@ -606,18 +615,17 @@ public class SyllabusServiceImpl implements ISyllabusService {
             SyllabusDTO syllabusDTO = new SyllabusDTO();
             syllabusDTO.setName(data[0]);
             syllabusDTO.setCode(data[1]);
-            syllabusDTO.setTimeAllocation(Long.parseLong(data[2]));
-            syllabusDTO.setDescription(data[3]);
-            syllabusDTO.setIsApproved(Boolean.parseBoolean(data[4]));
-            syllabusDTO.setIsActive(Boolean.parseBoolean(data[5]));
-            syllabusDTO.setVersion(data[6]);
-            syllabusDTO.setAttendee(Long.parseLong(data[7]));
+            syllabusDTO.setDescription(data[2]);
+            syllabusDTO.setIsApproved(Boolean.parseBoolean(data[3]));
+            syllabusDTO.setIsActive(Boolean.parseBoolean(data[4]));
+            syllabusDTO.setVersion(data[5]);
+            syllabusDTO.setAttendee(Long.parseLong(data[6]));
 
 
-            if(!data[8].equals("null")){
+            if(!data[7].equals("null")){
 
                 try{
-                    String[] unitIds = data[8].split("/");
+                    String[] unitIds = data[7].split("/");
                     List<Long> unitId = new ArrayList<>();
                     for(String un : unitIds){
                         unitId.add(Long.valueOf(un));
@@ -629,9 +637,9 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 }
 
             }
-            if(!data[9].equals("null")){
+            if(!data[8].equals("null")){
                 try {
-                    String[] learningObjectiveIds = data[9].split("/");
+                    String[] learningObjectiveIds = data[8].split("/");
                     List<Long> leobId = new ArrayList<>();
                     for(String leob : learningObjectiveIds){
                         leobId.add(Long.valueOf(leob));
@@ -642,9 +650,9 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 }
 
             }
-            if(!data[10].equals("null")){
+            if(!data[9].equals("null")){
                 try{
-                    String[] materialIds = data[10].split("/");
+                    String[] materialIds = data[9].split("/");
                     List<Long> maId = new ArrayList<>();
                     for(String ma : materialIds){
                         maId.add(Long.valueOf(ma));
@@ -655,14 +663,27 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 }
 
             }
-            if(!data[11].equals("null")){
+            if(!data[10].equals("null")){
                 try{
-                    String[] trainingProgramIds = data[11].split("/");
+                    String[] trainingProgramIds = data[10].split("/");
                     List<Long> trpoId = new ArrayList<>();
                     for(String trpo : trainingProgramIds){
                         trpoId.add(Long.valueOf(trpo));
                     }
                     syllabusDTO.setTrainingProgramIds(trpoId);
+                }catch (Exception e){
+                    return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+            }
+            if(!data[11].equals("null")){
+                try{
+                    String[] outputStandardIds = data[11].split("/");
+                    List<Long> outputStdIds = new ArrayList<>();
+                    for(String outputStdId : outputStandardIds){
+                        outputStdIds.add(Long.valueOf(outputStdId));
+                    }
+                    syllabusDTO.setTrainingProgramIds(outputStdIds);
                 }catch (Exception e){
                     return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
                 }

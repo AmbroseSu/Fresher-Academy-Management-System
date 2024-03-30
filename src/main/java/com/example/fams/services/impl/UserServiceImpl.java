@@ -191,7 +191,6 @@ public class UserServiceImpl implements UserService {
                 userRepository.updateUserById(userDTO.getId(),
                         userDTO.getFirstName(),
                         userDTO.getLastName(),
-                        userDTO.getEmail(),
                         userDTO.getPhone(),
                         userDTO.getDob(),
                         userDTO.getStatus(),

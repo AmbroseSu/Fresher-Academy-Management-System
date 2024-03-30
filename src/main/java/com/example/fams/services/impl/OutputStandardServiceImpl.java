@@ -75,7 +75,7 @@ public class OutputStandardServiceImpl implements IOutputStandardService {
             outputStandardRepository.save(outputStandard);
         }
         OutputStandardDTO result = convertOutputStandardToOutputStandardDTO(outputStandard);
-        if (outputStandardDTO.getId() == null) {
+        if (outputStandardDTO.getId() != null) {
             result.setSyllabusId(outputStandard.getSyllabus().getId());
         }
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");

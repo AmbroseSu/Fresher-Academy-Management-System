@@ -16,8 +16,6 @@ public class Syllabus extends BaseEntity{
 
     private String code;
 
-    private Long timeAllocation;
-
     private String description;
 
     private Boolean isApproved;
