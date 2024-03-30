@@ -127,6 +127,14 @@ public class ServiceUtils {
         }
     }
 
+    public static void validateOutputStandardIds(List<Long> outputStandardIds, OutputStandardRepository outputStandardRepository) {
+        for (Long outputStandardId : outputStandardIds) {
+            if (outputStandardRepository.findById(outputStandardId) == null) {
+                errors.add("OutputStandard with id " + outputStandardId + " does not exist");
+            }
+        }
+    }
+
     public static void validateStartDateBeforeEndDate(ClassDTO classDTO) {
         Long startDate = classDTO.getStartDate();
         Long endDate = classDTO.getEndDate();

@@ -6,11 +6,13 @@ import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.SyllabusDTO;
 import com.example.fams.dto.request.DeleteReplace;
 import com.example.fams.entities.*;
+import com.example.fams.entities.enums.DeliveryType;
 import com.example.fams.repository.*;
 import com.example.fams.services.ISyllabusService;
 import com.example.fams.services.ServiceUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -31,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("SyllabusService")
 public class SyllabusServiceImpl implements ISyllabusService {
@@ -44,9 +47,10 @@ public class SyllabusServiceImpl implements ISyllabusService {
     private final MaterialRepository materialRepository;
     private final SyllabusMaterialRepository syllabusMaterialRepository;
     private final UnitRepository unitRepository;
+    private final OutputStandardRepository outputStandardRepository;
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^\\d+$");
 
-    public SyllabusServiceImpl(SyllabusRepository syllabusRepository, SyllabusObjectiveRepository syllabusObjectiveRepository, GenericConverter genericConverter, TrainingProgramRepository trainingProgramRepository, LearningObjectiveRepository learningObjectiveRepository, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository, MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, UnitRepository unitRepository) {
+    public SyllabusServiceImpl(SyllabusRepository syllabusRepository, SyllabusObjectiveRepository syllabusObjectiveRepository, GenericConverter genericConverter, TrainingProgramRepository trainingProgramRepository, LearningObjectiveRepository learningObjectiveRepository, SyllabusTrainingProgramRepository syllabusTrainingProgramRepository, MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, UnitRepository unitRepository, OutputStandardRepository outputStandardRepository) {
         this.syllabusRepository = syllabusRepository;
         this.syllabusObjectiveRepository = syllabusObjectiveRepository;
         this.genericConverter = genericConverter;
@@ -56,13 +60,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
         this.materialRepository = materialRepository;
         this.syllabusMaterialRepository = syllabusMaterialRepository;
         this.unitRepository = unitRepository;
+        this.outputStandardRepository = outputStandardRepository;
     }
 
     @Override
     public ResponseEntity<?> findById(Long id) {
         Syllabus entity = syllabusRepository.findByStatusIsTrueAndId(id);
         if (entity != null){
-            SyllabusDTO result = (SyllabusDTO) genericConverter.toDTO(entity, SyllabusDTO.class);
+            SyllabusDTO result = convertSyllabusToSyllabusDTO(entity);
             return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
         }
         else{
@@ -105,11 +110,15 @@ public class SyllabusServiceImpl implements ISyllabusService {
         List<Long> requestLearningObjectiveIds = syllabusDTO.getLearningObjectiveIds();
         List<Long> requestTrainingProgramIds = syllabusDTO.getTrainingProgramIds();
         List<Long> requestMaterialIds = syllabusDTO.getMaterialIds();
+        List<Long> requestOutputStandardIds = syllabusDTO.getOutputStandardIds();
         Syllabus entity;
 
         // * Validate requestDTO ( if left null, then can be updated later )
         if (unitIds != null){
             ServiceUtils.validateUnitIds(unitIds, unitRepository);
+        }
+        if (requestOutputStandardIds != null){
+            ServiceUtils.validateOutputStandardIds(requestOutputStandardIds, outputStandardRepository);
         }
         if (requestTrainingProgramIds != null){
             ServiceUtils.validateTrainingProgramIds(requestTrainingProgramIds, trainingProgramRepository);
@@ -163,6 +172,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
             result.setTrainingProgramIds(requestTrainingProgramIds);
             result.setLearningObjectiveIds(requestLearningObjectiveIds);
             result.setMaterialIds(requestMaterialIds);
+            result.setOutputStandardIds(requestOutputStandardIds);
         }
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
@@ -355,8 +365,18 @@ public class SyllabusServiceImpl implements ISyllabusService {
                 }
             }
         }
+        List<OutputStandard> outputStandards = new ArrayList<>();
+        if (dto.getOutputStandardIds() != null) {
+            for (Long id : dto.getOutputStandardIds()) {
+                OutputStandard outputStandard = outputStandardRepository.findById(id);
+                if (outputStandard != null) {
+                    outputStandard.setSyllabus(syllabus); // Set the syllabus to the unit
+                    outputStandards.add(outputStandard);
+                }
+            }
+        }
         syllabus.setUnits(units);
-
+        syllabus.setOutputStandards(outputStandards);
         return syllabus;
     }
 
@@ -373,17 +393,14 @@ public class SyllabusServiceImpl implements ISyllabusService {
         List<Material> materialList = syllabusRepository.findMaterialsBySyllabusId(syllabus.getId());
         List<LearningObjective> learningObjectiveList = syllabusRepository.findLearningObjectivesBySyllabusId(syllabus.getId());
         List<Unit> unitList = syllabusRepository.findUnitsBySyllabusId(syllabus.getId());
+        List<OutputStandard> outputStandardList = syllabusRepository.findOutputStandardsBySyllabusId(syllabus.getId());
 
         if (trainingProgramList == null) newDTO.setTrainingProgramIds(null);
         else {
-            Long duration = trainingProgramList.stream()
-                    .mapToLong(TrainingProgram::getDuration)
-                    .sum();
             List<Long> trainingProgramIds = trainingProgramList.stream()
                     .map(TrainingProgram::getId)
                     .toList();
             newDTO.setTrainingProgramIds(trainingProgramIds);
-            newDTO.setDuration(duration);
         }
         if (materialList == null) newDTO.setMaterialIds(null);
         else {
@@ -401,8 +418,24 @@ public class SyllabusServiceImpl implements ISyllabusService {
         }
         if (unitList == null) newDTO.setUnitIds(null);
         else {
+            Long duration = unitList.stream()
+                    .mapToLong(Unit::getDuration)
+                    .sum();
+            Map<DeliveryType, Long> timeAllocations = syllabus.getUnits().stream()
+                    .flatMap(unit -> unit.getContents().stream())
+                    .collect(Collectors.groupingBy(
+                            Content::getDeliveryType,
+                            Collectors.summingLong(Content::getDuration)
+                    ));
             List<Long> unitIds = unitList.stream().map(Unit::getId).toList();
             newDTO.setUnitIds(unitIds);
+            newDTO.setDuration(duration);
+            newDTO.setTimeAllocations(timeAllocations);
+        }
+        if (outputStandardList == null) newDTO.setOutputStandardIds(null);
+        else {
+            List<Long> outputStandardIds = outputStandardList.stream().map(OutputStandard::getId).toList();
+            newDTO.setOutputStandardIds(outputStandardIds);
         }
         return newDTO;
     }

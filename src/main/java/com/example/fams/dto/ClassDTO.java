@@ -1,5 +1,6 @@
 package com.example.fams.dto;
 
+import com.example.fams.entities.enums.ClassStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,10 @@ public class ClassDTO {
   private String code;
 //  private Long duration;
   private Boolean status;
+  @NotNull(message = "Please enter class status")
+  private ClassStatus classStatus;
+  @NotBlank(message = "Please enter class location")
+  private String location;
 
   @NotNull(message = "Class start date must not be null")
   private Long startDate;

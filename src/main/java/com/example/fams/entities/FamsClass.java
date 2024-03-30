@@ -1,5 +1,6 @@
 package com.example.fams.entities;
 
+import com.example.fams.entities.enums.ClassStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,6 +20,8 @@ public class FamsClass extends BaseEntity{
     private String code;
 
     private Long duration;
+
+    private ClassStatus classStatus;
 
     private String location;
 

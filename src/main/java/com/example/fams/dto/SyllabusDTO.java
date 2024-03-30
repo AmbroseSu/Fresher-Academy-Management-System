@@ -1,5 +1,6 @@
 package com.example.fams.dto;
 
+import com.example.fams.entities.enums.DeliveryType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -40,12 +42,14 @@ public class SyllabusDTO {
 
     private Boolean status;
     private Long duration;
-    private String outputStandard;
+
+    private Map<DeliveryType, Long> timeAllocations;
 
     private List<Long> unitIds;
     private List<Long> learningObjectiveIds;
     private List<Long> materialIds;
     private List<Long> trainingProgramIds;
+    private List<Long> outputStandardIds;
     private String createBy;
     private String createdDate;
     private String modifiedBy;

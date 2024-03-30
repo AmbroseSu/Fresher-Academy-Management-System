@@ -48,6 +48,9 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long > {
     @Query("SELECT u FROM Unit u WHERE u.syllabus.id = :syllabusId")
     List<Unit> findUnitsBySyllabusId(Long syllabusId);
 
+    @Query("SELECT os FROM OutputStandard os WHERE os.syllabus.id = :syllabusId")
+    List<OutputStandard> findOutputStandardsBySyllabusId(Long syllabusId);
+
     @Query(value = "SELECT * FROM tbl_syllabus sl " +
             "WHERE (:name IS NULL OR LOWER(sl.name) LIKE LOWER(CONCAT('%', :name,'%'))) AND sl.status = TRUE " +
             "AND (:code IS NULL OR LOWER(sl.code) LIKE LOWER(CONCAT('%', :code,'%'))) " +
