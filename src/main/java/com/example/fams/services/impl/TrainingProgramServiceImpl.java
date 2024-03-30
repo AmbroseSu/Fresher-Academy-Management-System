@@ -365,24 +365,23 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-        String line; // Đọc dòng đầu tiên
+        String line;
         boolean isFirstLine = true;
-
         while ((line = reader.readLine()) != null) {
             if (isFirstLine) {
                 isFirstLine = false;
-                continue; // Skip the first line
+                continue; // Bỏ qua dòng đầu tiên
             }
 
             // If the line is "end", stop the loop
-            if (line.equals("end")) {
-                break;
-            }
-
-            // If the line is empty, continue to the next line
-            if (line.isEmpty()) {
-                continue;
-            }
+//            if (line.equals("end")) {
+//                break;
+//            }
+//
+//            // If the line is empty, continue to the next line
+//            if (line.isEmpty()) {
+//                continue;
+//            }
 
             String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
 
@@ -423,18 +422,18 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             while ((line = reader.readLine()) != null) {
                 if (isFirstLine) {
                     isFirstLine = false;
-                    continue; // Skip the first line
+                    continue; // Bỏ qua dòng đầu tiên
                 }
 
                 // If the line is "end", stop the loop
-                if (line.equals("end")) {
-                    break;
-                }
-
-                // If the line is empty, continue to the next line
-                if (line.isEmpty()) {
-                    continue;
-                }
+//                if (line.equals("end")) {
+//                    break;
+//                }
+//
+//                // If the line is empty, continue to the next line
+//                if (line.isEmpty()) {
+//                    continue;
+//                }
 
                 String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
 
