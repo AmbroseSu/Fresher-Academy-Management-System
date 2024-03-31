@@ -82,7 +82,7 @@ public class ServiceUtils {
     public static void validateSyllabusIds(List<Long> syllabusIds, SyllabusRepository syllabusRepository) {
         for (Long syllabusId : syllabusIds) {
             if (syllabusRepository.findOneById(syllabusId) == null) {
-                errors.add("Syllabus with id " + syllabusId + " does not exist");
+                errors.add("Syllabus with id " + syllabusIds + " does not exist");
             }
         }
     }

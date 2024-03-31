@@ -189,7 +189,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             trainingProgramRepository.save(entity);
             return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
         } else {
-            return ResponseUtil.error("LearningObjective not found", "Cannot change status of non-existing LearningObjective", HttpStatus.NOT_FOUND);
+            return ResponseUtil.error("Training program not found", "Cannot change status of non-existing training program", HttpStatus.NOT_FOUND);
         }
     }
 
