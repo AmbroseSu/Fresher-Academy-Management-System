@@ -36,6 +36,6 @@ public class Syllabus extends BaseEntity{
     @OneToMany(mappedBy = "syllabus")
     private List<Unit> units;
 
-    @OneToMany(mappedBy = "syllabus")
-    private List<OutputStandard> outputStandards;
+//    @OneToMany(mappedBy = "syllabus")
+//    private List<OutputStandard> outputStandards;
 }

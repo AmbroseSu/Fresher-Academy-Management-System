@@ -193,7 +193,7 @@ public class UnitServiceImpl implements IUnitService {
         Unit unit = new Unit();
         unit.setId(unitDTO.getId());
         unit.setName(unitDTO.getName());
-        unit.setDuration(unitDTO.getDuration());
+//        unit.setDuration(unitDTO.getDuration());
         unit.setStatus(unitDTO.getStatus());
 
         // Fetch the Syllabus using the provided syllabusId
@@ -231,10 +231,14 @@ public class UnitServiceImpl implements IUnitService {
 
         if (contents == null) newUnitDTO.setContentIds(null);
         else {
+            Long duration = contents.stream()
+                    .mapToLong(Content::getDuration)
+                    .sum();
             List<Long> contentIds = contents.stream()
                     .map(Content::getId)
                     .toList();
             newUnitDTO.setContentIds(contentIds);
+            newUnitDTO.setDuration(duration.intValue());
         }
 
         if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);

@@ -14,6 +14,6 @@ public class OutputStandard extends BaseEntity {
     private String outputStandardName;
 
     @ManyToOne
-    @JoinColumn(name = "syllabusId")
-    private Syllabus syllabus;
+    @JoinColumn(name = "contentId")
+    private Content content;
 }

@@ -14,5 +14,5 @@ public class OutputStandardDTO {
     @NotNull(message = "Output standard name must not be null")
     private String outputStandardName;
 
-    private Long syllabusId;
+    private Long contentId;
 }

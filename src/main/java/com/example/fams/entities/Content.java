@@ -27,6 +27,9 @@ public class Content extends BaseEntity {
     @OneToMany(mappedBy="content")
     private List<LearningObjectiveContent> learningObjectiveContents;
 
+    @OneToMany(mappedBy = "content")
+    private List<OutputStandard> outputStandards;
+
     @Override
     public String toString() {
         return "Content{" +

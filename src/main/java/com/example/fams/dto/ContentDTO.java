@@ -29,6 +29,7 @@ public class ContentDTO {
   private Long duration;
 
   private Boolean status;
+  private List<Long> outputStandardIds;
   private List<Long> learningObjectiveIds;
   private String createBy;
   private String modifiedBy;
