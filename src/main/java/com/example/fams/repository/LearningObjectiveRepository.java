@@ -17,6 +17,7 @@ public interface LearningObjectiveRepository extends JpaRepository<LearningObjec
     List<LearningObjective> findAllByStatusIsTrue(Pageable pageable);
     List<LearningObjective> findAllBy(Pageable pageable);
     List<LearningObjective> findAllByOrderByIdDesc(Pageable pageable);
+    Boolean existsById( Long id);
     LearningObjective findById(Long id);
     LearningObjective findByStatusIsTrueAndId(Long id);
     LearningObjective findByStatusIsTrueAndCode(String code);

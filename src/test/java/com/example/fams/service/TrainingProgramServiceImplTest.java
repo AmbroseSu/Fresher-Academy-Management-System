@@ -157,6 +157,7 @@ public class TrainingProgramServiceImplTest {
     }
 
 
+    // ham nay sai
     @Test
     void testCreateNewTrainingProgram_returnSuccess() {
         TrainingProgram trainingProgram = new TrainingProgram();

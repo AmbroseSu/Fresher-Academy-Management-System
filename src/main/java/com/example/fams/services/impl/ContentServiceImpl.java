@@ -145,7 +145,7 @@ public class ContentServiceImpl implements IContentService {
       contentRepository.save(entity);
       return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
     } else {
-      return ResponseUtil.error("LearningObjective not found", "Cannot change status of non-existing LearningObjective", HttpStatus.NOT_FOUND);
+      return ResponseUtil.error("Content not found", "Cannot change status of non-existing Content", HttpStatus.NOT_FOUND);
     }
   }
 
