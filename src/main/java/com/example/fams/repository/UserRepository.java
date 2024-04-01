@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     User findById(Long id);
 
+    Boolean existsById( Long id);
+
     List<User> findAllByStatusIsTrue(Pageable pageable);
 
     List<User> findAllByOrderByIdDesc(Pageable pageable);
