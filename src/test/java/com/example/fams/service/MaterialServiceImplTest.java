@@ -6,6 +6,7 @@ import com.example.fams.dto.MaterialDTO;
 import com.example.fams.dto.ResponseDTO;
 import com.example.fams.entities.Material;
 import com.example.fams.repository.MaterialRepository;
+import com.example.fams.repository.SyllabusMaterialRepository;
 import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.services.impl.MaterialServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,8 @@ public class MaterialServiceImplTest {
     @Mock
     private SyllabusRepository syllabusRepository;
     @Mock
+    private SyllabusMaterialRepository syllabusMaterialRepository;
+    @Mock
     private GenericConverter genericConverter;
     @InjectMocks
     private MaterialServiceImpl materialService;
@@ -52,7 +55,7 @@ public class MaterialServiceImplTest {
         entities.add(new Material());
         when(materialRepository.findAllByStatusIsTrue(pageable)).thenReturn(entities);
         when(materialRepository.countAllByStatusIsTrue()).thenReturn(2L);
-        when(genericConverter.toDTO(any(Material.class), eq(MaterialDTO.class)));
+        when(genericConverter.toDTO(any(Material.class), eq(MaterialDTO.class))).thenReturn(new MaterialDTO());
         ResponseEntity<?> response = materialService.findAllByStatusTrue(page, limit);
         ResponseDTO responseDTO = (ResponseDTO) response.getBody();
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -156,7 +159,7 @@ public class MaterialServiceImplTest {
     Mockito.lenient().when(syllabusRepository.existsById(1L)).thenReturn(false);
     CustomValidationException exception = assertThrows(CustomValidationException.class,
                 () -> materialService.save(materialDTO));
-    assertEquals("Syllabus with id 1 does not exist", exception.getMessage());
+    assertEquals("Syllabus with id [1] does not exist", exception.getMessage());
     }
     @Test
     void testUpdateMaterial_returnSuccess(){
