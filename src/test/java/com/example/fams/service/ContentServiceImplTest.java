@@ -191,7 +191,7 @@ public class ContentServiceImplTest {
   }
 
   @Test
-  void testUpdateTrainingProgram_returnSuccess() {
+  void testUpdateContent_returnSuccess() {
     Content content = new Content();
     content.setId(1L);
     ContentDTO contentDTO = new ContentDTO();
@@ -210,7 +210,7 @@ public class ContentServiceImplTest {
     assertEquals("Saved successfully", responseDTO.getDetails().get(0));
   }
   @Test
-  void testChangeStatus_TrainingProgramNotFound() {
+  void testChangeStatus_ContentNotFound() {
     // Given
     Long id = 1L;
     when(contentRepository.findById(id)).thenReturn(null);
