@@ -160,15 +160,6 @@ public class TrainingProgramServiceImplTest {
     // ham nay sai
     @Test
     void testCreateNewTrainingProgram_returnSuccess() {
-        TrainingProgram trainingProgram = new TrainingProgram();
-        List<TrainingProgram> entities = new ArrayList();
-        entities.add(new TrainingProgram());
-        entities.add(new TrainingProgram());
-        // Arrange
-        trainingProgram.setName("Tuan");
-        trainingProgram.setTraining_status(1);
-        trainingProgram.setDuration(50L);
-        trainingProgram.setStartTime(50L);
         TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
         // Mock behavior
         when(trainingProgramRepository.save(any())).thenReturn(new TrainingProgram());
@@ -203,15 +194,15 @@ public class TrainingProgramServiceImplTest {
     void testUpdateTrainingProgram_returnSuccess() {
         TrainingProgram trainingProgram = new TrainingProgram();
         trainingProgram.setId(1L);
-
+        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
         // Giả mạo các phương thức cần thiết
         Mockito.lenient().when(trainingProgramRepository.findOneById(any())).thenReturn(trainingProgram);
         when(trainingProgramRepository.save(any())).thenReturn(new TrainingProgram());
         when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class)))
-                .thenReturn(new TrainingProgramDTO());
+                .thenReturn(trainingProgramDTO);
 
         // Kiểm thử chức năng cập nhật
-        ResponseEntity<?> responseEntity = trainingProgramService.save(new TrainingProgramDTO());
+        ResponseEntity<?> responseEntity = trainingProgramService.save(trainingProgramDTO);
         ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
 
         // Kiểm tra phản hồi
