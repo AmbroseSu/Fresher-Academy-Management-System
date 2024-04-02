@@ -56,4 +56,7 @@ public interface UnitRepository extends JpaRepository<Unit, String> {
                                      @Param("sortById") String sortById,
                                      Pageable pageable);
 
+    Long countAllByStatusIsTrue();
+
+    Long countAllBy();
 }
