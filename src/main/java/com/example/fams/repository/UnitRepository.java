@@ -22,8 +22,8 @@ public interface UnitRepository extends JpaRepository<Unit, String> {
 
     @Query("SELECT c FROM Content c WHERE c.unit.id = :unitId")
     List<Content> findContentsByUnitId(@Param("unitId") Long unitId);
-    @Query("SELECT u.syllabus FROM Unit u WHERE u.syllabus.id = :syllabusId")
-    Syllabus findSyllabusBySyllabusId(@Param("syllabusId") Long syllabusId);
+    @Query("SELECT u FROM Unit u WHERE u.syllabus.id = :syllabusId")
+    List<Unit> findUnitsBySyllabusId(@Param("syllabusId") Long syllabusId);
 
     @Modifying
     @Transactional

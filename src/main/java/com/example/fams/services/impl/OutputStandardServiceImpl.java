@@ -5,8 +5,8 @@ import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.OutputStandardDTO;
 import com.example.fams.entities.*;
+import com.example.fams.repository.ContentRepository;
 import com.example.fams.repository.OutputStandardRepository;
-import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.services.IOutputStandardService;
 import com.example.fams.services.ServiceUtils;
 import org.springframework.http.HttpStatus;
@@ -22,12 +22,12 @@ public class OutputStandardServiceImpl implements IOutputStandardService {
 
     private final GenericConverter genericConverter;
 
-    private final SyllabusRepository syllabusRepository;
+    private final ContentRepository contentRepository;
 
-    public OutputStandardServiceImpl(OutputStandardRepository outputStandardRepository, GenericConverter genericConverter, SyllabusRepository syllabusRepository) {
+    public OutputStandardServiceImpl(OutputStandardRepository outputStandardRepository, GenericConverter genericConverter, ContentRepository contentRepository) {
         this.outputStandardRepository = outputStandardRepository;
         this.genericConverter = genericConverter;
-        this.syllabusRepository = syllabusRepository;
+        this.contentRepository = contentRepository;
     }
 
     @Override
@@ -54,10 +54,10 @@ public class OutputStandardServiceImpl implements IOutputStandardService {
     public ResponseEntity<?> save(OutputStandardDTO outputStandardDTO) {
         ServiceUtils.errors.clear();
         OutputStandard outputStandard;
-        Long requestSyllabusId = outputStandardDTO.getSyllabusId();
+        Long requestContentId = outputStandardDTO.getContentId();
 
-        if (requestSyllabusId != null) {
-            ServiceUtils.validateSyllabusIds(List.of(requestSyllabusId), syllabusRepository);
+        if (requestContentId != null) {
+            ServiceUtils.validateContentIds(List.of(requestContentId), contentRepository);
         }
         if (!ServiceUtils.errors.isEmpty()) {
             throw new CustomValidationException(ServiceUtils.errors);
@@ -65,18 +65,24 @@ public class OutputStandardServiceImpl implements IOutputStandardService {
         if (outputStandardDTO.getId() != null){
             OutputStandard oldEntity = outputStandardRepository.findById(outputStandardDTO.getId());
             OutputStandard tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-            outputStandard = convertDtoToEntity(outputStandardDTO, syllabusRepository);
+            outputStandard = (OutputStandard) genericConverter.toEntity(outputStandardDTO, OutputStandard.class);
             ServiceUtils.fillMissingAttribute(outputStandard, tempOldEntity);
+            if (requestContentId != null) {
+                outputStandard.setContent(contentRepository.findById(outputStandardDTO.getContentId()));
+            }
             outputStandard.markModified();
             outputStandardRepository.save(outputStandard);
         } else {
-            outputStandard = convertDtoToEntity(outputStandardDTO, syllabusRepository);
+            outputStandard = (OutputStandard) genericConverter.toEntity(outputStandardDTO, OutputStandard.class);
             outputStandard.setStatus(true);
+            if (requestContentId != null) {
+                outputStandard.setContent(contentRepository.findById(outputStandardDTO.getContentId()));
+            }
             outputStandardRepository.save(outputStandard);
         }
         OutputStandardDTO result = convertOutputStandardToOutputStandardDTO(outputStandard);
         if (outputStandardDTO.getId() != null) {
-            result.setSyllabusId(outputStandard.getSyllabus().getId());
+            result.setContentId(outputStandard.getContent().getId());
         }
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
@@ -91,22 +97,22 @@ public class OutputStandardServiceImpl implements IOutputStandardService {
         return null;
     }
 
-    public OutputStandard convertDtoToEntity(OutputStandardDTO outputStandardDTO, SyllabusRepository syllabusRepository) {
-        OutputStandard outputStandard = new OutputStandard();
-        outputStandard.setId(outputStandardDTO.getId());
-        outputStandard.setOutputStandardName(outputStandardDTO.getOutputStandardName());
-
-        // Fetch the Syllabus using the provided syllabusId
-        Syllabus syllabus = syllabusRepository.findOneById(outputStandardDTO.getSyllabusId());
-        outputStandard.setSyllabus(syllabus);
-
-        return outputStandard;
-    }
+//    public OutputStandard convertDtoToEntity(OutputStandardDTO outputStandardDTO, ContentRepository contentRepository) {
+//        OutputStandard outputStandard = new OutputStandard();
+//        outputStandard.setId(outputStandardDTO.getId());
+//        outputStandard.setOutputStandardName(outputStandardDTO.getOutputStandardName());
+//
+//        // Fetch the Syllabus using the provided syllabusId
+//        Content content = contentRepository.findById(outputStandardDTO.getContentId());
+//        outputStandard.setContent(content);
+//
+//        return outputStandard;
+//    }
 
     private OutputStandardDTO convertOutputStandardToOutputStandardDTO(OutputStandard outputStandard) {
         OutputStandardDTO newDTO = (OutputStandardDTO) genericConverter.toDTO(outputStandard, OutputStandardDTO.class);
-        if (outputStandard.getSyllabus() == null) newDTO.setSyllabusId(null);
-        else newDTO.setSyllabusId(outputStandard.getSyllabus().getId());
+        if (outputStandard.getContent() == null) newDTO.setContentId(null);
+        else newDTO.setContentId(outputStandard.getContent().getId());
         return newDTO;
     }
 }

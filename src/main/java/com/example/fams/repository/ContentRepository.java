@@ -24,6 +24,7 @@ public interface ContentRepository extends JpaRepository<Content, String> {
   Content findByStatusIsTrueAndId(Long id);
   //Content findByStatusIsTrueAndCode(String code);
   Long countAllByStatusIsTrue();
+  List<Content> findAllByUnitId(Long unitId);
 
   @Transactional
   @Modifying

@@ -4,10 +4,7 @@ import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ContentDTO;
-import com.example.fams.entities.Content;
-import com.example.fams.entities.LearningObjective;
-import com.example.fams.entities.LearningObjectiveContent;
-import com.example.fams.entities.Unit;
+import com.example.fams.entities.*;
 import com.example.fams.entities.enums.DeliveryType;
 import com.example.fams.repository.*;
 import com.example.fams.services.IContentService;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service("ContentService")
 public class ContentServiceImpl implements IContentService {
@@ -30,16 +28,18 @@ public class ContentServiceImpl implements IContentService {
   private final LearningObjectiveContentRepository learningObjectiveContentRepository;
   private final ContentLearningObjectiveRepository contentLearningObjectiveRepository;
   private final LearningObjectiveRepository learningObjectiveRepository;
+  private final OutputStandardRepository outputStandardRepository;
   private final GenericConverter genericConverter;
 
   public ContentServiceImpl(ContentRepository contentRepository, UnitRepository unitRepository, LearningObjectiveContentRepository learningObjectiveContentRepository,
                             ContentLearningObjectiveRepository contentLearningObjectiveRepository,
-                            LearningObjectiveRepository learningObjectiveRepository, GenericConverter genericConverter) {
+                            LearningObjectiveRepository learningObjectiveRepository, OutputStandardRepository outputStandardRepository, GenericConverter genericConverter) {
     this.contentRepository = contentRepository;
       this.unitRepository = unitRepository;
       this.learningObjectiveContentRepository = learningObjectiveContentRepository;
       this.contentLearningObjectiveRepository = contentLearningObjectiveRepository;
     this.learningObjectiveRepository = learningObjectiveRepository;
+    this.outputStandardRepository = outputStandardRepository;
     this.genericConverter = genericConverter;
   }
 
@@ -63,12 +63,16 @@ public class ContentServiceImpl implements IContentService {
   public ResponseEntity<?> save(ContentDTO contentDTO) {
     ServiceUtils.errors.clear();
     List<Long> requestLearningObjectiveIds = contentDTO.getLearningObjectiveIds();
+    List<Long> requestOutputStandardIds = contentDTO.getOutputStandardIds();
     Long requestUnitId = contentDTO.getUnitId();
     Content entity;
 
     // * Validate requestDTO ( if left null, then can be updated later )
     if (requestLearningObjectiveIds != null){
       ServiceUtils.validateLearningObjectiveIds(requestLearningObjectiveIds, learningObjectiveRepository);
+    }
+    if (requestOutputStandardIds != null) {
+      ServiceUtils.validateOutputStandardIds(requestOutputStandardIds, outputStandardRepository);
     }
     if (requestUnitId != null){
       ServiceUtils.validateUnitIds(List.of(requestUnitId), unitRepository);
@@ -81,11 +85,20 @@ public class ContentServiceImpl implements IContentService {
     if (contentDTO.getId() != null){
       Content oldEntity = contentRepository.findById(contentDTO.getId());
       Content tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-      entity = convertDtoToEntity(contentDTO, unitRepository);
+      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
       entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
       contentLearningObjectiveRepository.deleteAllByContentId(contentDTO.getId());
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
-      entity.setUnit(unitRepository.findById(requestUnitId));
+
+      if (requestUnitId != null) {
+        entity.setUnit(unitRepository.findById(requestUnitId));
+      }
+      if (requestOutputStandardIds != null) {
+        outputStandardRepository.findByContent_Id(contentDTO.getId()).stream()
+                .peek(outputStandard -> outputStandard.setContent(null))
+                .forEach(outputStandardRepository::save);
+      }
+      loadOutputStandardFromListOutputStandardId(requestOutputStandardIds, contentDTO.getId());
       entity.markModified();
       contentRepository.save(entity);
     }
@@ -93,9 +106,13 @@ public class ContentServiceImpl implements IContentService {
     // * For create request
     else {
       contentDTO.setStatus(true);
-      entity = convertDtoToEntity(contentDTO, unitRepository);
+      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
+      if (requestUnitId != null) {
+        entity.setUnit(unitRepository.findById(requestUnitId));
+      }
       contentRepository.save(entity);
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
+      loadOutputStandardFromListOutputStandardId(requestOutputStandardIds, entity.getId());
     }
 
     ContentDTO result = convertContentToContentDTO(entity);
@@ -156,6 +173,16 @@ public class ContentServiceImpl implements IContentService {
 
   }
 
+  private void loadOutputStandardFromListOutputStandardId(List<Long> requestOutputStandardIds, Long contentId) {
+    if (requestOutputStandardIds != null && !requestOutputStandardIds.isEmpty()) {
+      Content content = contentRepository.findById(contentId);
+      requestOutputStandardIds.stream()
+              .map(outputStandardRepository::findById)
+              .peek(outputStandard -> outputStandard.setContent(content))
+              .forEach(outputStandardRepository::save);
+    }
+  }
+
   @Override
   public ResponseEntity<?> searchSortFilter(ContentDTO contentDTO, int page, int limit) {
     DeliveryType deliveryType = contentDTO.getDeliveryType();
@@ -200,6 +227,7 @@ public class ContentServiceImpl implements IContentService {
   private ContentDTO convertContentToContentDTO(Content entity) {
     ContentDTO newContentDTO = (ContentDTO) genericConverter.toDTO(entity, ContentDTO.class);
     List<LearningObjective> learningObjectives = contentLearningObjectiveRepository.findLearningObjectivesByContentId(entity.getId());
+    List<OutputStandard> outputStandards = outputStandardRepository.findByContent_Id(entity.getId());
 
     if (learningObjectives == null) newContentDTO.setLearningObjectiveIds(null);
     else {
@@ -208,6 +236,13 @@ public class ContentServiceImpl implements IContentService {
               .map(LearningObjective::getId)
               .toList();
       newContentDTO.setLearningObjectiveIds(learningObjectiveIds);
+    }
+    if (outputStandards == null) newContentDTO.setOutputStandardIds(null);
+    else {
+      List<Long> outputStandardIds = outputStandards.stream()
+              .map(OutputStandard::getId)
+              .toList();
+        newContentDTO.setOutputStandardIds(outputStandardIds);
     }
 
     if (entity.getUnit() == null) newContentDTO.setUnitId(null);
@@ -218,21 +253,29 @@ public class ContentServiceImpl implements IContentService {
     return newContentDTO;
   }
 
-  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
-    Content content = new Content();
-    content.setId(contentDTO.getId());
-    content.setDeliveryType(contentDTO.getDeliveryType());
-    content.setDuration(contentDTO.getDuration());
-    content.setStatus(contentDTO.getStatus());
-    content.setTrainingFormat(contentDTO.getTrainingFormat());
-    content.setDeliveryType(contentDTO.getDeliveryType());
-
-    // Fetch the Unit using the provided unitId
-    Unit unit = unitRepository.findById(contentDTO.getUnitId());
-    content.setUnit(unit);
-
-    return content;
-  }
+//  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
+//    Content content = new Content();
+//    content.setId(contentDTO.getId());
+//    content.setDeliveryType(contentDTO.getDeliveryType());
+//    content.setDuration(contentDTO.getDuration());
+//    content.setStatus(contentDTO.getStatus());
+//    content.setTrainingFormat(contentDTO.getTrainingFormat());
+//    content.setDeliveryType(contentDTO.getDeliveryType());
+//    if (contentDTO.getOutputStandardIds() != null) {
+//      List<OutputStandard> outputStandards = contentDTO.getOutputStandardIds().stream()
+//              .map(outputStandardRepository::findById)
+//              .filter(Objects::nonNull)
+//              .peek(outputStandard -> outputStandard.setContent(content))
+//              .toList();
+//      content.setOutputStandards(outputStandards);
+//    }
+//
+//    // Fetch the Unit using the provided unitId
+//    Unit unit = unitRepository.findById(contentDTO.getUnitId());
+//    content.setUnit(unit);
+//
+//    return content;
+//  }
 
   private void loadContentLearningObjectiveFromListLearningObjectiveId(List<Long> requestLearningObjectiveIds, Long contentId) {
     if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {

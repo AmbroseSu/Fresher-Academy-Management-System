@@ -20,7 +20,7 @@ public class UnitDTO {
     @NotBlank(message = "Unit Name must not be blank")
     private String name;
 
-    @NotNull(message = "Duration must not be null")
+//    @NotNull(message = "Duration must not be null")
     private Integer duration;
 
     private Boolean status;

@@ -16,7 +16,7 @@ public class Unit extends BaseEntity{
 
     private String name;
 
-    private Integer duration;
+//    private Integer duration;
 
     @OneToMany(mappedBy="unit")
     private List<Content> contents;

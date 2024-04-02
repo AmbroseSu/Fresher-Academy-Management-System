@@ -77,17 +77,30 @@ public class UnitServiceImpl implements IUnitService {
         if (unitDTO.getId() != null){
             Unit oldEntity = unitRepository.findById(unitDTO.getId());
             Unit tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
+//            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
+            unit = (Unit) genericConverter.toEntity(unitDTO, Unit.class);
             ServiceUtils.fillMissingAttribute(unit, tempOldEntity);
+
+            if (requestSyllabusId != null) {
+                unit.setSyllabus(syllabusRepository.findOneById(requestSyllabusId));
+            }
+            if (requestContentIds != null) {
+                contentRepository.findAllByUnitId(unitDTO.getId()).stream()
+                        .peek(content -> content.setUnit(null))
+                        .forEach(contentRepository::save);
+            }
             loadContentsFromListContentIds(requestContentIds, unit.getId());
+
             unit.markModified();
             unitRepository.save(unit);
         }
-
         // * For create request
         else {
             unitDTO.setStatus(true);
-            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
+            unit = (Unit) genericConverter.toEntity(unitDTO, Unit.class);
+            if (requestSyllabusId != null) {
+                unit.setSyllabus(syllabusRepository.findOneById(requestSyllabusId));
+            }
             unitRepository.save(unit);
             loadContentsFromListContentIds(requestContentIds, unit.getId());
         }
@@ -189,37 +202,36 @@ public class UnitServiceImpl implements IUnitService {
         }
     }
 
-    public Unit convertDtoToEntity(UnitDTO unitDTO, SyllabusRepository syllabusRepository, ContentRepository contentRepository) {
-        Unit unit = new Unit();
-        unit.setId(unitDTO.getId());
-        unit.setName(unitDTO.getName());
-        unit.setDuration(unitDTO.getDuration());
-        unit.setStatus(unitDTO.getStatus());
-
-        // Fetch the Syllabus using the provided syllabusId
-        Syllabus syllabus = syllabusRepository.findOneById(unitDTO.getSyllabusId());
-        unit.setSyllabus(syllabus);
-
-        // Fetch the Content objects using the provided contentIds
-        List<Content> contents = new ArrayList<>();
-        if (unitDTO.getContentIds() != null){
-            for (Long id : unitDTO.getContentIds()) {
-                Content content = contentRepository.findById(id);
-                if (content != null){
-                    content.setUnit(unit);
-                    contents.add(content);
-                }
-            }
-        }
-        unit.setContents(contents);
-        return unit;
-    }
+//    public Unit convertDtoToEntity(UnitDTO unitDTO, SyllabusRepository syllabusRepository, ContentRepository contentRepository) {
+//        Unit unit = new Unit();
+//        unit.setId(unitDTO.getId());
+//        unit.setName(unitDTO.getName());
+////        unit.setDuration(unitDTO.getDuration());
+//        unit.setStatus(unitDTO.getStatus());
+//
+//        // Fetch the Syllabus using the provided syllabusId
+//        Syllabus syllabus = syllabusRepository.findOneById(unitDTO.getSyllabusId());
+//        unit.setSyllabus(syllabus);
+//
+//        // Fetch the Content objects using the provided contentIds
+//        List<Content> contents = new ArrayList<>();
+//        if (unitDTO.getContentIds() != null){
+//            for (Long id : unitDTO.getContentIds()) {
+//                Content content = contentRepository.findById(id);
+//                if (content != null){
+//                    content.setUnit(unit);
+//                    contents.add(content);
+//                }
+//            }
+//        }
+//        unit.setContents(contents);
+//        return unit;
+//    }
 
     private void convertListUnitToListUnitDTO(List<Unit> units, List<UnitDTO> result) {
-        for (Unit unit : units) {
-            UnitDTO newUnitDTO = convertUnitToUnitDTO(unit);
-            result.add(newUnitDTO);
-        }
+        result.addAll(units.stream()
+                .map(this::convertUnitToUnitDTO)
+                .toList());
     }
 
     private UnitDTO convertUnitToUnitDTO(Unit unit) {
@@ -231,10 +243,14 @@ public class UnitServiceImpl implements IUnitService {
 
         if (contents == null) newUnitDTO.setContentIds(null);
         else {
+            Long duration = contents.stream()
+                    .mapToLong(Content::getDuration)
+                    .sum();
             List<Long> contentIds = contents.stream()
                     .map(Content::getId)
                     .toList();
             newUnitDTO.setContentIds(contentIds);
+            newUnitDTO.setDuration(duration.intValue());
         }
 
         if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
