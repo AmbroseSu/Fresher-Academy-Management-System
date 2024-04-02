@@ -85,11 +85,20 @@ public class ContentServiceImpl implements IContentService {
     if (contentDTO.getId() != null){
       Content oldEntity = contentRepository.findById(contentDTO.getId());
       Content tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-      entity = convertDtoToEntity(contentDTO, unitRepository);
+      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
       entity = ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
       contentLearningObjectiveRepository.deleteAllByContentId(contentDTO.getId());
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
-      entity.setUnit(unitRepository.findById(requestUnitId));
+
+      if (requestUnitId != null) {
+        entity.setUnit(unitRepository.findById(requestUnitId));
+      }
+      if (requestOutputStandardIds != null) {
+        outputStandardRepository.findByContent_Id(contentDTO.getId()).stream()
+                .peek(outputStandard -> outputStandard.setContent(null))
+                .forEach(outputStandardRepository::save);
+      }
+      loadOutputStandardFromListOutputStandardId(requestOutputStandardIds, contentDTO.getId());
       entity.markModified();
       contentRepository.save(entity);
     }
@@ -97,9 +106,13 @@ public class ContentServiceImpl implements IContentService {
     // * For create request
     else {
       contentDTO.setStatus(true);
-      entity = convertDtoToEntity(contentDTO, unitRepository);
+      entity = (Content) genericConverter.toEntity(contentDTO, Content.class);
+      if (requestUnitId != null) {
+        entity.setUnit(unitRepository.findById(requestUnitId));
+      }
       contentRepository.save(entity);
       loadContentLearningObjectiveFromListLearningObjectiveId(requestLearningObjectiveIds, entity.getId());
+      loadOutputStandardFromListOutputStandardId(requestOutputStandardIds, entity.getId());
     }
 
     ContentDTO result = convertContentToContentDTO(entity);
@@ -158,6 +171,16 @@ public class ContentServiceImpl implements IContentService {
     Content content = contentRepository.findById(id);
     return content != null;
 
+  }
+
+  private void loadOutputStandardFromListOutputStandardId(List<Long> requestOutputStandardIds, Long contentId) {
+    if (requestOutputStandardIds != null && !requestOutputStandardIds.isEmpty()) {
+      Content content = contentRepository.findById(contentId);
+      requestOutputStandardIds.stream()
+              .map(outputStandardRepository::findById)
+              .peek(outputStandard -> outputStandard.setContent(content))
+              .forEach(outputStandardRepository::save);
+    }
   }
 
   @Override
@@ -230,29 +253,29 @@ public class ContentServiceImpl implements IContentService {
     return newContentDTO;
   }
 
-  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
-    Content content = new Content();
-    content.setId(contentDTO.getId());
-    content.setDeliveryType(contentDTO.getDeliveryType());
-    content.setDuration(contentDTO.getDuration());
-    content.setStatus(contentDTO.getStatus());
-    content.setTrainingFormat(contentDTO.getTrainingFormat());
-    content.setDeliveryType(contentDTO.getDeliveryType());
-    if (contentDTO.getOutputStandardIds() != null) {
-      List<OutputStandard> outputStandards = contentDTO.getOutputStandardIds().stream()
-              .map(outputStandardRepository::findById)
-              .filter(Objects::nonNull)
-              .peek(outputStandard -> outputStandard.setContent(content))
-              .toList();
-      content.setOutputStandards(outputStandards);
-    }
-
-    // Fetch the Unit using the provided unitId
-    Unit unit = unitRepository.findById(contentDTO.getUnitId());
-    content.setUnit(unit);
-
-    return content;
-  }
+//  public Content convertDtoToEntity(ContentDTO contentDTO, UnitRepository unitRepository) {
+//    Content content = new Content();
+//    content.setId(contentDTO.getId());
+//    content.setDeliveryType(contentDTO.getDeliveryType());
+//    content.setDuration(contentDTO.getDuration());
+//    content.setStatus(contentDTO.getStatus());
+//    content.setTrainingFormat(contentDTO.getTrainingFormat());
+//    content.setDeliveryType(contentDTO.getDeliveryType());
+//    if (contentDTO.getOutputStandardIds() != null) {
+//      List<OutputStandard> outputStandards = contentDTO.getOutputStandardIds().stream()
+//              .map(outputStandardRepository::findById)
+//              .filter(Objects::nonNull)
+//              .peek(outputStandard -> outputStandard.setContent(content))
+//              .toList();
+//      content.setOutputStandards(outputStandards);
+//    }
+//
+//    // Fetch the Unit using the provided unitId
+//    Unit unit = unitRepository.findById(contentDTO.getUnitId());
+//    content.setUnit(unit);
+//
+//    return content;
+//  }
 
   private void loadContentLearningObjectiveFromListLearningObjectiveId(List<Long> requestLearningObjectiveIds, Long contentId) {
     if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {

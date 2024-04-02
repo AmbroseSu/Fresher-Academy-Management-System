@@ -18,13 +18,15 @@ public class OutputStandardController {
     @Qualifier("OutputStandardService")
     private IOutputStandardService outputStandardService;
 
-    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View')")
+    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:View') ||" +
+            "hasAuthority('content:Full_Access') || hasAuthority('content:View')")
     @GetMapping("/outputStandard/{id}")
     public ResponseEntity<?> getOutputStandardById(@PathVariable Long id) {
         return outputStandardService.findById(id);
     }
 
-    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
+    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create') ||" +
+            "hasAuthority('content:Full_Access') || hasAuthority('content:Create')")
     @PostMapping("/outputStandard")
     public ResponseEntity<?> createOutputStandard(@Valid @RequestBody OutputStandardDTO outputStandardDTO) {
         return outputStandardService.save(outputStandardDTO);
