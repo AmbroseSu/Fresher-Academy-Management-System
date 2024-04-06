@@ -17,14 +17,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -189,7 +187,6 @@ public class UnitServiceImplTest {
         Unit savedUnit = new Unit(); // Tạo một đối tượng Unit đã được lưu thành công
         savedUnit.setId(1L);
         savedUnit.setName("Test Unit");
-        savedUnit.setDuration(1);
         savedUnit.setStatus(true);
 
         // Mock behavior của unitRepository.save(any())

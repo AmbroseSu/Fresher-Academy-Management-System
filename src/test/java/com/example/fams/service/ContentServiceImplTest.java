@@ -1,34 +1,14 @@
 package com.example.fams.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.example.fams.config.CustomValidationException;
 import com.example.fams.converter.GenericConverter;
-import com.example.fams.dto.ClassDTO;
 import com.example.fams.dto.ContentDTO;
 import com.example.fams.dto.ResponseDTO;
 import com.example.fams.entities.Content;
-import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.enums.DeliveryType;
 import com.example.fams.entities.enums.TrainingFormat;
-import com.example.fams.repository.ContentLearningObjectiveRepository;
-import com.example.fams.repository.ContentRepository;
-import com.example.fams.repository.LearningObjectiveContentRepository;
-import com.example.fams.repository.LearningObjectiveRepository;
-import com.example.fams.repository.UnitRepository;
-import com.example.fams.services.impl.ClassServiceImpl;
+import com.example.fams.repository.*;
 import com.example.fams.services.impl.ContentServiceImpl;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +19,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ContentServiceImplTest {

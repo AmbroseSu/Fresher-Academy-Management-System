@@ -1,6 +1,5 @@
 package com.example.fams.repository;
 
-import com.example.fams.entities.User;
 import com.example.fams.entities.UserRole;
 import com.example.fams.entities.enums.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,8 +13,15 @@ import java.util.List;
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     @Transactional
     @Modifying
-    @Query("UPDATE UserRole ur SET ur.syllabusPermission = :syllabusPermission, ur.materialPermission = :materialPermission, ur.trainingProgramPermission = :trainingProgramPermission, ur.learningObjectivePermission = :learningObjectivePermission, ur.unitPermission = :unitPermission, ur.classPermission = :classPermission, ur.contentPermission = :contentPermission, ur.userPermission = :userPermission WHERE ur.id = (SELECT u.userRole.id FROM User u WHERE u.id = :userId)")
-    void updateUserRoleByUserId(@Param("userId") Long userId, @Param("syllabusPermission") Permission syllabusPermission, @Param("materialPermission") Permission materialPermission, @Param("trainingProgramPermission") Permission trainingProgramPermission, @Param("learningObjectivePermission") Permission learningObjectivePermission, @Param("unitPermission") Permission unitPermission, @Param("classPermission") Permission classPermission, @Param("contentPermission") Permission contentPermission, @Param("userPermission") Permission userPermission);
+    @Query("UPDATE UserRole ur SET ur.syllabusPermission = :syllabusPermission, ur.materialPermission = :materialPermission, ur.trainingProgramPermission = :trainingProgramPermission, ur.learningObjectivePermission = :learningObjectivePermission, ur.unitPermission = :unitPermission, ur.classPermission = :classPermission, ur.contentPermission = :contentPermission, ur.userPermission = :userPermission WHERE ur.id = :userRoleId")
+    void updateUserRoleByUserRoleId(@Param("userRoleId") Long userRoleId,
+            @Param("syllabusPermission") Permission syllabusPermission,
+            @Param("materialPermission") Permission materialPermission,
+            @Param("trainingProgramPermission") Permission trainingProgramPermission,
+            @Param("learningObjectivePermission") Permission learningObjectivePermission,
+            @Param("unitPermission") Permission unitPermission, @Param("classPermission") Permission classPermission,
+            @Param("contentPermission") Permission contentPermission,
+            @Param("userPermission") Permission userPermission);
 
     UserRole findFirstByOrderByIdAsc();
 
@@ -23,4 +29,5 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     UserRole findUserRoleByUserId(@Param("userId") Long userId);
 
     List<UserRole> findAllBy();
+
 }

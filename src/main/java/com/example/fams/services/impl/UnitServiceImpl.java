@@ -33,7 +33,8 @@ public class UnitServiceImpl implements IUnitService {
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
 
-    public UnitServiceImpl(UnitRepository unitRepository, ContentRepository contentRepository, SyllabusRepository syllabusRepository, GenericConverter genericConverter) {
+    public UnitServiceImpl(UnitRepository unitRepository, ContentRepository contentRepository,
+            SyllabusRepository syllabusRepository, GenericConverter genericConverter) {
         this.unitRepository = unitRepository;
         this.contentRepository = contentRepository;
         this.syllabusRepository = syllabusRepository;
@@ -45,7 +46,8 @@ public class UnitServiceImpl implements IUnitService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<Unit> units = unitRepository.findByStatusIsTrue(pageable);
         List<UnitDTO> result = new ArrayList<>();
-        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusDTO và List<ContentDTO> ở trong)
+        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusDTO và
+        // List<ContentDTO> ở trong)
         convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -63,10 +65,10 @@ public class UnitServiceImpl implements IUnitService {
         Long requestSyllabusId = unitDTO.getSyllabusId();
 
         // * Validate requestDTO ( if left null, then can be updated later )
-        if (requestContentIds != null){
+        if (requestContentIds != null) {
             ServiceUtils.validateContentIds(requestContentIds, contentRepository);
         }
-        if (requestSyllabusId != null){
+        if (requestSyllabusId != null) {
             ServiceUtils.validateSyllabusIds(List.of(requestSyllabusId), syllabusRepository);
         }
         if (!ServiceUtils.errors.isEmpty()) {
@@ -74,10 +76,10 @@ public class UnitServiceImpl implements IUnitService {
         }
 
         // * For update request
-        if (unitDTO.getId() != null){
+        if (unitDTO.getId() != null) {
             Unit oldEntity = unitRepository.findById(unitDTO.getId());
             Unit tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
-//            unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
+            // unit = convertDtoToEntity(unitDTO, syllabusRepository, contentRepository);
             unit = (Unit) genericConverter.toEntity(unitDTO, Unit.class);
             ServiceUtils.fillMissingAttribute(unit, tempOldEntity);
 
@@ -106,13 +108,13 @@ public class UnitServiceImpl implements IUnitService {
         }
 
         UnitDTO result = convertUnitToUnitDTO(unit);
-//        result.setSyllabusId(requestSyllabusId);
-//        result.setContentIds(requestContentIds);
+        // result.setSyllabusId(requestSyllabusId);
+        // result.setContentIds(requestContentIds);
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
-    public Boolean checkExist(Long id){
-       Unit unit = unitRepository.findById(id);
+    public Boolean checkExist(Long id) {
+        Unit unit = unitRepository.findById(id);
         return unit != null;
     }
 
@@ -122,8 +124,7 @@ public class UnitServiceImpl implements IUnitService {
         if (entity != null) {
             UnitDTO result = convertUnitToUnitDTO(entity);
             return ResponseUtil.getObject(result, HttpStatus.OK, "Fetched successfully");
-        }
-        else {
+        } else {
             return ResponseUtil.error("Unit not found", "Cannot Find Unit", HttpStatus.NOT_FOUND);
         }
     }
@@ -133,7 +134,8 @@ public class UnitServiceImpl implements IUnitService {
         Pageable pageable = PageRequest.of(page - 1, limit);
         List<Unit> units = unitRepository.findAllBy(pageable);
         List<UnitDTO> result = new ArrayList<>();
-        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusId và List contentIds ở trong)
+        // ? Với mỗi unit, chuyển nó thành unitDTO (chưa có syllabusId và List
+        // contentIds ở trong)
         convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -145,11 +147,12 @@ public class UnitServiceImpl implements IUnitService {
 
     public ResponseEntity<?> searchSortFilter(UnitDTO unitDTO, int page, int limit) {
         String name = unitDTO.getName();
+        String dayNumber = unitDTO.getDayNumber();
         Integer duration = unitDTO.getDuration();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Unit> units = unitRepository.searchSortFilter(name, duration, pageable);
+        List<Unit> units = unitRepository.searchSortFilter(name, dayNumber, duration, pageable);
         List<UnitDTO> result = new ArrayList<>();
-        Long count = unitRepository.countSearchSortFilter(name, duration);
+        Long count = unitRepository.countSearchSortFilter(name, dayNumber, duration);
         convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -162,11 +165,12 @@ public class UnitServiceImpl implements IUnitService {
     @Override
     public ResponseEntity<?> searchSortFilterADMIN(UnitDTO unitDTO, String sortById, int page, int limit) {
         String name = unitDTO.getName();
+        String dayNumber = unitDTO.getDayNumber();
         Integer duration = unitDTO.getDuration();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<Unit> units = unitRepository.searchSortFilterADMIN(name, duration, sortById, pageable);
+        List<Unit> units = unitRepository.searchSortFilterADMIN(name, dayNumber, duration, sortById, pageable);
         List<UnitDTO> result = new ArrayList<>();
-        Long count = unitRepository.countSearchSortFilter(name, duration);
+        Long count = unitRepository.countSearchSortFilter(name, dayNumber, duration);
         convertListUnitToListUnitDTO(units, result);
         return ResponseUtil.getCollection(result,
                 HttpStatus.OK,
@@ -202,31 +206,32 @@ public class UnitServiceImpl implements IUnitService {
         }
     }
 
-//    public Unit convertDtoToEntity(UnitDTO unitDTO, SyllabusRepository syllabusRepository, ContentRepository contentRepository) {
-//        Unit unit = new Unit();
-//        unit.setId(unitDTO.getId());
-//        unit.setName(unitDTO.getName());
-////        unit.setDuration(unitDTO.getDuration());
-//        unit.setStatus(unitDTO.getStatus());
-//
-//        // Fetch the Syllabus using the provided syllabusId
-//        Syllabus syllabus = syllabusRepository.findOneById(unitDTO.getSyllabusId());
-//        unit.setSyllabus(syllabus);
-//
-//        // Fetch the Content objects using the provided contentIds
-//        List<Content> contents = new ArrayList<>();
-//        if (unitDTO.getContentIds() != null){
-//            for (Long id : unitDTO.getContentIds()) {
-//                Content content = contentRepository.findById(id);
-//                if (content != null){
-//                    content.setUnit(unit);
-//                    contents.add(content);
-//                }
-//            }
-//        }
-//        unit.setContents(contents);
-//        return unit;
-//    }
+    // public Unit convertDtoToEntity(UnitDTO unitDTO, SyllabusRepository
+    // syllabusRepository, ContentRepository contentRepository) {
+    // Unit unit = new Unit();
+    // unit.setId(unitDTO.getId());
+    // unit.setName(unitDTO.getName());
+    //// unit.setDuration(unitDTO.getDuration());
+    // unit.setStatus(unitDTO.getStatus());
+    //
+    // // Fetch the Syllabus using the provided syllabusId
+    // Syllabus syllabus = syllabusRepository.findOneById(unitDTO.getSyllabusId());
+    // unit.setSyllabus(syllabus);
+    //
+    // // Fetch the Content objects using the provided contentIds
+    // List<Content> contents = new ArrayList<>();
+    // if (unitDTO.getContentIds() != null){
+    // for (Long id : unitDTO.getContentIds()) {
+    // Content content = contentRepository.findById(id);
+    // if (content != null){
+    // content.setUnit(unit);
+    // contents.add(content);
+    // }
+    // }
+    // }
+    // unit.setContents(contents);
+    // return unit;
+    // }
 
     private void convertListUnitToListUnitDTO(List<Unit> units, List<UnitDTO> result) {
         result.addAll(units.stream()
@@ -241,7 +246,8 @@ public class UnitServiceImpl implements IUnitService {
 
         // ! Set list contentIds và syllabusId sau khi convert ở trên vào unitDTO
 
-        if (contents == null) newUnitDTO.setContentIds(null);
+        if (contents == null)
+            newUnitDTO.setContentIds(null);
         else {
             Long duration = contents.stream()
                     .mapToLong(Content::getDuration)
@@ -253,9 +259,10 @@ public class UnitServiceImpl implements IUnitService {
             newUnitDTO.setDuration(duration.intValue());
         }
 
-        if (unit.getSyllabus() == null) newUnitDTO.setSyllabusId(null);
-        else newUnitDTO.setSyllabusId(unit.getSyllabus().getId());
+        if (unit.getSyllabus() == null)
+            newUnitDTO.setSyllabusId(null);
+        else
+            newUnitDTO.setSyllabusId(unit.getSyllabus().getId());
         return newUnitDTO;
     }
 }
-

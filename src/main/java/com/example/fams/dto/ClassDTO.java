@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -35,10 +36,10 @@ public class ClassDTO {
   private Long endDate;
 
   @NotNull(message = "Class start time frame must not be null")
-  private Float startTimeFrame;
+  private LocalTime startTimeFrame;
 
   @NotNull(message = "Class end time frame must not be null")
-  private Float endTimeFrame;
+  private LocalTime endTimeFrame;
 
   private List<Long> userIds;
   private Long trainingProgramId;

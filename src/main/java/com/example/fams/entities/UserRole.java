@@ -3,6 +3,7 @@ package com.example.fams.entities;
 import com.example.fams.entities.enums.Permission;
 import com.example.fams.entities.enums.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

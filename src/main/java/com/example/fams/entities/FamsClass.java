@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Date;
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -32,10 +33,10 @@ public class FamsClass extends BaseEntity{
     private Long endDate;
 
     @Column(name="start_time_frame")
-    private Float startTimeFrame;
+    private LocalTime startTimeFrame;
 
     @Column(name="end_time_frame")
-    private Float endTimeFrame;
+    private LocalTime endTimeFrame;
 
     @OneToMany(mappedBy = "famsClass")
     private List<ClassUser> classUsers;

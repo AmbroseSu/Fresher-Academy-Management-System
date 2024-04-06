@@ -32,8 +32,9 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
 
   // ? Search by fields filter
   @Query(value = "SELECT * FROM tbl_class cl " +
-          "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%'))) AND cl.status = TRUE " +
-          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%')))",
+          "WHERE ((:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%')))" +
+          "OR (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%'))))" +
+          "AND cl.status = TRUE",
           nativeQuery = true)
   List<FamsClass> searchSortFilter(@Param("code") String code,
                                    @Param("name") String name,
@@ -41,14 +42,14 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
 
   @Query(value = "SELECT COUNT(*) FROM tbl_class cl " +
           "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%'))) AND cl.status = TRUE " +
-          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%')))",
+          "OR (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%')))",
           nativeQuery = true)
   Long countSearchSortFilter(String code,
                              String name);
 
   @Query(value = "SELECT * FROM tbl_class cl " +
           "WHERE (:code IS NULL OR LOWER(cl.code) LIKE LOWER(CONCAT('%', :code,'%')))  " +
-          "AND (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
+          "OR (:name IS NULL OR LOWER(cl.name) LIKE LOWER(CONCAT('%', :name,'%'))) " +
           "ORDER BY " +
           "CASE WHEN :sortById ='iDESC' THEN cl.id END DESC, " +
           "CASE WHEN :sortById ='iASC' THEN cl.id END ASC, " +

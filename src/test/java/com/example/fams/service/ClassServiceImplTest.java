@@ -1,42 +1,32 @@
 package com.example.fams.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.example.fams.config.CustomValidationException;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ClassDTO;
 import com.example.fams.dto.ResponseDTO;
-import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.entities.FamsClass;
-import com.example.fams.entities.TrainingProgram;
-import com.example.fams.repository.ClassRepository;
-import com.example.fams.repository.ClassUserRepository;
-import com.example.fams.repository.TrainingProgramRepository;
-import com.example.fams.repository.UserClassRepository;
-import com.example.fams.repository.UserRepository;
+import com.example.fams.repository.*;
 import com.example.fams.services.impl.ClassServiceImpl;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.mockito.junit.jupiter.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ClassServiceImplTest{
 
@@ -164,8 +154,8 @@ public class ClassServiceImplTest{
     classDTO.setStatus(true);
     classDTO.setStartDate(1733961600L);
     classDTO.setEndDate(1736640000L);
-    classDTO.setStartTimeFrame(1201113F);
-    classDTO.setEndTimeFrame(16130F);
+    classDTO.setStartTimeFrame(LocalTime.parse("20:00:00"));
+    classDTO.setEndTimeFrame(LocalTime.parse("21:00:00"));
     classDTO.setUserIds(null);
    // ClassDTO classDTO = new ClassDTO();
     // Mock behavior
@@ -191,8 +181,8 @@ public class ClassServiceImplTest{
     classDTO.setStatus(true);
     classDTO.setStartDate(1733961600L);
     classDTO.setEndDate(1736640000L);
-    classDTO.setStartTimeFrame(1201113F);
-    classDTO.setEndTimeFrame(16130F);
+    classDTO.setStartTimeFrame(LocalTime.parse("20:00:00"));
+    classDTO.setEndTimeFrame(LocalTime.parse("21:00:00"));
     classDTO.setUserIds(Collections.singletonList(1L)); // Assuming syllabusId 1 doesn't exist
 
     // Using Mockito.lenient() to avoid UnnecessaryStubbingException

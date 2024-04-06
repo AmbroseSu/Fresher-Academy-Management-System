@@ -1,30 +1,20 @@
 package com.example.fams.service;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.amazonaws.Response;
 import com.example.fams.config.CustomValidationException;
-import com.example.fams.controller.TrainingProgramController;
 import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ResponseDTO;
 import com.example.fams.dto.TrainingProgramDTO;
-import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.TrainingProgram;
+import com.example.fams.repository.SyllabusRepository;
 import com.example.fams.repository.SyllabusTrainingProgramRepository;
 import com.example.fams.repository.TrainingProgramRepository;
-import com.example.fams.repository.*;
 import com.example.fams.services.ServiceUtils;
 import com.example.fams.services.impl.TrainingProgramServiceImpl;
-
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.aspectj.lang.annotation.Before;
-import org.hibernate.StaleObjectStateException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,13 +25,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingProgramServiceImplTest {
