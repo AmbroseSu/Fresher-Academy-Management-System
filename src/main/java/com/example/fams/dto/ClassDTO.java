@@ -35,11 +35,13 @@ public class ClassDTO {
   @NotNull(message = "Class end date must not be null")
   private Long endDate;
 
-  @NotNull(message = "Class start time frame must not be null")
-  private LocalTime startTimeFrame;
+//  @NotNull(message = "Class start time frame must not be null")
+//  private LocalTime startTimeFrame;
+//
+//  @NotNull(message = "Class end time frame must not be null")
+//  private LocalTime endTimeFrame;
 
-  @NotNull(message = "Class end time frame must not be null")
-  private LocalTime endTimeFrame;
+  private List<Long> calendarIds;
 
   private List<Long> userIds;
   private Long trainingProgramId;

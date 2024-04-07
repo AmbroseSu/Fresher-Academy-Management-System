@@ -25,13 +25,10 @@ import java.util.List;
 
 @Service("MaterialService")
 public class MaterialServiceImpl implements IMaterialService {
-
-
     private final MaterialRepository materialRepository;
     private final SyllabusMaterialRepository syllabusMaterialRepository;
     private final SyllabusRepository syllabusRepository;
     private final GenericConverter genericConverter;
-
     private final IStorageService storageService;
 
     public MaterialServiceImpl(MaterialRepository materialRepository, SyllabusMaterialRepository syllabusMaterialRepository, SyllabusRepository syllabusRepository, GenericConverter genericConverter,
