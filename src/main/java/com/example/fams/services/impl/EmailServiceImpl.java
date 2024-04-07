@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<p>Your account has been successfully created. Below are your login credentials:</p>"
                 + "<ul>"
                 + "<li><strong>Username:</strong> " + userEmail + "</li>"
-                + "<li><strong>Password:</strong> " + password + "</li>"
+                + "<li><strong>Password:</strong> " + "Your phone number" + "</li>"
                 + "</ul>"
                 + "<p>Please keep your login credentials secure and do not share them with anyone.</p>"
                 + "<p>Thank you for choosing our services. We hope you enjoy your experience on our website!</p>"
