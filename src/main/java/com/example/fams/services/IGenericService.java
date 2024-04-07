@@ -1,5 +1,6 @@
 package com.example.fams.services;
 
+import com.example.fams.dto.ClassDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface IGenericService<T> {
@@ -11,5 +12,7 @@ public interface IGenericService<T> {
     ResponseEntity<?> save(T t);
 
     ResponseEntity<?> changeStatus(Long id);
+
+    Boolean checkExist(Long id);
 
 }

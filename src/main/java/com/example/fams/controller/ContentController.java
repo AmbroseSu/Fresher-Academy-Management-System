@@ -1,40 +1,82 @@
 package com.example.fams.controller;
 
+import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.ClassDTO;
 import com.example.fams.dto.ContentDTO;
+import com.example.fams.services.IClassService;
+import com.example.fams.services.IContentService;
 import com.example.fams.services.IGenericService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin
 public class ContentController {
   @Autowired
   @Qualifier("ContentService")
-  private IGenericService<ContentDTO> contentService;
+  private IContentService contentService;
 
-  @GetMapping("user/content/findAllByStatusTrue")
-  public ResponseEntity<?> getAllClassByStatusTrue(@RequestParam int page, @RequestParam int limit) {
+  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
+  @GetMapping("/content")
+  public ResponseEntity<?> getAllContentByStatusTrue(@RequestParam(defaultValue = "1") int page,
+                                                     @RequestParam(defaultValue = "10") int limit) {
     return contentService.findAllByStatusTrue(page, limit);
   }
 
-  @GetMapping("admin/content/findAll")
-  public ResponseEntity<?> getAllLearningObjectives(@RequestParam int page, @RequestParam int limit) {
+  @PreAuthorize("hasAuthority('content:Full_Access')")
+  @GetMapping("/content/hidden")
+  public ResponseEntity<?> getAllContent(@RequestParam(defaultValue = "1") int page,
+                                         @RequestParam(defaultValue = "10") int limit) {
     return contentService.findAll(page, limit);
   }
 
-  @PostMapping("admin/content/create")
-  public ResponseEntity<?> createLearningObjective(@RequestBody ContentDTO contentDTO) {
+  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
+  @GetMapping("/content/{id}")
+  public ResponseEntity<?> getByClassId(@PathVariable Long id) {
+    return contentService.findById(id);
+  }
+
+  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:View')")
+  @PostMapping("/content/search")
+  public ResponseEntity<?> searchContent(@RequestBody ContentDTO contentDTO,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int limit){
+    return contentService.searchSortFilter(contentDTO, page, limit);
+  }
+
+  @PreAuthorize("hasAuthority('content:Full_Access')")
+  @PostMapping("/content/search/hidden")
+  public ResponseEntity<?> searchContentADMIN(@RequestBody ContentDTO contentDTO,
+      @RequestParam(required = false) String sortById,
+      @RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "10") int limit){
+    return contentService.searchSortFilterADMIN(contentDTO, sortById, page, limit);
+  }
+
+  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:Create')")
+  @PostMapping("/content")
+  public ResponseEntity<?> createContent(@Valid @RequestBody ContentDTO contentDTO) {
     return contentService.save(contentDTO);
   }
 
-  @PutMapping("admin/content/update")
-  public ResponseEntity<?> updateLearningObjective(@RequestBody ContentDTO contentDTO) {
-    return contentService.save(contentDTO);
+  @PreAuthorize("hasAuthority('content:Full_Access') || hasAuthority('content:Modify')")
+  @PutMapping("/content/{id}")
+  public ResponseEntity<?> updateContent(@Valid @RequestBody ContentDTO contentDTO, @PathVariable(name = "id") Long id) {
+    if(contentService.checkExist(id)){
+      contentDTO.setId(id);
+      return contentService.save(contentDTO);
+    }
+    return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
   }
 
-  @DeleteMapping("admin/content/delete/{id}")
+  @PreAuthorize("hasAuthority('content:Full_Access')")
+  @DeleteMapping("/content/{id}")
   public ResponseEntity<?> changeStatus(@PathVariable Long id) {
     return contentService.changeStatus(id);
   }

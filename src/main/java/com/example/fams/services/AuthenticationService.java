@@ -10,11 +10,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface AuthenticationService {
-    ResponseEntity<?> signup(SignUpRequest signUpRequest);
-    JwtAuthenticationRespone signin(SigninRequest signinRequest);
-    JwtAuthenticationRespone refreshToken(RefreshTokenRequest refreshTokenRequest);
-
-    boolean generateAndSendOTP(String userEmail);
-
-    boolean verifyOTP(String enteredOTP);
+    ResponseEntity<?> signin(SigninRequest signinRequest);
+    ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest);
+    ResponseEntity<?> generateAndSendOTP(String userEmail);
+    ResponseEntity<?> verifyOTP(String enteredOTP, Long id);
+    ResponseEntity<?> resetPassword(String email, String newPassword);
 }

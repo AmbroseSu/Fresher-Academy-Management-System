@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
+import java.util.List;
+
 @UtilityClass
 public class ResponseUtil {
     public static ResponseEntity<ResponseDTO> getObject(Object result, HttpStatus status, String response){
@@ -70,6 +72,26 @@ public class ResponseUtil {
         );
     }
 
+    public static ResponseEntity<?> getError(Object result, HttpStatus status, String response) {
+        return new ResponseEntity<>(
+            ResponseDTO.builder()
+                .statusCode(status.value())
+                .details(ExceptionUtils.getResponseString(response))
+                .content(result)
+                .build()
+            , status
+        );
+    }
 
+    public static ResponseEntity<?> error(List<String> errors, String message, HttpStatus status) {
+        return new ResponseEntity<> (
+                ResponseDTO.builder()
+                        .message(message)
+                        .details(errors)
+                        .statusCode(status.value())
+                        .build()
+                ,status
+        );
+    }
 
 }

@@ -11,11 +11,10 @@ import java.util.List;
 @Table(name="tbl_syllabus")
 public class Syllabus extends BaseEntity{
 
+    private Long attendee;
     private String name;
 
     private String code;
-
-    private Long timeAllocation;
 
     private String description;
 
@@ -25,13 +24,18 @@ public class Syllabus extends BaseEntity{
 
     private String version;
 
-    @ManyToMany
-    private List<Material> materials;
+    @OneToMany(mappedBy="syllabus")
+    private List<SyllabusMaterial> syllabusMaterial;
 
-    @ManyToMany
-    private List<LearningObjective> learningObjectives;
+    @OneToMany(mappedBy = "syllabus")
+    private List<SyllabusObjective> syllabusObjectives;
 
-    @ManyToMany(mappedBy="syllabuses")
-    private List<TrainingProgram> trainingPrograms;
+    @OneToMany(mappedBy = "syllabus")
+    private List<SyllabusTrainingProgram> syllabusTrainingPrograms;
 
+    @OneToMany(mappedBy = "syllabus")
+    private List<Unit> units;
+
+//    @OneToMany(mappedBy = "syllabus")
+//    private List<OutputStandard> outputStandards;
 }

@@ -1,5 +1,6 @@
 package com.example.fams.entities;
 
+import com.example.fams.entities.enums.Gender;
 import com.example.fams.entities.enums.Role;
 import com.example.fams.validation.ValidEmail;
 import com.example.fams.validation.ValidPhone;
@@ -18,44 +19,46 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tbl_user")
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+
+public class User extends BaseEntity implements UserDetails {
+
     private String firstName;
 
-    private String secondName;
+    private String lastName;
 
-    @ValidEmail
     private String email;
     private String password;
-    private Role role;
 
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "com.example.fams.validation.CustomerUUIDGenerator"
-    )
+    @ManyToOne
+    @JoinColumn(name = "roleId")
+    private UserRole userRole;
+
+    @Column(name = "uuid", nullable = false, unique = true)
     private String uuid;
 
-    @ValidPhone
     private String phone;
     private Long dob;
-    private Boolean gender;
-    private Integer status;
-    private String createBy;
-    private Long createDate;
-    private String modifiedBy;
-    private Long modifiedDate;
+    private Gender gender;
+    private String avatarUrl;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Class> aClasses;
+//    @ManyToMany(mappedBy = "user")
+//    private List<User> user;
+    @OneToMany(mappedBy = "user")
+    private List<ClassUser> classUsers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(
+                new SimpleGrantedAuthority("syllabus:" + userRole.getSyllabusPermission().name()),
+                new SimpleGrantedAuthority("material:" + userRole.getMaterialPermission().name()),
+                new SimpleGrantedAuthority("trainingProgram:" + userRole.getTrainingProgramPermission().name()),
+                new SimpleGrantedAuthority("learningObjective:" + userRole.getLearningObjectivePermission().name()),
+                new SimpleGrantedAuthority("unit:" + userRole.getUnitPermission().name()),
+                new SimpleGrantedAuthority("class:" + userRole.getClassPermission().name()),
+                new SimpleGrantedAuthority("content:" + userRole.getContentPermission().name()),
+                new SimpleGrantedAuthority("user:" + userRole.getUserPermission().name())
+        );
     }
-
     @Override
     public String getUsername() {
         return email;
@@ -78,6 +81,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return super.isStatus();
     }
 }

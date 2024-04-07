@@ -3,6 +3,8 @@ package com.example.fams.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name="tbl_unit")
@@ -14,6 +16,9 @@ public class Unit extends BaseEntity{
 
     private String name;
 
-    private Integer duration;
-
+//    private Integer duration;
+    private String dayNumber;
+    
+    @OneToMany(mappedBy="unit")
+    private List<Content> contents;
 }

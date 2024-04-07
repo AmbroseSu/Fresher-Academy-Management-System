@@ -7,6 +7,7 @@ import org.hibernate.id.IdentifierGenerator;
 import java.io.Serializable;
 import java.util.UUID;
 
+// Khong dung den
 public class CustomerUUIDGenerator implements IdentifierGenerator {
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
