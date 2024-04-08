@@ -22,7 +22,7 @@ public class ClassDTO {
   private String name;
   @NotBlank(message = "Please enter class code")
   private String code;
-//  private Long duration;
+  private Long duration;
   private Boolean status;
   @NotNull(message = "Please enter class status")
   private ClassStatus classStatus;
@@ -34,6 +34,10 @@ public class ClassDTO {
 
   @NotNull(message = "Class end date must not be null")
   private Long endDate;
+
+  private LocalTime startTime;
+
+  private LocalTime endTime;
 
 //  @NotNull(message = "Class start time frame must not be null")
 //  private LocalTime startTimeFrame;

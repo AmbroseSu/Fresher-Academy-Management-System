@@ -4,7 +4,6 @@ import com.example.fams.entities.enums.ClassStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Date;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -36,5 +35,9 @@ public class FamsClass extends BaseEntity {
     private List<ClassUser> classUsers;
 
     @OneToMany (mappedBy = "famsClass")
-    private List<ClassCalendar> classCalendars;
+    private List<CalendarClass> calendarsByWeekDay;
+
+    private LocalTime startTime;
+
+    private LocalTime endTime;
 }

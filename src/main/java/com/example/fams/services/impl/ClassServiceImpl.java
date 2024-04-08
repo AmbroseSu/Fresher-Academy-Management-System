@@ -3,14 +3,18 @@ package com.example.fams.services.impl;
 import com.example.fams.config.CustomValidationException;
 import com.example.fams.config.ResponseUtil;
 import com.example.fams.converter.GenericConverter;
+import com.example.fams.dto.CalendarDTO;
 import com.example.fams.dto.ClassDTO;
+import com.example.fams.entities.CalendarClass;
 import com.example.fams.entities.ClassUser;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.TrainingProgram;
 import com.example.fams.entities.User;
+import com.example.fams.entities.enums.WeekDay;
 import com.example.fams.repository.*;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.ServiceUtils;
+import java.util.Calendar;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ import java.util.List;
 public class ClassServiceImpl implements IClassService {
 
   private final ClassRepository classRepository;
+  private final CalendarRepository calendarRepository;
   private final UserClassRepository userClassRepository;
   private final ClassUserRepository classUserRepository;
   private final UserRepository userRepository;
@@ -31,9 +36,10 @@ public class ClassServiceImpl implements IClassService {
   private final GenericConverter genericConverter;
 
   public ClassServiceImpl(ClassRepository classRepository,
-      UserClassRepository userClassRepository,
+      CalendarRepository calendarRepository, UserClassRepository userClassRepository,
                           ClassUserRepository classUserRepository, UserRepository userRepository, TrainingProgramRepository trainingProgramRepository, GenericConverter genericConverter) {
     this.classRepository = classRepository;
+    this.calendarRepository = calendarRepository;
     this.userClassRepository = userClassRepository;
     this.classUserRepository = classUserRepository;
     this.userRepository = userRepository;
@@ -75,7 +81,7 @@ public class ClassServiceImpl implements IClassService {
     }
     if (classDTO.getId() == null){
       ServiceUtils.validateStartDateBeforeEndDate(classDTO);
-      ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
+      //ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
     }
     if (!ServiceUtils.errors.isEmpty()) {
       throw new CustomValidationException(ServiceUtils.errors);
@@ -262,13 +268,109 @@ public class ClassServiceImpl implements IClassService {
     famsClass.setLocation(classDTO.getLocation());
     famsClass.setStartDate(classDTO.getStartDate());
     famsClass.setEndDate(classDTO.getEndDate());
-    famsClass.setStartTimeFrame(classDTO.getStartTimeFrame());
-    famsClass.setEndTimeFrame(classDTO.getEndTimeFrame());
-
     TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
     famsClass.setTrainingProgram(trainingProgram);
 
     return famsClass;
+  }
+  public CalendarClass convertCalendarDtoToEntity(CalendarDTO calendarDTO, ClassRepository classRepository) {
+    CalendarClass calendarClass = new CalendarClass();
+    calendarClass.setId(calendarDTO.getId());
+    calendarClass.setWeekDays(calendarDTO.getWeekDay());
+    calendarClass.setFamsClass(classRepository.findById(calendarDTO.getId()));
+
+    return calendarClass;
+  }
+
+
+  public ResponseEntity<?> creatClass(ClassDTO classDTO, CalendarDTO calendarDTO){
+    long week = calculateWeeks(classDTO.getStartDate(),classDTO.getEndDate());
+    final int hoursOfSlot = 4;
+    long numberOfSlotOneWeek;
+    try{
+      numberOfSlotOneWeek = (classDTO.getDuration()/hoursOfSlot)/week;
+
+      ServiceUtils.errors.clear();
+      List<Long> requestUserIds = classDTO.getUserIds();
+      Long requestTrainingProgramId = classDTO.getTrainingProgramId();
+      FamsClass entity;
+      CalendarClass calendar;
+
+      // * Validate requestDTO ( if left null, then can be updated later )
+      if (requestUserIds != null){
+        ServiceUtils.validateUserIds(requestUserIds, userRepository);
+      }
+      if (requestTrainingProgramId != null){
+        ServiceUtils.validateTrainingProgramIds(List.of(requestTrainingProgramId), trainingProgramRepository);
+      }
+      if (classDTO.getId() == null){
+        ServiceUtils.validateStartDateBeforeEndDate(classDTO);
+        //ServiceUtils.validateStartDateWhenSameTimeFrame(classDTO, classRepository);
+      }
+      if (!ServiceUtils.errors.isEmpty()) {
+        throw new CustomValidationException(ServiceUtils.errors);
+      }
+
+      //for(WeekDay weekDay : calendarDTO.getWeekDay()){
+        // * For update request
+        if (classDTO.getId() != null){
+          FamsClass oldEntity = classRepository.findById(classDTO.getId());
+          FamsClass tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
+          entity = convertDtoToEntity(classDTO, trainingProgramRepository);
+          ServiceUtils.fillMissingAttribute(entity, tempOldEntity);
+          classUserRepository.deleteAllByFamsClassId(classDTO.getId());
+          loadClassUserFromListUserId(requestUserIds, entity.getId());
+          entity.markModified();
+          classRepository.save(entity);
+        }
+
+        // * For create request
+        else {
+          if(numberOfSlotOneWeek == calendarDTO.getWeekDay().size()) {
+            classDTO.setStatus(true);
+            entity = convertDtoToEntity(classDTO, trainingProgramRepository);
+            calendar = convertCalendarDtoToEntity(calendarDTO, classRepository);
+            classRepository.save(entity);
+            calendarRepository.save(calendar);
+            loadClassUserFromListUserId(requestUserIds, entity.getId());
+            ClassDTO result = convertClassToClassDTO(entity);
+            if (classDTO.getId() == null) {
+              result.setUserIds(requestUserIds);
+            }
+            result.setTrainingProgramId(requestTrainingProgramId);
+
+            //}
+
+          }
+
+        }
+        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
+
+
+
+
+    }catch (Exception e){
+      return ResponseEntity.ok("");
+    }
+  }
+
+
+  public static int calculateWeeks(Long startDay, Long endDay) {
+    Calendar startCalendar = Calendar.getInstance();
+    startCalendar.setTimeInMillis(startDay * 1000); // Chia cho 1000 để chuyển về đơn vị giây
+    Calendar endCalendar = Calendar.getInstance();
+    endCalendar.setTimeInMillis(endDay * 1000); // Chia cho 1000 để chuyển về đơn vị giây
+
+    if (endCalendar.before(startCalendar)) {
+      return -1; // Trả về giá trị âm để biểu thị lỗi
+    }
+
+    int weeks = 0;
+    while (startCalendar.before(endCalendar)) {
+      startCalendar.add(Calendar.WEEK_OF_YEAR, 1);
+      weeks++;
+    }
+    return weeks;
   }
 
 

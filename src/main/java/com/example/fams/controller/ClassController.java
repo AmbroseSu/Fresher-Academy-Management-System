@@ -1,7 +1,9 @@
 package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.CalendarDTO;
 import com.example.fams.dto.ClassDTO;
+import com.example.fams.entities.CalendarClass;
 import com.example.fams.services.IClassService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +71,13 @@ public class ClassController {
     @PostMapping("/class")
     public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO) {
         return classService.save(classDTO);
+    }
+
+    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
+    @PostMapping("/classcalen")
+    public ResponseEntity<?> createCaClass(@Valid @RequestBody ClassDTO classDTO, @Valid @RequestBody
+        CalendarDTO calendarDTO) {
+        return classService.creatClass(classDTO,calendarDTO);
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")

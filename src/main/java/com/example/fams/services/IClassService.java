@@ -1,5 +1,6 @@
 package com.example.fams.services;
 
+import com.example.fams.dto.CalendarDTO;
 import com.example.fams.dto.ClassDTO;
 import com.example.fams.dto.LearningObjectiveDTO;
 import org.springframework.http.ResponseEntity;
@@ -14,4 +15,5 @@ public interface IClassService extends IGenericService<ClassDTO>{
 
 
   ResponseEntity<?> searchBetweenStartDateAndEndDate(Long startDate, Long endDate, int page, int limit);
+  ResponseEntity<?> creatClass(ClassDTO classDTO, CalendarDTO calendarDTO);
 }
