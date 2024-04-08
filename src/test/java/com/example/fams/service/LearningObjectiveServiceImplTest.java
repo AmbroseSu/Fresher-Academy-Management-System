@@ -532,4 +532,44 @@ class LearningObjectiveServiceImplTest {
         verify(syllabusRepository, times(1)).findById(3L);
         verify(syllabusObjectiveRepository, times(3)).save(any(SyllabusObjective.class));
     }
+    @Test
+    void testSave_UpdateExistingLearningObjective() {
+        // Arrange
+        Long learningObjectiveId = 1L;
+        LearningObjectiveDTO learningObjectiveDTO = new LearningObjectiveDTO();
+        learningObjectiveDTO.setId(learningObjectiveId);
+        learningObjectiveDTO.setCode("LO001");
+        learningObjectiveDTO.setName("Learning Objective 1");
+        learningObjectiveDTO.setType(1);
+        learningObjectiveDTO.setDescription("This is a learning objective");
+        learningObjectiveDTO.setStatus(true);
+
+
+        LearningObjective existingLearningObjective = new LearningObjective();
+        existingLearningObjective.setId(learningObjectiveId);
+
+        LearningObjective updatedLearningObjective = new LearningObjective();
+        updatedLearningObjective.setId(learningObjectiveId);
+
+        User testUser = new User();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn(testUser.getUsername());
+
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(learningObjectiveRepository.findById(learningObjectiveId)).thenReturn(existingLearningObjective);
+        when(learningObjectiveRepository.save(any(LearningObjective.class))).thenReturn(updatedLearningObjective);
+        when(genericConverter.toDTO(any(LearningObjective.class), eq(LearningObjectiveDTO.class))).thenReturn(learningObjectiveDTO);
+
+        // Act
+        ResponseEntity<?> response = learningObjectiveService.save(learningObjectiveDTO);
+        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Saved successfully", responseDTO.getDetails().get(0));
+          }
 }
