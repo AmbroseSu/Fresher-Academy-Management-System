@@ -16,18 +16,35 @@ import java.util.List;
 public class ClassDTO {
 
   private Long id;
+
   @NotBlank(message = "FSU must not be blank")
   private String fsu;
+
   @NotBlank(message = "Class Name must not be blank")
   private String name;
+
   @NotBlank(message = "Please enter class code")
   private String code;
 //  private Long duration;
   private Boolean status;
+
   @NotNull(message = "Please enter class status")
   private ClassStatus classStatus;
+
   @NotBlank(message = "Please enter class location")
   private String location;
+
+  @NotNull(message = "Attendee must not be null")
+  private String attendee;
+
+  @NotNull(message = "Attendee - actual must not be null")
+  private Long attendeeActual;
+
+  @NotNull(message = "Attendee - accepted must not be null")
+  private Long attendeeAccepted;
+
+  @NotNull(message = "Attendee - planned must not be null")
+  private Long attendeePlanned;
 
   @NotNull(message = "Class start date must not be null")
   private Long startDate;
@@ -41,7 +58,9 @@ public class ClassDTO {
   @NotNull(message = "Class end time frame must not be null")
   private LocalTime endTimeFrame;
 
-  private List<Long> userIds;
+//  private List<Long> userIds;
+  private List<Long> adminIds;
+  private List<Long> trainerIds;
   private Long trainingProgramId;
   private String createBy;
   private String createdDate;
