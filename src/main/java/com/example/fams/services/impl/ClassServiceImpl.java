@@ -8,6 +8,7 @@ import com.example.fams.entities.ClassUser;
 import com.example.fams.entities.FamsClass;
 import com.example.fams.entities.TrainingProgram;
 import com.example.fams.entities.User;
+import com.example.fams.entities.enums.Role;
 import com.example.fams.repository.*;
 import com.example.fams.services.IClassService;
 import com.example.fams.services.ServiceUtils;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service("ClassService")
 public class ClassServiceImpl implements IClassService {
@@ -62,12 +65,15 @@ public class ClassServiceImpl implements IClassService {
   @Override
   public ResponseEntity<?> save(ClassDTO classDTO) {
     ServiceUtils.errors.clear();
-    List<Long> requestUserIds = classDTO.getUserIds();
+    List<Long> requestUserIds = Stream.concat(
+            classDTO.getAdminIds().stream(),
+            classDTO.getTrainerIds().stream())
+            .toList();
     Long requestTrainingProgramId = classDTO.getTrainingProgramId();
     FamsClass entity;
 
     // * Validate requestDTO ( if left null, then can be updated later )
-    if (requestUserIds != null){
+    if (requestUserIds != null && !requestUserIds.isEmpty()){
       ServiceUtils.validateUserIds(requestUserIds, userRepository);
     }
     if (requestTrainingProgramId != null){
@@ -105,7 +111,8 @@ public class ClassServiceImpl implements IClassService {
 
     ClassDTO result = convertClassToClassDTO(entity);
     if (classDTO.getId() == null){
-      result.setUserIds(requestUserIds);
+      result.setAdminIds(classDTO.getAdminIds());
+      result.setTrainerIds(classDTO.getTrainerIds());
     }
     result.setTrainingProgramId(requestTrainingProgramId);
     return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
@@ -237,16 +244,21 @@ public class ClassServiceImpl implements IClassService {
     ClassDTO newClassDTO = (ClassDTO) genericConverter.toDTO(entity, ClassDTO.class);
     List<User> users = classUserRepository.findUserByClassId(entity.getId());
     if (entity.getClassUsers() == null){
-      newClassDTO.setUserIds(null);
+      newClassDTO.setAdminIds(null);
+      newClassDTO.setTrainerIds(null);
     }
     else {
       // ! Set list learningObjectiveIds và unitId sau khi convert ở trên vào contentDTO
-      List<Long> userIds = users.stream()
+      List<Long> adminIds = users.stream()
+              .filter(user -> user.getUserRole().getRole().equals(Role.CLASSADMIN))
               .map(User::getId)
-              .toList();
-
-      newClassDTO.setUserIds(userIds);
-
+              .collect(Collectors.toList());
+      newClassDTO.setAdminIds(adminIds);
+      List<Long> trainerIds = users.stream()
+              .filter(user -> user.getUserRole().getRole().equals(Role.TRAINER))
+              .map(User::getId)
+              .collect(Collectors.toList());
+      newClassDTO.setTrainerIds(trainerIds);
     }
     return newClassDTO;
   }
