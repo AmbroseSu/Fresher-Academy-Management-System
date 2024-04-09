@@ -22,7 +22,8 @@ public class ClassDTO {
   private String name;
   @NotBlank(message = "Please enter class code")
   private String code;
-  private Long duration;
+  @NotBlank(message = "Not Null")
+  private Double duration;
   private Boolean status;
   @NotNull(message = "Please enter class status")
   private ClassStatus classStatus;

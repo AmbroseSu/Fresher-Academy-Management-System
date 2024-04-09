@@ -12,7 +12,7 @@ import lombok.Data;
 @Table(name = "tbl_calendar")
 public class CalendarClass extends BaseEntity{
 
-    private List<WeekDay> weekDays;
+    private WeekDay weekDays;
 
     @ManyToOne
     @JoinColumn(name = "famsClassId")

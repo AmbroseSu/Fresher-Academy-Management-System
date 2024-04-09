@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class CalendarDTO implements Serializable {
     Long id;
-    List<WeekDay> weekDay;
+    WeekDay weekDay;
     private Long famsClassIds;
 }

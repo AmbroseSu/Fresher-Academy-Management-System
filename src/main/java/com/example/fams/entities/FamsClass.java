@@ -19,7 +19,7 @@ public class FamsClass extends BaseEntity {
 
     private String code;
 
-    private Long duration;
+    private Double duration;
 
     private ClassStatus classStatus;
 
