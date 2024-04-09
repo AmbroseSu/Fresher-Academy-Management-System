@@ -25,7 +25,15 @@ public class FamsClass extends BaseEntity {
 
     private String location;
 
-    @Column(name = "start_date")
+    private String attendee;
+
+    private Long attendeeActual;
+
+    private Long attendeeAccepted;
+
+    private Long attendeePlanned;
+
+    @Column(name="start_date")
     private Long startDate;
 
     @Column(name = "end_date")
