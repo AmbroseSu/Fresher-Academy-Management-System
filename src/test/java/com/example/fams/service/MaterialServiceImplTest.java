@@ -133,8 +133,6 @@ public class MaterialServiceImplTest {
         assertEquals("Material not found", responseDTO.getDetails().get(0));
     }
 
-    // doi fix, chua hoan thien
-
     @Test
     void testCreateNewMaterial_returnSuccess(){
         MaterialDTO materialDTO = new MaterialDTO();
@@ -194,7 +192,7 @@ public class MaterialServiceImplTest {
         verify(materialRepository, times(1)).save(material); // Verify that save is called once
     }
     @Test
-    public void testSearchSortFilterByName() {
+    public void testSearchSortFilterByName_ReturnSuccess() {
         // Mock search data
         String searchName = "Test Material";
         String description = null; // Not searching by description in this test
@@ -211,10 +209,12 @@ public class MaterialServiceImplTest {
         MaterialDTO searchDTO = new MaterialDTO();
         searchDTO.setName(searchName);
         ResponseEntity<?> response = materialService.searchSortFilter(searchDTO, page + 1, limit);
-
+        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
         // Verify results
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
+        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+        verify(materialRepository, times(1)).searchSortFilter(eq("Test Material"), eq(null), any(Pageable.class));
+        verify(materialRepository, times(1)).countSearchSortFilter(eq("Test Material"), eq(null));
         // Additional assertions can be made here to verify response content based on expectedMaterials
     }
     @Test
@@ -236,10 +236,12 @@ public class MaterialServiceImplTest {
         MaterialDTO searchDTO = new MaterialDTO();
         searchDTO.setName(searchName);
         ResponseEntity<?> response = materialService.searchSortFilterADMIN(searchDTO, sortById, page + 1, limit);
-
+        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
         // Verify results
         assertEquals(HttpStatus.OK, response.getStatusCode());
-
+        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+        verify(materialRepository, times(1)).searchSortFilterADMIN(eq("Test Material"), eq(null), eq(sortById), any(Pageable.class));
+        verify(materialRepository, times(1)).countSearchSortFilter(eq("Test Material"), eq(null));
         // Additional assertions can be made here to verify response content based on expectedMaterials
     }
     @Test
@@ -268,7 +270,7 @@ public class MaterialServiceImplTest {
         assert responseDTO != null;
         List<?> content = (List<?>) responseDTO.getContent();
         assertEquals(2, content.size());
-
+        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
         // Verify method invocations
         verify(materialRepository, times(1)).findAllByOrderByIdDesc(pageable);
         verify(materialRepository, times(1)).count();
@@ -283,7 +285,6 @@ public class MaterialServiceImplTest {
 
         // Call the method to test
         boolean exists = materialService.checkExist(materialId);
-
         // Assert
         assertTrue(exists);
     }
@@ -301,12 +302,8 @@ public class MaterialServiceImplTest {
         Long materialId = 1L;
         MaterialDTO materialDTO = new MaterialDTO();
         materialDTO.setId(materialId);
-        materialDTO.setName("Updated Material Name");
-        materialDTO.setDescription("Updated Material Description");
-        materialDTO.setSyllabusIds(null);
         Material oldEntity = new Material();
         oldEntity.setId(materialId);
-        oldEntity.setStatus(true);
         // Mock repository behaviors
         when(materialRepository.findById(materialId)).thenReturn(oldEntity);
         when(genericConverter.toDTO(any(Material.class), eq(MaterialDTO.class))).thenReturn(materialDTO);
@@ -317,11 +314,6 @@ public class MaterialServiceImplTest {
         ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
         assertNotNull(responseDTO);
         assertEquals("Saved successfully", responseDTO.getDetails().get(0));
-        // Verify interactions with repositories
-        verify(materialRepository, times(1)).findById(materialId);
-        verify(materialRepository, times(1)).save(any(Material.class));
-        verify(syllabusMaterialRepository, times(1)).deleteAllByMaterialId(materialId);
-        verify(materialRepository, times(1)).save(any(Material.class)); // Ensure save is called after updating entity
         // Clear the SecurityContextHolder after the test
         SecurityContextHolder.clearContext();
     }

@@ -4,6 +4,7 @@ import com.example.fams.entities.Content;
 import com.example.fams.entities.LearningObjective;
 import com.example.fams.entities.Unit;
 import com.example.fams.entities.enums.DeliveryType;
+import com.example.fams.entities.enums.TrainingFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -35,29 +36,35 @@ public interface ContentRepository extends JpaRepository<Content, String> {
   @Query("SELECT co FROM Content co " +
       "WHERE co.status = TRUE " +
       "AND (:deliveryType IS NULL OR co.deliveryType = :deliveryType) " +
+          "AND (:trainingFormat IS NULL OR co.trainingFormat = :trainingFormat) " +
       "AND (:duration IS NULL OR co.duration = :duration) ")
   List<Content> searchSortFilter(
       @Param("deliveryType") DeliveryType deliveryType,
+      @Param("trainingFormat") TrainingFormat trainingFormat,
       @Param("duration") Long duration,
       Pageable pageable);
 
   @Query("SELECT COUNT(co) FROM Content co " +
       "WHERE co.status = TRUE " +
       "AND (:deliveryType IS NULL OR co.deliveryType = :deliveryType) " +
+          "AND (:trainingFormat IS NULL OR co.trainingFormat = :trainingFormat) " +
       "AND (:duration IS NULL OR co.duration = :duration) " )
   Long countSearchSortFilter(
       DeliveryType deliveryType,
+      TrainingFormat trainingFormat,
       Long duration);
 
 
   @Query("SELECT co FROM Content co " +
       "WHERE (:deliveryType IS NULL OR co.deliveryType = :deliveryType) " +
+          "AND (:trainingFormat IS NULL OR co.trainingFormat = :trainingFormat) " +
       "AND (:duration IS NULL OR co.duration = :duration) "+
       "ORDER BY  " +
       "CASE WHEN :sortById ='iDESC' THEN co.id  END DESC ," +
       "CASE WHEN :sortById ='iASC' THEN co.id  END ASC ,"+
       "co.id desc")
   List<Content> searchSortFilterADMIN(@Param("deliveryType") DeliveryType deliveryType,
+      @Param("trainingFormat") TrainingFormat trainingFormat,
       @Param("duration") Long duration,
       @Param("sortById") String sortById,
       Pageable pageable);
