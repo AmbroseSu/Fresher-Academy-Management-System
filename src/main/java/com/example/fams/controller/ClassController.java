@@ -79,7 +79,7 @@ public class ClassController {
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
     @PostMapping("/classcalen")
     public ResponseEntity<?> createCaClass(@Valid @RequestBody ClassCalendarDTO classCalendarDTO) {
-        return classService.creatClass(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
+        return classService.save_withCalendar(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
@@ -95,10 +95,10 @@ public class ClassController {
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
     @PutMapping("/classcalen/{id}")
-    public ResponseEntity<?> updateClasscalen(@Valid @RequestBody ClassCalendarDTO classCalendarDTO, @PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> updateClassCalendar(@Valid @RequestBody ClassCalendarDTO classCalendarDTO, @PathVariable(name = "id") Long id) {
         if(classService.checkExist(id)){
             classCalendarDTO.getClassDTO().setId(id);
-            return classService.creatClass(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
+            return classService.save_withCalendar(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
 
         }
         return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);

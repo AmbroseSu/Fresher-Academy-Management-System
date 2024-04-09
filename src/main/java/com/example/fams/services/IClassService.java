@@ -17,5 +17,5 @@ public interface IClassService extends IGenericService<ClassDTO>{
 
 
   ResponseEntity<?> searchBetweenStartDateAndEndDate(Long startDate, Long endDate, int page, int limit);
-  ResponseEntity<?> creatClass(ClassDTO classDTO, List<WeekDay> weekDays);
+  ResponseEntity<?> save_withCalendar(ClassDTO classDTO, List<WeekDay> weekDays);
 }

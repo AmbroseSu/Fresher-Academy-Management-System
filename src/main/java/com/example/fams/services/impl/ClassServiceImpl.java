@@ -285,6 +285,10 @@ public class ClassServiceImpl implements IClassService {
     famsClass.setEndDate(classDTO.getEndDate());
     famsClass.setStartTime(classDTO.getStartTime());
     famsClass.setEndTime(classDTO.getEndTime());
+    famsClass.setAttendee(classDTO.getAttendee());
+    famsClass.setAttendeeAccepted(classDTO.getAttendeeAccepted());
+    famsClass.setAttendeeActual(classDTO.getAttendeeActual());
+    famsClass.setAttendeePlanned(classDTO.getAttendeePlanned());
     TrainingProgram trainingProgram = trainingProgramRepository.findOneById(classDTO.getTrainingProgramId());
     famsClass.setTrainingProgram(trainingProgram);
 
@@ -300,7 +304,7 @@ public class ClassServiceImpl implements IClassService {
   }
 
 
-  public ResponseEntity<?> creatClass(ClassDTO classDTO, List<WeekDay> weekDays){
+  public ResponseEntity<?> save_withCalendar(ClassDTO classDTO, List<WeekDay> weekDays){
     Double week = (double) calculateWeeks(classDTO.getStartDate(),classDTO.getEndDate());
     Duration duration = Duration.between(classDTO.getStartTime(), classDTO.getEndTime());
     // Lấy số giờ, phút và giây từ duration
@@ -314,7 +318,11 @@ public class ClassServiceImpl implements IClassService {
         return ResponseUtil.error("false time","False",HttpStatus.BAD_REQUEST);
       }
       ServiceUtils.errors.clear();
-      List<Long> requestUserIds = classDTO.getUserIds();
+
+      List<Long> requestUserIds = Stream.concat(
+                      classDTO.getAdminIds().stream(),
+                      classDTO.getTrainerIds().stream())
+              .toList();
       Long requestTrainingProgramId = classDTO.getTrainingProgramId();
       FamsClass entity;
       CalendarClass calendar;
@@ -383,7 +391,8 @@ public class ClassServiceImpl implements IClassService {
               loadClassUserFromListUserId(requestUserIds, entity.getId());
               ClassDTO result = convertClassToClassDTO(entity);
               if (classDTO.getId() == null) {
-                result.setUserIds(requestUserIds);
+                result.setAdminIds(classDTO.getAdminIds());
+                result.setTrainerIds(classDTO.getTrainerIds());
               }
               result.setTrainingProgramId(requestTrainingProgramId);
 
