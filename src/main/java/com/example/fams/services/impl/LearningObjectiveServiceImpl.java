@@ -237,7 +237,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         return learningObjective;
     }
 
-    private void loadContentLearningObjectiveFromListContentId(List<Long> requestContentIds, Long learningObjectiveId) {
+    public void loadContentLearningObjectiveFromListContentId(List<Long> requestContentIds, Long learningObjectiveId) {
         if (requestContentIds != null && !requestContentIds.isEmpty()) {
             for (Long contentId : requestContentIds) {
                 Content content = contentRepository.findById(contentId);
@@ -252,7 +252,7 @@ public class LearningObjectiveServiceImpl implements ILearningObjectiveService {
         }
     }
 
-    private void loadSyllabusObjectiveFromListSyllabusId(List<Long> requestSyllabusIds, Long learningObjectiveId) {
+    public void loadSyllabusObjectiveFromListSyllabusId(List<Long> requestSyllabusIds, Long learningObjectiveId) {
         if (requestSyllabusIds != null && !requestSyllabusIds.isEmpty()) {
             for (Long syllabusId : requestSyllabusIds) {
                 Syllabus syllabus = syllabusRepository.findById(syllabusId).get();

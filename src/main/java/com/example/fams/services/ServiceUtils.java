@@ -143,14 +143,14 @@ public class ServiceUtils {
         }
     }
 
-    public static void validateStartDateWhenSameTimeFrame(ClassDTO classDTO, ClassRepository classRepository) {
-        List<FamsClass> conflictDateRangeClasses = classRepository.findFamsClassWithStartDateInRange(classDTO.getStartDate());
-        if (conflictDateRangeClasses != null){
-            conflictDateRangeClasses.forEach(famsClass -> {
-                if (Objects.equals(famsClass.getStartTimeFrame(), classDTO.getStartTimeFrame())){
-                    errors.add(famsClass.getName() + " with this time frame has existed!");
-                }
-            });
-        }
-    }
+//    public static void validateStartDateWhenSameTimeFrame(ClassDTO classDTO, ClassRepository classRepository) {
+//        List<FamsClass> conflictDateRangeClasses = classRepository.findFamsClassWithStartDateInRange(classDTO.getStartDate());
+//        if (conflictDateRangeClasses != null){
+//            conflictDateRangeClasses.forEach(famsClass -> {
+//                if (Objects.equals(famsClass.getStartTimeFrame(), classDTO.getStartTimeFrame())){
+//                    errors.add(famsClass.getName() + " with this time frame has existed!");
+//                }
+//            });
+//        }
+//    }
 }
