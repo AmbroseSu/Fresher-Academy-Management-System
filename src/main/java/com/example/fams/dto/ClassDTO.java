@@ -25,7 +25,8 @@ public class ClassDTO {
 
   @NotBlank(message = "Please enter class code")
   private String code;
-//  private Long duration;
+  @NotBlank(message = "Not Null")
+  private Double duration;
   private Boolean status;
 
   @NotNull(message = "Please enter class status")
@@ -52,11 +53,17 @@ public class ClassDTO {
   @NotNull(message = "Class end date must not be null")
   private Long endDate;
 
-  @NotNull(message = "Class start time frame must not be null")
-  private LocalTime startTimeFrame;
+  private LocalTime startTime;
 
-  @NotNull(message = "Class end time frame must not be null")
-  private LocalTime endTimeFrame;
+  private LocalTime endTime;
+
+//  @NotNull(message = "Class start time frame must not be null")
+//  private LocalTime startTimeFrame;
+//
+//  @NotNull(message = "Class end time frame must not be null")
+//  private LocalTime endTimeFrame;
+
+  private List<Long> calendarIds;
 
 //  private List<Long> userIds;
   private List<Long> adminIds;

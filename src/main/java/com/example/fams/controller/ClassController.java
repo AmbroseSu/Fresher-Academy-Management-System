@@ -1,9 +1,14 @@
 package com.example.fams.controller;
 
 import com.example.fams.config.ResponseUtil;
+import com.example.fams.dto.CalendarDTO;
+import com.example.fams.dto.ClassCalendarDTO;
 import com.example.fams.dto.ClassDTO;
+import com.example.fams.entities.CalendarClass;
+import com.example.fams.entities.enums.WeekDay;
 import com.example.fams.services.IClassService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -71,12 +76,29 @@ public class ClassController {
         return classService.save(classDTO);
     }
 
+    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
+    @PostMapping("/classcalen")
+    public ResponseEntity<?> createCaClass(@Valid @RequestBody ClassCalendarDTO classCalendarDTO) {
+        return classService.creatClass(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
+    }
+
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
     @PutMapping("/class/{id}")
     public ResponseEntity<?> updateClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
         if(classService.checkExist(id)){
             classDTO.setId(id);
             return classService.save(classDTO);
+
+        }
+        return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
+    }
+
+    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
+    @PutMapping("/classcalen/{id}")
+    public ResponseEntity<?> updateClasscalen(@Valid @RequestBody ClassCalendarDTO classCalendarDTO, @PathVariable(name = "id") Long id) {
+        if(classService.checkExist(id)){
+            classCalendarDTO.getClassDTO().setId(id);
+            return classService.creatClass(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
 
         }
         return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
