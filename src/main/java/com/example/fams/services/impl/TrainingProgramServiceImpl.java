@@ -95,11 +95,11 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Training program not found with ID: " + id);
             }
-        } catch (Exception e) {
-            // If an error occurs during the process, return an internal server error response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while fetching training program: " + e.getMessage());
-        }
+            } catch (Exception e) {
+                // If an error occurs during the process, return an internal server error response
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("An error occurred while fetching training program: " + e.getMessage());
+            }
     }
 
 

@@ -243,27 +243,27 @@ public class UnitServiceImplTest {
     }
 
 
-//    @Test
-//    void testUpdateUnit_returnSuccess() {
-//        // Arrange
-//        Unit unit = new Unit();
-//        unit.setId(1L);
-//
-//        // Mocking necessary methods
-//        Mockito.lenient().when(unitRepository.findById((Long) any())).thenReturn(unit);
-//        when(unitRepository.save(any())).thenReturn(new Unit());
-//        when(genericConverter.toDTO(any(Unit.class), eq(UnitDTO.class)))
-//                .thenReturn(new UnitDTO());
-//        when(genericConverter.toEntity(any(UnitDTO.class), eq(Unit.class))).thenReturn(new Unit());
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = unitService.save(new UnitDTO());
-//        ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
-//
-//        // Assert
-//        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-//        assertEquals("Saved successfully", responseDTO.getDetails().get(0));
-//    }
+    @Test
+    void testUpdateUnit_returnSuccess() {
+        // Arrange
+        Unit unit = new Unit();
+        unit.setId(1L);
+
+        // Mocking necessary methods
+        Mockito.lenient().when(unitRepository.findById((Long) any())).thenReturn(unit);
+        when(unitRepository.save(any())).thenReturn(new Unit());
+        when(genericConverter.toDTO(any(Unit.class), eq(UnitDTO.class)))
+                .thenReturn(new UnitDTO());
+        when(genericConverter.toEntity(any(UnitDTO.class), eq(Unit.class))).thenReturn(new Unit());
+
+        // Act
+        ResponseEntity<?> responseEntity = unitService.save(new UnitDTO());
+        ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
+
+        // Assert
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Saved successfully", responseDTO.getDetails().get(0));
+    }
 
 
 
