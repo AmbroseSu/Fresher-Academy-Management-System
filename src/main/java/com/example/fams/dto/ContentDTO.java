@@ -2,6 +2,7 @@ package com.example.fams.dto;
 
 import com.example.fams.entities.enums.DeliveryType;
 import com.example.fams.entities.enums.TrainingFormat;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,12 @@ public class ContentDTO {
 
 
   private Long id;
+
+  @NotBlank(message = "Content name must not be null")
+  private String name;
+
+  @NotNull(message = "Content training time must not be null")
+  private Long trainingTime;
 
   private Long unitId;
 
