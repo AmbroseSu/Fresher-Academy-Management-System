@@ -1,9 +1,11 @@
 package com.example.fams;
 
+import com.example.fams.entities.OutputStandard;
 import com.example.fams.entities.User;
 import com.example.fams.entities.UserRole;
 import com.example.fams.entities.enums.Permission;
 import com.example.fams.entities.enums.Role;
+import com.example.fams.repository.OutputStandardRepository;
 import com.example.fams.repository.UserRepository;
 import com.example.fams.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ public class FamsApplication implements CommandLineRunner {
     private UserRepository userRepository;
     @Autowired
     private UserRoleRepository userRoleRepository;
+    @Autowired
+    private OutputStandardRepository outputStandardRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(FamsApplication.class, args);
@@ -47,5 +51,12 @@ public class FamsApplication implements CommandLineRunner {
             userRepository.save(FAMSuser);
         }
 
+        if(outputStandardRepository.count() == 0) {
+            for(int i = 0; i <= 2; i++) {
+                OutputStandard outputStandard = new OutputStandard();
+                outputStandard.setOutputStandardName("OPSD" + (i + 1));
+                outputStandardRepository.save(outputStandard);
+            }
+        }
     }
 }

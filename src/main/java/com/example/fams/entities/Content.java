@@ -16,6 +16,10 @@ public class Content extends BaseEntity {
     @JoinColumn(name="unitId")
     private Unit unit;
 
+    private String name;
+
+    private Long trainingTime;
+
     @Enumerated(EnumType.STRING)
     private DeliveryType deliveryType;
 
