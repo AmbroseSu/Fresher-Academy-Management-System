@@ -70,31 +70,31 @@ public class ClassController {
         return classService.searchSortFilterADMIN(classDTO, sortById, page, limit);
     }
 
-    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
-    @PostMapping("/class")
-    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO) {
-        return classService.save(classDTO);
-    }
+//    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
+//    @PostMapping("/class")
+//    public ResponseEntity<?> createClass(@Valid @RequestBody ClassDTO classDTO) {
+//        return classService.save(classDTO);
+//    }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Create')")
-    @PostMapping("/classcalen")
+    @PostMapping("/class")
     public ResponseEntity<?> createCaClass(@Valid @RequestBody ClassCalendarDTO classCalendarDTO) {
         return classService.save_withCalendar(classCalendarDTO.getClassDTO(),classCalendarDTO.getWeekDays());
     }
 
+//    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
+//    @PutMapping("/class/{id}")
+//    public ResponseEntity<?> updateClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
+//        if(classService.checkExist(id)){
+//            classDTO.setId(id);
+//            return classService.save(classDTO);
+//
+//        }
+//        return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
+//    }
+
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
     @PutMapping("/class/{id}")
-    public ResponseEntity<?> updateClass(@Valid @RequestBody ClassDTO classDTO, @PathVariable(name = "id") Long id) {
-        if(classService.checkExist(id)){
-            classDTO.setId(id);
-            return classService.save(classDTO);
-
-        }
-        return ResponseUtil.error("Not found","Unit not exist", HttpStatus.NOT_FOUND);
-    }
-
-    @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:Modify')")
-    @PutMapping("/classcalen/{id}")
     public ResponseEntity<?> updateClassCalendar(@Valid @RequestBody ClassCalendarDTO classCalendarDTO, @PathVariable(name = "id") Long id) {
         if(classService.checkExist(id)){
             classCalendarDTO.getClassDTO().setId(id);

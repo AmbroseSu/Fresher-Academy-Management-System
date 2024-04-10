@@ -315,7 +315,7 @@ public class ClassServiceImpl implements IClassService {
     try{
       numberOfSlotOneWeek = (classDTO.getDuration()/hoursOfSlot)/week;
       if(numberOfSlotOneWeek % 1 != 0){
-        return ResponseUtil.error("false time","False",HttpStatus.BAD_REQUEST);
+        return ResponseUtil.error("he number of slots in a week must be an a whole number","False",HttpStatus.BAD_REQUEST);
       }
       ServiceUtils.errors.clear();
 
@@ -343,8 +343,16 @@ public class ClassServiceImpl implements IClassService {
         throw new CustomValidationException(ServiceUtils.errors);
       }
 
-
+      List<FamsClass> allClass = classRepository.findAll();
         if (classDTO.getId() != null){
+          String oldClassName = classDTO.getName();
+          for(FamsClass famsClass : allClass) {
+            if (!(oldClassName.equals(famsClass.getName()) && famsClass.getId().equals(classDTO.getId()))) {
+              if (famsClass.getName().equals(classDTO.getName())) {
+                return ResponseUtil.error("Class name has exists", "Error", HttpStatus.BAD_REQUEST);
+              }
+            }
+          }
           FamsClass oldEntity = classRepository.findById(classDTO.getId());
           FamsClass tempOldEntity = ServiceUtils.cloneFromEntity(oldEntity);
           entity = convertDtoToEntity(classDTO, trainingProgramRepository);
@@ -353,28 +361,28 @@ public class ClassServiceImpl implements IClassService {
           loadClassUserFromListUserId(requestUserIds, entity.getId());
           entity.markModified();
           classRepository.save(entity);
+          return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
         }
 
         // * For create request
         else {
-          List<FamsClass> allClass = classRepository.findAll();
           for(FamsClass famsClass : allClass){
             if(famsClass.getName().equals(classDTO.getName())){
-              return ResponseUtil.error("Class name has exists","False",HttpStatus.BAD_REQUEST);
+              return ResponseUtil.error("Class name has exists","Error",HttpStatus.BAD_REQUEST);
             }
             if(famsClass.getLocation().equals(classDTO.getLocation())){
 
               if((famsClass.getStartTime().isBefore(classDTO.getStartTime()) && famsClass.getEndTime().isAfter(classDTO.getEndTime()))){
-                return ResponseUtil.error("false","false",HttpStatus.BAD_REQUEST);
+                return ResponseUtil.error("This Class has existed location and time frame","Create failed",HttpStatus.BAD_REQUEST);
               }
               if((famsClass.getStartTime().isBefore(classDTO.getEndTime()) && famsClass.getStartTime().isAfter(classDTO.getStartTime()))){
-                return ResponseUtil.error("false","false",HttpStatus.BAD_REQUEST);
+                return ResponseUtil.error("This Class has existed location and time frame","Create failed",HttpStatus.BAD_REQUEST);
               }
               if((famsClass.getStartTime().equals(classDTO.getStartTime()) && famsClass.getEndTime().equals(classDTO.getEndTime()))){
-                return ResponseUtil.error("false","false",HttpStatus.BAD_REQUEST);
+                return ResponseUtil.error("This Class has existed location and time frame","Create failed",HttpStatus.BAD_REQUEST);
               }
               if((famsClass.getEndTime().isBefore(classDTO.getEndTime()) && famsClass.getEndTime().isAfter(classDTO.getStartTime()))){
-                return ResponseUtil.error("false","false",HttpStatus.BAD_REQUEST);
+                return ResponseUtil.error("This Class has existed location and time frame","Create failed",HttpStatus.BAD_REQUEST);
               }
             }
           }
@@ -398,11 +406,12 @@ public class ClassServiceImpl implements IClassService {
 
               return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
             }
+          return ResponseUtil.error("Amount of slot per week required: " + (int) Math.floor(numberOfSlotOneWeek),"Wrong amount of slot per week",HttpStatus.BAD_REQUEST);
+
         }
-      return ResponseUtil.error("False weekday","false",HttpStatus.BAD_REQUEST);
 
     }catch (Exception e){
-      return ResponseUtil.error("False",e.getMessage(),HttpStatus.BAD_REQUEST);
+      return ResponseUtil.error("Error",e.getMessage(),HttpStatus.BAD_REQUEST);
     }
   }
 
