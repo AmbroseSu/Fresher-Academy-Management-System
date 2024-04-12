@@ -40,11 +40,11 @@ public class ClassController {
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
     @PostMapping("/class/search/between")
-    public ResponseEntity<?> searchBetweenStartDateAndEndDate(@RequestParam Long startDate,
-                                              @RequestParam Long endDate,
+    public ResponseEntity<?> searchBetweenStartDateAndEndDate(@RequestParam(value = "dayStartWeek") Long dayStartWeek,
+                                              @RequestParam(value = "dayEndWeek") Long dayEndWeek,
                                               @RequestParam(defaultValue = "1") int page,
                                               @RequestParam(defaultValue = "10") int limit) {
-        return classService.searchBetweenStartDateAndEndDate(startDate, endDate, page, limit);
+        return classService.searchBetweenStartDateAndEndDate(dayStartWeek, dayEndWeek, page, limit);
     }
 
     @PreAuthorize("hasAuthority('class:Full_Access') || hasAuthority('class:View')")
@@ -107,6 +107,6 @@ public class ClassController {
     @PreAuthorize("hasAuthority('class:Full_Access')")
     @DeleteMapping("/class/{id}")
     public ResponseEntity<?> changeStatus(@PathVariable Long id) {
-        return classService.changeStatus(id);
+        return classService.changeStatusClassCalendar(id);
     }
 }

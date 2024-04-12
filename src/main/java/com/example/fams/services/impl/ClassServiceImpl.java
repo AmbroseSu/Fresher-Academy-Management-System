@@ -186,6 +186,37 @@ public class ClassServiceImpl implements IClassService {
   }
 
   @Override
+  public ResponseEntity<?> changeStatusClassCalendar(Long id) {
+    FamsClass famsClass = classRepository.findById(id);
+    if (famsClass != null) {
+      if (famsClass.getStatus()) {
+        famsClass.setStatus(false);
+      } else {
+        famsClass.setStatus(true);
+      }
+      List<CalendarClass> calendarsClasses = calendarRepository.findByFamsClassId(id);
+      if (!calendarsClasses.isEmpty()){
+        for (CalendarClass calendarClass : calendarsClasses){
+          if(calendarClass.getStatus()){
+            calendarClass.setStatus(false);
+          }else{
+            calendarClass.setStatus(true);
+          }
+          calendarRepository.save(calendarClass);
+        }
+      }else{
+        return ResponseUtil.error("Calendar not found", "Cannot change status of non-existing Calendar", HttpStatus.NOT_FOUND);
+      }
+
+      classRepository.save(famsClass);
+      return ResponseUtil.getObject(null, HttpStatus.OK, "Status changed successfully");
+    } else {
+      return ResponseUtil.error("Class not found", "Cannot change status of non-existing Class", HttpStatus.NOT_FOUND);
+    }
+  }
+
+
+  @Override
   public Boolean checkExist(Long id) {
     FamsClass famsClass = classRepository.findById(id);
     return famsClass != null;
@@ -226,20 +257,57 @@ public class ClassServiceImpl implements IClassService {
         count);
   }
 
+
+
+
   @Override
-  public ResponseEntity<?> searchBetweenStartDateAndEndDate(Long startDate, Long endDate, int page, int limit) {
-    Pageable pageable = PageRequest.of(page - 1, limit);
-    List<FamsClass> entities = classRepository.searchBetweenStartDateAndEndDate(startDate, endDate, pageable);
-    List<ClassDTO> result = new ArrayList<>();
-    Long count = classRepository.countSearchBetweenStartDateAndEndDate(startDate, endDate);
-    convertListClassToListClassDTO(entities, result);
-    return ResponseUtil.getCollection(result,
-            HttpStatus.OK,
-            "Fetched successfully",
-            page,
-            limit,
-            count);
+  public ResponseEntity<?> searchBetweenStartDateAndEndDate(Long dayStartWeek, Long dayEndWeek, int page, int limit) {
+    try {
+      Pageable pageable = PageRequest.of(page - 1, limit);
+      List<FamsClass> entities = classRepository.searchBetweenStartDateAndEndDate(dayStartWeek,
+          dayEndWeek, pageable);
+      List<ClassDTO> result = new ArrayList<>();
+      Long count = classRepository.countSearchBetweenStartDateAndEndDate(dayStartWeek, dayEndWeek);
+      convertListClassToListClassDTO(entities, result);
+      List<ClassCalendarDTO> classCalendarDTOS = new ArrayList<>();
+      ClassCalendarDTO classCalendarDTO = new ClassCalendarDTO();
+      for (ClassDTO classDTO : result) {
+        List<CalendarClass> calendarClasses = calendarRepository.findByFamsClassId(
+            classDTO.getId());
+        List<WeekDay> weekDays = new ArrayList<>();
+        //convertListCalendarClasstoDto(calendarClasses, calendarDTOS);
+        for(CalendarClass calendarClass : calendarClasses){
+          weekDays.add(calendarClass.getWeekDays());
+        }
+        classCalendarDTO.setClassDTO(classDTO);
+        classCalendarDTO.setWeekDays(weekDays);
+        classCalendarDTOS.add(classCalendarDTO);
+
+      }
+      return ResponseUtil.getCollection(classCalendarDTOS,
+          HttpStatus.OK,
+          "Fetched successfully",
+          page,
+          limit,
+          count);
+
+    } catch (Exception e){
+      return ResponseUtil.error(e.getMessage(),e.toString(),HttpStatus.BAD_REQUEST);
+    }
   }
+
+//  private void convertListCalendarClasstoDto(List<CalendarClass> calendarClasses, List<CalendarDTO> calendarDTOS){
+//    for(CalendarClass calendarClass : calendarClasses){
+//      CalendarDTO calendarDTO = convertCalendarToCalendarDto(calendarClass);
+//      calendarDTOS.add(calendarDTO);
+//    }
+//  }
+//
+//  private CalendarDTO convertCalendarToCalendarDto(CalendarClass calendarClass){
+//    CalendarDTO calendarDTO = (CalendarDTO) genericConverter.toDTO(calendarClass,CalendarDTO.class);
+//    return calendarDTO;
+//  }
+
 
   private void convertListClassToListClassDTO(List<FamsClass> entities, List<ClassDTO> result) {
     for (FamsClass famsClass : entities){
@@ -297,6 +365,7 @@ public class ClassServiceImpl implements IClassService {
   public CalendarClass convertCalendarDtoToEntity(CalendarDTO calendarDTO, ClassRepository classRepository) {
     CalendarClass calendarClass = new CalendarClass();
     calendarClass.setId(calendarDTO.getId());
+    calendarClass.setStatus(calendarDTO.getStatus());
     calendarClass.setWeekDays(calendarDTO.getWeekDay());
     calendarClass.setFamsClass(classRepository.findById(calendarDTO.getFamsClassIds()));
 
@@ -392,6 +461,7 @@ public class ClassServiceImpl implements IClassService {
               classRepository.save(entity);
               for(WeekDay weekDay : weekDays) {
                 calendarDTO.setWeekDay(weekDay);
+                calendarDTO.setStatus(true);
                 calendarDTO.setFamsClassIds(entity.getId());
                 calendar = convertCalendarDtoToEntity(calendarDTO, classRepository);
                 calendarRepository.save(calendar);
@@ -414,6 +484,7 @@ public class ClassServiceImpl implements IClassService {
       return ResponseUtil.error("Error",e.getMessage(),HttpStatus.BAD_REQUEST);
     }
   }
+
 
 
 
