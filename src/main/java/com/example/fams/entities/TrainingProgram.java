@@ -14,7 +14,7 @@ public class TrainingProgram extends BaseEntity{
 
     private Long startTime;
 
-    private Long duration;
+//    private Long duration;
 
     private Integer training_status;
 

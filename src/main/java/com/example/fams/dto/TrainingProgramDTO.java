@@ -21,7 +21,7 @@ public class TrainingProgramDTO {
     @NotNull(message = "Start time must not be null")
     private Long startTime;
 
-    @NotNull(message = "Duration must not be null")
+//    @NotNull(message = "Duration must not be null")
     private Long duration;
 
     @NotNull(message = "Training status must not be null")

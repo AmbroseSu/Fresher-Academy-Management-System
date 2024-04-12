@@ -50,7 +50,7 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
     @Query("SELECT tp FROM TrainingProgram tp " +
             "WHERE (:name IS NULL OR tp.name = :name) AND tp.status = TRUE " +
             "AND (:startTime IS NULL OR tp.startTime = :startTime) " +
-            "AND (:duration IS NULL OR tp.duration = :duration) " +
+//            "AND (:duration IS NULL OR tp.duration = :duration) " +
             "AND (:training_status IS NULL OR tp.training_status = :training_status)" +
             "ORDER BY " +
             "CASE WHEN :sort_by_created_date ='cDESC' THEN tp.createdDate END DESC, " +
@@ -58,7 +58,7 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
             "tp.createdDate DESC")
     List<TrainingProgram> searchSortFilter(@Param("name") String name,
             @Param("startTime") Long startTime,
-            @Param("duration") Long duration,
+//            @Param("duration") Long duration,
             @Param("training_status") Integer training_status,
             @Param("sort_by_created_date") String sortByCreatedDate,
             Pageable pageable);
@@ -66,17 +66,17 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
     @Query("SELECT COUNT(tp) FROM TrainingProgram tp " +
             "WHERE (:name IS NULL OR tp.name = :name) AND tp.status = TRUE " +
             "AND (:startTime IS NULL OR tp.startTime = :startTime) " +
-            "AND (:duration IS NULL OR tp.duration = :duration) " +
+//            "AND (:duration IS NULL OR tp.duration = :duration) " +
             "AND (:training_status IS NULL OR tp.training_status = :training_status)")
     Long countSearchSortFilter(@Param("name") String name,
             @Param("startTime") Long startTime,
-            @Param("duration") Long duration,
+//            @Param("duration") Long duration,
             @Param("training_status") Integer training_status);
 
     @Query("SELECT tp FROM TrainingProgram tp " +
             "WHERE (:name IS NULL OR tp.name = :name) " +
             "AND (:startTime IS NULL OR tp.startTime = :startTime) " +
-            "AND (:duration IS NULL OR tp.duration = :duration) " +
+//            "AND (:duration IS NULL OR tp.duration = :duration) " +
             "AND (:training_status IS NULL OR tp.training_status = :training_status) " +
             "ORDER BY " +
             "CASE WHEN :sortById ='iDESC' THEN tp.id END DESC, " +
@@ -84,7 +84,7 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
             "tp.id DESC")
     List<TrainingProgram> searchSortFilterADMIN(@Param("name") String name,
             @Param("startTime") Long startTime,
-            @Param("duration") Long duration,
+//            @Param("duration") Long duration,
             @Param("training_status") Integer training_status,
             @Param("sortById") String sortById,
             Pageable pageable);

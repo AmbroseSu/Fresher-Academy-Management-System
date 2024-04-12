@@ -147,8 +147,9 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 // For new training program creation
                 entity = convertDtoToEntity(trainingProgramDTO, syllabusTrainingProgramRepository);
                 entity.setStatus(true);
-                trainingProgramRepository.save(entity);
+
                 loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusIds, entity.getId());
+                trainingProgramRepository.save(entity);
             }
 
             TrainingProgramDTO result = convertTpToTpDTO(entity);
@@ -206,7 +207,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         Long duration = trainingProgramDTO.getDuration();
         Integer training_status = trainingProgramDTO.getTraining_status();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilter(name, startTime, duration, training_status, sortByCreatedDate, pageable);
+        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilter(name, startTime, /*duration,*/ training_status, sortByCreatedDate, pageable);
         List<TrainingProgramDTO> result = new ArrayList<>();
         convertListTpToListTpDTO(entities, result);
         return ResponseUtil.getCollection(result,
@@ -224,7 +225,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         Long duration = trainingProgramDTO.getDuration();
         Integer training_status = trainingProgramDTO.getTraining_status();
         Pageable pageable = PageRequest.of(page - 1, limit);
-        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilterADMIN(name, startTime, duration, training_status, sortById,  pageable);
+        List<TrainingProgram> entities = trainingProgramRepository.searchSortFilterADMIN(name, startTime, /*duration,*/ training_status, sortById,  pageable);
         List<TrainingProgramDTO> result = new ArrayList<>();
         convertListTpToListTpDTO(entities, result);
         return ResponseUtil.getCollection(result,
@@ -240,7 +241,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         trainingProgram.setId(trainingProgramDTO.getId());
         trainingProgram.setName(trainingProgramDTO.getName());
         trainingProgram.setStartTime(trainingProgramDTO.getStartTime());
-        trainingProgram.setDuration(trainingProgramDTO.getDuration());
+//        trainingProgram.setDuration(trainingProgramDTO.getDuration());
         trainingProgram.setTraining_status(trainingProgramDTO.getTraining_status());
         trainingProgram.setStatus(trainingProgramDTO.getStatus());
 
@@ -257,7 +258,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     private TrainingProgramDTO convertTpToTpDTO(TrainingProgram entity) {
         TrainingProgramDTO newTpDTO = (TrainingProgramDTO) genericConverter.toDTO(entity, TrainingProgramDTO.class);
         List<Syllabus> syllabus = syllabusTrainingProgramRepository.findSyllabusByTrainingProgramId(entity.getId());
-        if (entity.getSyllabusTrainingPrograms() == null){
+        if (syllabus == null || syllabus.isEmpty()){
             newTpDTO.setSyllabusIds(null);
         }
         else {
@@ -265,9 +266,14 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
             List<Long> syllabusIds = syllabus.stream()
                     .map(Syllabus::getId)
                     .toList();
+            Long duration = syllabus.stream()
+                            .flatMap(sy -> sy.getUnits().stream())
+                            .flatMap(unit -> unit.getContents().stream())
+                            .mapToLong(Content::getDuration)
+                            .sum();
 
             newTpDTO.setSyllabusIds(syllabusIds);
-
+            newTpDTO.setDuration(duration);
         }
         return newTpDTO;
     }
