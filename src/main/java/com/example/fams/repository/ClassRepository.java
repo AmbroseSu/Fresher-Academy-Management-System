@@ -59,9 +59,9 @@ public interface ClassRepository extends JpaRepository<FamsClass, String> {
                                         @Param("sortById") String sortById,
                                         Pageable pageable);
 
-  @Query("SELECT f FROM FamsClass f WHERE f.startDate >= :inputStartDate AND f.endDate <= :inputEndDate")
-  List<FamsClass> searchBetweenStartDateAndEndDate(Long inputStartDate, Long inputEndDate, Pageable pageable);
+  @Query("SELECT f FROM FamsClass f WHERE f.startDate <= :dayStartWeek AND f.endDate >= :dayEndWeek")
+  List<FamsClass> searchBetweenStartDateAndEndDate(Long dayStartWeek, Long dayEndWeek, Pageable pageable);
 
-  @Query("SELECT COUNT(f) FROM FamsClass f WHERE f.startDate >= :inputStartDate AND f.endDate <= :inputEndDate")
-  Long countSearchBetweenStartDateAndEndDate(Long inputStartDate, Long inputEndDate);
+  @Query("SELECT COUNT(f) FROM FamsClass f WHERE f.startDate <= :dayStartWeek AND f.endDate >= :dayEndWeek")
+  Long countSearchBetweenStartDateAndEndDate(Long dayStartWeek, Long dayEndWeek);
 }

@@ -13,5 +13,6 @@ import java.util.List;
 public class CalendarDTO implements Serializable {
     Long id;
     WeekDay weekDay;
+    private Boolean status;
     private Long famsClassIds;
 }
