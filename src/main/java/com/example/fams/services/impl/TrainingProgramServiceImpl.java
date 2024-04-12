@@ -148,8 +148,8 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
                 entity = convertDtoToEntity(trainingProgramDTO, syllabusTrainingProgramRepository);
                 entity.setStatus(true);
 
-                loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusIds, entity.getId());
                 trainingProgramRepository.save(entity);
+                loadTrainingProgramSyllabusFromListSyllabus(requestSyllabusIds, entity.getId());
             }
 
             TrainingProgramDTO result = convertTpToTpDTO(entity);
