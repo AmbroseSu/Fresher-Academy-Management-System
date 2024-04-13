@@ -97,7 +97,7 @@ public class ServiceUtils {
     }
     public static void validateUserIds(List<Long> userIds, UserRepository userRepository) {
         for (Long userId : userIds) {
-            if (userRepository.findById(userId) == null) {
+            if (!userRepository.existsById(userId)) {
                 errors.add("User with id " + userId + " does not exist");
             }
         }
@@ -105,7 +105,7 @@ public class ServiceUtils {
 
     public static void validateTrainingProgramIds(List<Long> trainingProgramIds, TrainingProgramRepository trainingProgramRepository) {
         for (Long trainingProgramId : trainingProgramIds) {
-            if (trainingProgramRepository.findById(trainingProgramId).isEmpty()) {
+            if (!trainingProgramRepository.existsById(trainingProgramId)) {
                 errors.add("Training Program with id " + trainingProgramId + " does not exist");
             }
         }
