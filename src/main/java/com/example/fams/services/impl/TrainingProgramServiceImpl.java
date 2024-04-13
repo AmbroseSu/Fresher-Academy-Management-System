@@ -278,92 +278,6 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         return newTpDTO;
     }
 
-    public List<TrainingProgramDTO> parseExcelFile(MultipartFile file) throws IOException {
-        List<TrainingProgramDTO> trainingProgramDTOS = new ArrayList<>();
-        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-        XSSFSheet worksheet = workbook.getSheetAt(0);
-
-        for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
-            if (index > 0) {
-                XSSFRow row = worksheet.getRow(index);
-                TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
-
-
-
-
-
-                        //trainingProgramDTO.setId(Long.valueOf(getCellValueAsString(row.getCell(0))));
-                        trainingProgramDTO.setName(getCellValueAsString(row.getCell(0)));
-                        trainingProgramDTO.setStartTime(Long.valueOf(getCellValueAsString(row.getCell(1))));
-                        trainingProgramDTO.setDuration(Long.valueOf(getCellValueAsString(row.getCell(2))));
-                        trainingProgramDTO.setTraining_status(Integer.valueOf(getCellValueAsString(row.getCell(3))));
-                      //  trainingProgramDTO.setStatus(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
-                    if(!getCellValueAsString(row.getCell(4)).isEmpty()){
-                        String[] syllabusIds = getCellValueAsString(row.getCell(4)).split(",");
-                        List<Long> syId = new ArrayList<>();
-                        for(String sy : syllabusIds){
-                            syId.add(Long.valueOf(sy));
-                        }
-                        trainingProgramDTO.setSyllabusIds(syId);
-                    }
-
-                        trainingProgramDTOS.add(trainingProgramDTO);
-
-
-
-            }
-        }
-
-        workbook.close();
-        return trainingProgramDTOS;
-    }
-
-//    @Override
-//    public ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException {
-//        List<TrainingProgramDTO> trainingProgramList = new ArrayList<>();
-//
-//        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-//            String line;
-//            boolean isFirstLine = true;
-//            while (!(line = reader.readLine()).equals("")) {
-//                if (isFirstLine) {
-//                    isFirstLine = false;
-//                    continue; // Bỏ qua dòng đầu tiên
-//                }
-//
-//                String[] data = line.split(","); // Phân cách dữ liệu theo dấu ','
-//
-//                TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
-//                trainingProgramDTO.setName(data[0]);
-//                trainingProgramDTO.setDuration(Long.valueOf(data[1]));
-//                trainingProgramDTO.setTraining_status(Integer.valueOf(data[2]));
-//
-//
-//                if(!data[3].equals("null")){
-//
-//                    try{
-//                        String[] syllabusIds = data[3].split("/");
-//                        List<Long> syllabusId = new ArrayList<>();
-//                        for(String sy : syllabusIds){
-//                            syllabusId.add(Long.valueOf(sy));
-//                        }
-//
-//                        trainingProgramDTO.setSyllabusIds(syllabusId);
-//                    }catch (Exception e){
-//                        return ResponseUtil.error("Please check format file", e.getMessage(), HttpStatus.BAD_REQUEST);
-//                    }
-//
-//                }
-//
-//                trainingProgramList.add(trainingProgramDTO);
-//            }
-//            return ResponseUtil.getObject(trainingProgramList, HttpStatus.OK, "");
-//        } catch (Exception e) {
-//            // Xử lý các trường hợp ngoại lệ nếu có
-//            return ResponseUtil.getError(trainingProgramList,HttpStatus.BAD_REQUEST, e.getMessage());
-//        }
-//
-//    }
 
 
     @Override
@@ -673,19 +587,4 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
         return ResponseUtil.getObject(null, HttpStatus.CREATED, "Delete Susscessfully");
     }
 
-    private String getCellValueAsString(XSSFCell cell) {
-        if (cell == null) {
-            return "";
-        }
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return Long.toString((long) cell.getNumericCellValue());
-            case BOOLEAN:
-                return Boolean.toString(cell.getBooleanCellValue());
-            default:
-                return "";
-        }
-    }
 }

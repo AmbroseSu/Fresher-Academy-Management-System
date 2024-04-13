@@ -85,54 +85,6 @@ public class SyllabusController {
         return syllabusService.changeStatus(id);
     }
 
-//    @PostMapping("syllabus/update")
-//    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
-//
-//
-//        try {
-//            List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
-//            for(SyllabusDTO syllabusDTO : syllabusDTOS) {
-//                syllabusService.save(syllabusDTO);
-//            }
-//            return ResponseUtil.getObject(syllabusDTOS,HttpStatus.CREATED,"Upload Successfully!");
-//        } catch (Exception e) {
-//            String result = e.getMessage().toString();
-//            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
-    @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
-    @PostMapping("syllabus/updatee")
-    public /*@ResponseBody*/ ResponseEntity<?> uploadFileReplace(/*@RequestParam("file")*/@RequestBody MultipartFile file,
-        @RequestParam Boolean name, @RequestParam Boolean code, @RequestParam
-    DuplicateHandle duplicateHandle) {
-
-
-        try {
-            if(duplicateHandle.toString().equals("REPLACE")){
-                return syllabusService.checkSyllabusReplace(file, name, code);
-            }else{
-                if(duplicateHandle.toString().equals("SKIP")){
-                    return syllabusService.checkSyllabusSkip(file, name, code);
-                }else{
-                    if(duplicateHandle.toString().equals("ALLOW")){
-                        List<SyllabusDTO> syllabusDTOS = syllabusService.parseExcelFile(file);
-                        for(SyllabusDTO syllabusDTO : syllabusDTOS) {
-                            syllabusService.save(syllabusDTO);
-                        }
-                        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
-                    }
-                }
-            }
-
-            return ResponseUtil.error("Import False", "Import Syllabus False",HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            String result = e.getMessage().toString();
-            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
 
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
     @PostMapping("syllabus/updatecsv")
@@ -182,13 +134,6 @@ public class SyllabusController {
     }
 
 
-//    @PreAuthorize("hasAuthority('syllabus:Full_Access')")
-//    @DeleteMapping("/syllabus/delete")
-//    public ResponseEntity<?> changeStatusForUpload(@RequestBody DeleteReplaceSyllabus ids,
-//        @RequestParam(value = "name") boolean name,
-//        @RequestParam(value = "code") boolean code) {
-//        return syllabusService.changeStatusforUpload(ids, name, code);
-//    }
 
 
 }

@@ -81,23 +81,6 @@ public class TrainingProgramController {
     }
 
 
-    @PreAuthorize("hasAuthority('trainingProgram:Full_Access') || hasAuthority('trainingProgram:Modify') || hasAuthority('trainingProgram:Create')")
-    @PostMapping("admin/trainingProgram/upload")
-    public /*@ResponseBody*/ ResponseEntity<?> uploadFile(/*@RequestParam("file")*/@RequestBody MultipartFile file) {
-
-
-        try {
-            List<TrainingProgramDTO> trainingProgramDTOS = trainingProgramService.parseExcelFile(file);
-            for(TrainingProgramDTO trainingProgramDTO : trainingProgramDTOS) {
-                trainingProgramService.save(trainingProgramDTO);
-            }
-            return ResponseUtil.getObject(trainingProgramDTOS,HttpStatus.CREATED,"Upload Successfully!");
-        } catch (Exception e) {
-            String result = e.getMessage().toString();
-            return ResponseUtil.error(result, "",HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @PreAuthorize("hasAuthority('syllabus:Full_Access') || hasAuthority('syllabus:Create')")
     @PostMapping("trainingProgram/updatecsv")
     public ResponseEntity<?> uploadFileReplaceNew(@RequestParam("file") MultipartFile file,

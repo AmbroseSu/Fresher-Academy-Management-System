@@ -345,18 +345,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
     }
 
 
-//    public Syllabus convertDtoToEntity(SyllabusDTO dto) {
-//        Syllabus syllabus = new Syllabus();
-//        syllabus.setId(dto.getId());
-//        syllabus.setName(dto.getName());
-//        syllabus.setCode(dto.getCode());
-//        syllabus.setDescription(dto.getDescription());
-//        syllabus.setIsApproved(dto.getIsApproved());
-//        syllabus.setIsActive(dto.getIsActive());
-//        syllabus.setVersion(dto.getVersion());
-//        syllabus.setAttendee(dto.getAttendee());
-//        return syllabus;
-//    }
 
     public void convertListSyllabusToListSyllabusDTO(List<Syllabus> syllabusList, List<SyllabusDTO> syllabusDTOS){
         syllabusDTOS.addAll(syllabusList.stream()
@@ -418,74 +406,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
         return newDTO;
     }
 
-    public List<SyllabusDTO> parseExcelFile(MultipartFile file) throws IOException {
-        List<SyllabusDTO> syllabusDTOS = new ArrayList<>();
-        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-        XSSFSheet worksheet = workbook.getSheetAt(0);
-
-        for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
-            if (index > 0) {
-                XSSFRow row = worksheet.getRow(index);
-                SyllabusDTO syllabusDTO = new SyllabusDTO();
-
-                    syllabusDTO.setName(getCellValueAsString(row.getCell(0)));
-                    syllabusDTO.setCode(getCellValueAsString(row.getCell(1)));
-                    syllabusDTO.setDescription(getCellValueAsString(row.getCell(2)));
-                    syllabusDTO.setIsApproved(Boolean.valueOf(getCellValueAsString(row.getCell(3))));
-                    syllabusDTO.setIsActive(Boolean.valueOf(getCellValueAsString(row.getCell(4))));
-                    syllabusDTO.setVersion(getCellValueAsString(row.getCell(5)));
-                    syllabusDTO.setAttendee(Long.valueOf(getCellValueAsString(row.getCell(6))));
-
-                    if(!getCellValueAsString(row.getCell(7)).isEmpty()){
-                        String[] unitIds = getCellValueAsString(row.getCell(7)).split(",");
-                        List<Long> unitId = new ArrayList<>();
-                        for(String un : unitIds){
-                            unitId.add(Long.valueOf(un));
-                        }
-                        syllabusDTO.setUnitIds(unitId);
-                    }
-                    if(!getCellValueAsString(row.getCell(8)).isEmpty()){
-                        String[] learningObjectiveIds = getCellValueAsString(row.getCell(8)).split(",");
-                        List<Long> leobId = new ArrayList<>();
-                        for(String leob : learningObjectiveIds){
-                            leobId.add(Long.valueOf(leob));
-                        }
-                        syllabusDTO.setLearningObjectiveIds(leobId);
-                    }
-                    if(!getCellValueAsString(row.getCell(9)).isEmpty()){
-                        String[] materialIds = getCellValueAsString(row.getCell(9)).split(",");
-                        List<Long> maId = new ArrayList<>();
-                        for(String ma : materialIds){
-                            maId.add(Long.valueOf(ma));
-                        }
-                        syllabusDTO.setMaterialIds(maId);
-                    }
-                    if(!getCellValueAsString(row.getCell(10)).isEmpty()){
-                        String[] trainingProgramIds = getCellValueAsString(row.getCell(10)).split(",");
-                        List<Long> trpoId = new ArrayList<>();
-                        for(String trpo : trainingProgramIds){
-                            trpoId.add(Long.valueOf(trpo));
-                        }
-                        syllabusDTO.setTrainingProgramIds(trpoId);
-                    }
-
-//                    if(!getCellValueAsString(row.getCell(11)).isEmpty()){
-//                        String[] outputStandardIds = getCellValueAsString(row.getCell(11)).split(",");
-//                        List<Long> outputStdIds = new ArrayList<>();
-//                        for(String outputStd : outputStandardIds){
-//                            outputStdIds.add(Long.valueOf(outputStd));
-//                        }
-//                        syllabusDTO.setOutputStandardIds(outputStdIds);
-//                    }
-//                    syllabusDTOS.add(syllabusDTO);
-
-
-            }
-        }
-
-        workbook.close();
-        return syllabusDTOS;
-    }
 
 
 
@@ -558,7 +478,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
 //                    }
 //                    syllabusDTO.setOutputStandardIds(outputStdIds);
 //                }
-//                syllabusList.add(syllabusDTO);
+                syllabusList.add(syllabusDTO);
 
             }
             return syllabusList;
@@ -686,32 +606,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
 
 
-//    @Override
-//    public ResponseEntity<?> checkSyllabus(MultipartFile file, Boolean name, Boolean code) throws IOException {
-//        Integer count = 0;
-//        List<SyllabusDTO> errorSyllabus = new ArrayList<>();
-//        List<SyllabusDTO> syllabusList = parseExcelFile(file);
-//        List<Syllabus> syllabusShow = new ArrayList<>();
-//        for(SyllabusDTO syllabusDTO : syllabusList) {
-//            List<Syllabus> listNameSyllabus = syllabusRepository.getAllSyllabusByName(syllabusDTO.getName());
-//            if(listNameSyllabus.size() == 0){
-//                save(syllabusDTO); //add them luon
-//            }else if( listNameSyllabus.size() == 1){
-//                syllabusDTO.setId(listNameSyllabus.get(0).getId());
-//                save(syllabusDTO); // update
-//            }else if(listNameSyllabus.size() > 1){
-//                syllabusShow.addAll(listNameSyllabus);
-//                //convertListSyllabusToListSyllabusDTO(listNameSyllabus, errorSyllabus);
-//                //return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-//            }
-//        }
-//        if(syllabusShow.size() !=0){
-//            convertListSyllabusToListSyllabusDTO(syllabusShow, errorSyllabus);
-//            return ResponseUtil.getError(errorSyllabus,HttpStatus.BAD_REQUEST,"false");//phai xoa chi con 1
-//        }
-//
-//        return ResponseUtil.getObject(null, HttpStatus.OK, "Saved successfully");
-//    }
 
 
     public ResponseEntity<?> checkSyllabusReplace(MultipartFile file, Boolean name, Boolean code) throws IOException {
@@ -830,22 +724,6 @@ public class SyllabusServiceImpl implements ISyllabusService {
 
     }
 
-
-    public String getCellValueAsString(XSSFCell cell) {
-        if (cell == null) {
-            return "";
-        }
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return Long.toString((long) cell.getNumericCellValue());
-            case BOOLEAN:
-                return Boolean.toString(cell.getBooleanCellValue());
-            default:
-                return "";
-        }
-    }
 
 
     @Override
