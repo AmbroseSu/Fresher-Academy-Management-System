@@ -6,6 +6,7 @@ import com.example.fams.converter.GenericConverter;
 import com.example.fams.dto.ResponseDTO;
 import com.example.fams.dto.TrainingProgramDTO;
 import com.example.fams.dto.UnitDTO;
+import com.example.fams.dto.request.DeleteReplace;
 import com.example.fams.entities.Syllabus;
 import com.example.fams.entities.SyllabusTrainingProgram;
 import com.example.fams.entities.TrainingProgram;
@@ -20,6 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,10 +40,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.poi.ss.util.CellUtil.createCell;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,6 +49,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TrainingProgramServiceImplTest {
     @Mock
     private TrainingProgramRepository trainingProgramRepository;
@@ -276,10 +278,58 @@ public class TrainingProgramServiceImplTest {
 
 
     @Test
-    void testParseCsvFile() throws IOException {
-        MultipartFile file = Mockito.mock(MultipartFile.class);
-        List<TrainingProgramDTO> result = trainingProgramService.parseCsvFile(file);
-        // Add assertions to verify the result
+    void testParseCsvFile_ValidFile() throws IOException {
+        // Mock CSV file content
+        String csvContent = "Name,Duration,TrainingStatus,SyllabusIds\n" +
+                "Program 1,10,1,1/2\n" +
+                "Program 2,20,0,null\n";
+
+        MockMultipartFile csvFile = new MockMultipartFile("file", "test.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8));
+
+        // Call the method
+        List<TrainingProgramDTO> trainingProgramList = trainingProgramService.parseCsvFile(csvFile);
+
+        // Assert the parsed training programs
+        assertEquals(2, trainingProgramList.size());
+
+        TrainingProgramDTO program1 = trainingProgramList.get(0);
+        assertEquals("Program 1", program1.getName());
+        assertEquals(10L, program1.getDuration());
+        assertEquals(1, program1.getTraining_status());
+        assertEquals(Arrays.asList(1L, 2L), program1.getSyllabusIds());
+
+        TrainingProgramDTO program2 = trainingProgramList.get(1);
+        assertEquals("Program 2", program2.getName());
+        assertEquals(20L, program2.getDuration());
+        assertEquals(0, program2.getTraining_status());
+        assertNull(program2.getSyllabusIds());
+    }
+
+    @Test
+    void testParseCsvFile_EmptyFile() throws IOException {
+        // Mock empty CSV file
+        MockMultipartFile csvFile = new MockMultipartFile("file", "test.csv", "text/csv", new byte[0]);
+
+        // Call the method
+        List<TrainingProgramDTO> trainingProgramList = trainingProgramService.parseCsvFile(csvFile);
+
+        // Assert that the list is empty
+        assertTrue(trainingProgramList.isEmpty());
+    }
+
+    @Test
+    void testParseCsvFile_InvalidFormat() throws IOException {
+        // Mock CSV file with invalid format
+        String csvContent = "Name,Duration,TrainingStatus,SyllabusIds\n" +
+                "Program 1,invalid,1,1/2\n";
+
+        MockMultipartFile csvFile = new MockMultipartFile("file", "test.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8));
+
+        // Call the method
+        List<TrainingProgramDTO> trainingProgramList = trainingProgramService.parseCsvFile(csvFile);
+
+        // Assert that the list is empty due to the exception
+        assertTrue(trainingProgramList.isEmpty());
     }
 
 
@@ -365,128 +415,283 @@ public class TrainingProgramServiceImplTest {
 //        verify(trainingProgramRepository, never()).save(any()); // Ensure save is not called
 //    }
 //
-//    @Test
-//    void testSearchSortFilter() {
-//        // Arrange
-//        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
-//        trainingProgramDTO.setName("Test Training Program");
-//        trainingProgramDTO.setStartTime(1618959600000L); // April 18, 2021 00:00:00 UTC
-//        trainingProgramDTO.setDuration(3600000L); // 1 hour
-//        trainingProgramDTO.setTraining_status(1);
-//
-//        String sortByCreatedDate = "asc";
-//        int page = 1;
-//        int limit = 10;
-//
-//        List<TrainingProgram> entities = new ArrayList<>();
-//        entities.add(new TrainingProgram());
-//        entities.add(new TrainingProgram());
-//        when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class))).thenReturn(trainingProgramDTO);
-//        when(trainingProgramRepository.searchSortFilter(
-//                trainingProgramDTO.getName(),
-//                trainingProgramDTO.getStartTime(),
-//                trainingProgramDTO.getDuration(),
-//                trainingProgramDTO.getTraining_status(),
-//                sortByCreatedDate,
-//                PageRequest.of(page - 1, limit)
-//        )).thenReturn(entities);
-//
-//        // Act
-//        ResponseEntity<?> response = trainingProgramService.searchSortFilter(trainingProgramDTO, sortByCreatedDate, page, limit);
-//        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
-//        // Assert
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
-//        verify(trainingProgramRepository, times(1)).searchSortFilter(
-//                trainingProgramDTO.getName(),
-//                trainingProgramDTO.getStartTime(),
-//                trainingProgramDTO.getDuration(),
-//                trainingProgramDTO.getTraining_status(),
-//                sortByCreatedDate,
-//                PageRequest.of(page - 1, limit)
-//        );
-//    }
-//
-//    @Test
-//    void testSearchSortFilterADMIN() {
-//        // Arrange
-//        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
-//        trainingProgramDTO.setName("Test Training Program");
-//        trainingProgramDTO.setStartTime(1618959600000L); // April 18, 2021 00:00:00 UTC
-//        trainingProgramDTO.setDuration(3600000L); // 1 hour
-//        trainingProgramDTO.setTraining_status(1);
-//
-//        String sortById = "asc";
-//        int page = 1;
-//        int limit = 10;
-//
-//        List<TrainingProgram> entities = new ArrayList<>();
-//        entities.add(new TrainingProgram());
-//        entities.add(new TrainingProgram());
-//        when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class))).thenReturn(trainingProgramDTO);
-//        when(trainingProgramRepository.searchSortFilterADMIN(
-//                trainingProgramDTO.getName(),
-//                trainingProgramDTO.getStartTime(),
-//                trainingProgramDTO.getDuration(),
-//                trainingProgramDTO.getTraining_status(),
-//                sortById,
-//                PageRequest.of(page - 1, limit)
-//        )).thenReturn(entities);
-//
-//        // Act
-//        ResponseEntity<?> response = trainingProgramService.searchSortFilterADMIN(trainingProgramDTO, sortById, page, limit);
-//        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
-//        // Assert
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
-//        verify(trainingProgramRepository, times(1)).searchSortFilterADMIN(
-//                trainingProgramDTO.getName(),
-//                trainingProgramDTO.getStartTime(),
-//                trainingProgramDTO.getDuration(),
-//                trainingProgramDTO.getTraining_status(),
-//                sortById,
-//                PageRequest.of(page - 1, limit)
-//        );
-//    }
-//
-//    @Test
-//    void testSearchSortFilterADMIN_EmptyResult() {
-//        // Arrange
-//        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
-//        trainingProgramDTO.setName("Test Training");
-//        trainingProgramDTO.setDuration(1L);
-//        trainingProgramDTO.setStartTime(1L);
-//        trainingProgramDTO.setTraining_status(10);
-//        String sortById = "id"; // Assuming sorting by id
-//        int page = 1;
-//        int limit = 10;
-//
-//        Pageable pageable = PageRequest.of(page - 1, limit);
-//
-//        // Mock unit repository to return an empty list
-//        List<TrainingProgram> trainingPrograms = new ArrayList<>();
-//        when(trainingProgramRepository.searchSortFilterADMIN(
-//                trainingProgramDTO.getName(),
-//                trainingProgramDTO.getStartTime(),
-//                trainingProgramDTO.getDuration(),
-//                trainingProgramDTO.getTraining_status(),
-//                sortById,
-//                pageable
-//        )).thenReturn(trainingPrograms);
-//
-//        // Act
-//        ResponseEntity<?> responseEntity = trainingProgramService.searchSortFilterADMIN(trainingProgramDTO, sortById, page, limit);
-//        ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
-//
-//        // Assert
-//        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-//        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
-//        List<TrainingProgramDTO> result = (List<TrainingProgramDTO>) responseDTO.getContent();
-//
-//    }
 
     @Test
-     void testCheckCsvFile() throws IOException {
+    void testChangeStatusforUpload_ChangeStatusByName_Success() {
+        // Arrange
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = false;
+        Boolean name = true;
+
+        TrainingProgram entity1 = new TrainingProgram();
+        entity1.setId(1L);
+        entity1.setName("Program 1");
+        entity1.setStatus(true);
+
+        TrainingProgram entity2 = new TrainingProgram();
+        entity2.setId(2L);
+        entity2.setName("Program 1");
+        entity2.setStatus(true);
+
+        TrainingProgram entity3 = new TrainingProgram();
+        entity3.setId(3L);
+        entity3.setName("Program 1");
+        entity3.setStatus(true);
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(entity1);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(entity2);
+        when(trainingProgramRepository.getAllTrainingProgramByName("Program 1")).thenReturn(Arrays.asList(entity1, entity2, entity3));
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("Delete Susscessfully", ((ResponseDTO) response.getBody()).getDetails().get(0));
+
+        verify(trainingProgramRepository, times(2)).save(any(TrainingProgram.class));
+    }
+
+    @Test
+    void testChangeStatusforUpload_ChangeStatusById_Success() {
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = false;
+        Boolean name = true;
+
+        TrainingProgram entity1 = new TrainingProgram();
+        entity1.setId(1L);
+        entity1.setName("Program 1");
+        entity1.setStatus(true);
+
+        TrainingProgram entity2 = new TrainingProgram();
+        entity2.setId(2L);
+        entity2.setName("Program 1");
+        entity2.setStatus(true);
+
+        TrainingProgram entity3 = new TrainingProgram();
+        entity3.setId(3L);
+        entity3.setName("Program 1");
+        entity3.setStatus(true);
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(entity1);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(entity2);
+        when(trainingProgramRepository.getAllTrainingProgramById(1L)).thenReturn(Collections.singletonList(entity1));
+        when(trainingProgramRepository.getAllTrainingProgramById(2L)).thenReturn(Collections.singletonList(entity2));
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("Delete Susscessfully", ((ResponseDTO) response.getBody()).getDetails().get(0));
+
+        verify(trainingProgramRepository, times(2)).save(any(TrainingProgram.class));
+    }
+
+
+    @Test
+    void testChangeStatusforUpload_RemoveAllTrainingPrograms_Failure() {
+        // Arrange
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = true;
+        Boolean name = true;
+
+        TrainingProgram entity1 = new TrainingProgram();
+        entity1.setId(1L);
+        entity1.setName("Program 1");
+        entity1.setStatus(true);
+
+        TrainingProgram entity2 = new TrainingProgram();
+        entity2.setId(2L);
+        entity2.setName("Program 1");
+        entity2.setStatus(true);
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(entity1);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(entity2);
+        when(trainingProgramRepository.getAllSyllabusByNameAndId(1L, "Program 1")).thenReturn(Arrays.asList(entity1, entity2));
+        when(trainingProgramRepository.getAllSyllabusByNameAndId(2L, "Program 1")).thenReturn(Arrays.asList(entity1, entity2));
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Don't remove all, leave one id", ((ResponseDTO) response.getBody()).getMessage());
+
+        verify(trainingProgramRepository, never()).save(any(TrainingProgram.class));
+    }
+
+    @Test
+    void testChangeStatusforUpload_RemoveAllTrainingProgramsByName_Failure() {
+        // Arrange
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = false;
+        Boolean name = true;
+
+        TrainingProgram entity1 = new TrainingProgram();
+        entity1.setId(1L);
+        entity1.setName("Program 1");
+        entity1.setStatus(true);
+
+        TrainingProgram entity2 = new TrainingProgram();
+        entity2.setId(2L);
+        entity2.setName("Program 1");
+        entity2.setStatus(true);
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(entity1);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(entity2);
+        when(trainingProgramRepository.getAllTrainingProgramByName("Program 1")).thenReturn(Arrays.asList(entity1, entity2));
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Don't remove all, leave one id", ((ResponseDTO) response.getBody()).getMessage());
+
+        verify(trainingProgramRepository, never()).save(any(TrainingProgram.class));
+    }
+
+    @Test
+    void testChangeStatusforUpload_RemoveAllTrainingProgramsById_Failure() {
+        // Arrange
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = true;
+        Boolean name = false;
+
+        TrainingProgram entity1 = new TrainingProgram();
+        entity1.setId(1L);
+        entity1.setName("Program 1");
+        entity1.setStatus(true);
+
+        TrainingProgram entity2 = new TrainingProgram();
+        entity2.setId(1L);
+        entity2.setName("Program 2");
+        entity2.setStatus(true);
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(entity1);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(entity2);
+        when(trainingProgramRepository.getAllTrainingProgramById(1L)).thenReturn(Arrays.asList(entity1, entity2));
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Don't remove all, leave one id", ((ResponseDTO) response.getBody()).getMessage());
+
+        verify(trainingProgramRepository, never()).save(any(TrainingProgram.class));
+    }
+
+
+    @Test
+    void testSearchSortFilter() {
+        // Arrange
+        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+        trainingProgramDTO.setName("Test Training Program");
+        trainingProgramDTO.setStartTime(1618959600000L); // April 18, 2021 00:00:00 UTC
+        trainingProgramDTO.setDuration(3600000L); // 1 hour
+        trainingProgramDTO.setTraining_status(1);
+
+        String sortByCreatedDate = "asc";
+        int page = 1;
+        int limit = 10;
+
+        List<TrainingProgram> entities = new ArrayList<>();
+        entities.add(new TrainingProgram());
+        entities.add(new TrainingProgram());
+        when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class))).thenReturn(trainingProgramDTO);
+        when(trainingProgramRepository.searchSortFilter(
+                trainingProgramDTO.getName(),
+                trainingProgramDTO.getStartTime(),
+                trainingProgramDTO.getTraining_status(),
+                sortByCreatedDate,
+                PageRequest.of(page - 1, limit)
+        )).thenReturn(entities);
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.searchSortFilter(trainingProgramDTO, sortByCreatedDate, page, limit);
+        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+        verify(trainingProgramRepository, times(1)).searchSortFilter(
+                trainingProgramDTO.getName(),
+                trainingProgramDTO.getStartTime(),
+                trainingProgramDTO.getTraining_status(),
+                sortByCreatedDate,
+                PageRequest.of(page - 1, limit)
+        );
+    }
+
+    @Test
+    void testChangeStatusforUpload_NonExistingTrainingProgram_Failure() {
+        // Arrange
+        DeleteReplace ids = new DeleteReplace();
+        ids.setId(Arrays.asList(1L, 2L));
+        Boolean id = true;
+        Boolean name = true;
+
+        when(trainingProgramRepository.findOneById(1L)).thenReturn(null);
+        when(trainingProgramRepository.findOneById(2L)).thenReturn(null);
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.changeStatusforUpload(ids, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Cannot change status of non-existing Syllabus", ((ResponseDTO) response.getBody()).getMessage());
+
+        verify(trainingProgramRepository, never()).save(any(TrainingProgram.class));
+    }
+
+    @Test
+    void testSearchSortFilterADMIN() {
+        // Arrange
+        TrainingProgramDTO trainingProgramDTO = new TrainingProgramDTO();
+        trainingProgramDTO.setName("Test Training Program");
+        trainingProgramDTO.setStartTime(1618959600000L); // April 18, 2021 00:00:00 UTC
+        trainingProgramDTO.setDuration(3600000L); // 1 hour
+        trainingProgramDTO.setTraining_status(1);
+
+        String sortById = "asc";
+        int page = 1;
+        int limit = 10;
+
+        List<TrainingProgram> entities = new ArrayList<>();
+        entities.add(new TrainingProgram());
+        entities.add(new TrainingProgram());
+        when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class))).thenReturn(trainingProgramDTO);
+        when(trainingProgramRepository.searchSortFilterADMIN(
+                trainingProgramDTO.getName(),
+                trainingProgramDTO.getStartTime(),
+                trainingProgramDTO.getTraining_status(),
+                sortById,
+                PageRequest.of(page - 1, limit)
+        )).thenReturn(entities);
+
+        // Act
+        ResponseEntity<?> response = trainingProgramService.searchSortFilterADMIN(trainingProgramDTO, sortById, page, limit);
+        ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+        verify(trainingProgramRepository, times(1)).searchSortFilterADMIN(
+                trainingProgramDTO.getName(),
+                trainingProgramDTO.getStartTime(),
+                trainingProgramDTO.getTraining_status(),
+                sortById,
+                PageRequest.of(page - 1, limit)
+        );
+    }
+
+    @Test
+     void testCheckCsvFile_Success() throws IOException {
         // Mock CSV file content
         String csvContent = "Name,Duration,TrainingStatus,SyllabusIds\n" +
                 "Program 1,10,1,1/2\n" +
@@ -505,6 +710,25 @@ public class TrainingProgramServiceImplTest {
         ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
         assertEquals(2, ((List<?>) responseDTO.getContent()).size());
 
+    }
+
+    @Test
+    void testCheckCsvFile_InvalidSyllabusIds() throws IOException {
+        // Mock CSV file content with invalid syllabusIds
+        String csvContent = "Name,Duration,TrainingStatus,SyllabusIds\n" +
+                "Program 1,10,1,1/invalid\n" +
+                "Program 2,20,0,null\n";
+
+        MockMultipartFile csvFile = new MockMultipartFile("file", "test.csv", "text/csv", csvContent.getBytes(StandardCharsets.UTF_8));
+
+        ResponseEntity<?> responseEntity = trainingProgramService.checkCsvFile(csvFile);
+        ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
+        // Assert the response
+        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+        assertEquals("Please check format file", responseDTO.getDetails().get(0));
+        assertTrue(responseDTO.getMessage().startsWith("Invalid format for syllabusIds:"));
     }
 
     @Test
@@ -534,8 +758,36 @@ public class TrainingProgramServiceImplTest {
         assertEquals("Please check format file", ((ResponseDTO) responseEntity.getBody()).getDetails().get(0));
     }
 
+    @Test
+    void testCheckTrainingProgramSkip_NameTrueIdFalse_Success() throws IOException {
+        // Arrange
+        MultipartFile file = mock(MultipartFile.class);
+        InputStream inputStream = new ByteArrayInputStream("test data".getBytes());
+        when(file.getInputStream()).thenReturn(inputStream);
 
+        Boolean id = false;
+        Boolean name = true;
 
+        TrainingProgramDTO dto1 = new TrainingProgramDTO();
+        dto1.setName("Program 1");
+        TrainingProgramDTO dto2 = new TrainingProgramDTO();
+        dto2.setName("Program 2");
+
+        when(trainingProgramService.checkCsvFile(file)).thenReturn(ResponseEntity.ok().build());
+        when(trainingProgramService.parseCsvFile(file)).thenReturn(Arrays.asList(dto1, dto2));
+        when(trainingProgramRepository.getAllTrainingProgramByName("Program 1")).thenReturn(Collections.emptyList());
+        when(trainingProgramRepository.getAllTrainingProgramByName("Program 2")).thenReturn(Collections.emptyList());
+        when(genericConverter.toDTO(any(TrainingProgram.class), eq(TrainingProgramDTO.class)))
+                .thenReturn(new TrainingProgramDTO());
+        // Act
+        ResponseEntity<?> response = trainingProgramService.checkTrainingProgramSkip(file, id, name);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Saved successfully", ((ResponseDTO) response.getBody()).getDetails().get(0));
+
+        verify(trainingProgramService, times(2)).save(any(TrainingProgramDTO.class));
+    }
 
 }
 

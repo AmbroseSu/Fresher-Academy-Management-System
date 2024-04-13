@@ -502,8 +502,7 @@ public class TrainingProgramServiceImpl implements ITrainingProgramService {
     }
 
     @Override
-    public ResponseEntity<?> changeStatusforUpload(DeleteReplace ids, Boolean id,
-        Boolean name) {
+    public ResponseEntity<?> changeStatusforUpload(DeleteReplace ids, Boolean id, Boolean name) {
         boolean flag =false;
         for (Long idd : ids.getId()) {
             TrainingProgram entity = trainingProgramRepository.findOneById(idd);
