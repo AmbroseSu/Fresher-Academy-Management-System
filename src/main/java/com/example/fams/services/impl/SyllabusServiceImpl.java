@@ -174,7 +174,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         return ResponseUtil.getObject(result, HttpStatus.OK, "Saved successfully");
     }
 
-    private void loadListTrainingProgramFromSyllabusId(List<Long> requestTrainingProgramIds, Long syllabusId) {
+    public void loadListTrainingProgramFromSyllabusId(List<Long> requestTrainingProgramIds, Long syllabusId) {
         if (requestTrainingProgramIds != null && !requestTrainingProgramIds.isEmpty()) {
             for (Long trainingProgramId : requestTrainingProgramIds) {
                 TrainingProgram trainingProgram = trainingProgramRepository.findById(trainingProgramId).get();
@@ -358,13 +358,13 @@ public class SyllabusServiceImpl implements ISyllabusService {
 //        return syllabus;
 //    }
 
-    private void convertListSyllabusToListSyllabusDTO(List<Syllabus> syllabusList, List<SyllabusDTO> syllabusDTOS){
+    public void convertListSyllabusToListSyllabusDTO(List<Syllabus> syllabusList, List<SyllabusDTO> syllabusDTOS){
         syllabusDTOS.addAll(syllabusList.stream()
                 .map(this::convertSyllabusToSyllabusDTO)
                 .toList());
     }
 
-    private SyllabusDTO convertSyllabusToSyllabusDTO(Syllabus syllabus){
+    public SyllabusDTO convertSyllabusToSyllabusDTO(Syllabus syllabus){
         SyllabusDTO newDTO = (SyllabusDTO) genericConverter.toDTO(syllabus, SyllabusDTO.class);
         List<TrainingProgram> trainingProgramList = syllabusRepository.findTrainingProgramsBySyllabusId(syllabus.getId());
         List<Material> materialList = syllabusRepository.findMaterialsBySyllabusId(syllabus.getId());
@@ -831,7 +831,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
     }
 
 
-    private String getCellValueAsString(XSSFCell cell) {
+    public String getCellValueAsString(XSSFCell cell) {
         if (cell == null) {
             return "";
         }

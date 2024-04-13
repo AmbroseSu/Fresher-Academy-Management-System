@@ -13,6 +13,7 @@ import java.util.List;
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long> {
 
     List<Syllabus> findAllByStatusIsTrue(Pageable pageable);
+    List<Syllabus> findAllBy(Pageable pageable);
 
     List<Syllabus> findAllByOrderByIdDesc(Pageable pageable);
 
