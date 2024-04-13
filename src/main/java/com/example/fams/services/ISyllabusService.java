@@ -28,7 +28,6 @@ public interface ISyllabusService extends IGenericService<SyllabusDTO> {
     ResponseEntity<?> searchSortFilterADMIN(SyllabusDTO syllabusDTO,
                                             String sortById,
                                             int page, int limit);
-    List<SyllabusDTO> parseExcelFile(MultipartFile file) throws IOException;
 
     ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException;
 

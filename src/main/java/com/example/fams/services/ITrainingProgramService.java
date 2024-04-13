@@ -27,7 +27,6 @@ public interface ITrainingProgramService   {
     ResponseEntity<?> searchSortFilterADMIN(TrainingProgramDTO trainingProgramDTO,
                                             String sortById,
                                             int page, int limit);
-    List<TrainingProgramDTO> parseExcelFile(MultipartFile file) throws IOException;
 
     ResponseEntity<?> checkCsvFile(MultipartFile file) throws IOException;
 
