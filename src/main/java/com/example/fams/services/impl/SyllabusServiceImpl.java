@@ -194,7 +194,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         return syllabus != null;
     }
 
-    private void loadListSyllabusObjectiveFromSyllabusId(List<Long> requestLearningObjectiveIds, Long syllabusId) {
+    public void loadListSyllabusObjectiveFromSyllabusId(List<Long> requestLearningObjectiveIds, Long syllabusId) {
         if (requestLearningObjectiveIds != null && !requestLearningObjectiveIds.isEmpty()) {
             for (Long learningObjectiveId : requestLearningObjectiveIds) {
                 LearningObjective learningObjective = learningObjectiveRepository.findById(learningObjectiveId);
@@ -209,7 +209,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
         }
     }
 
-    private void loadListMaterialFromSyllabusId(List<Long> requestMaterialIds, Long syllabusId) {
+    public void loadListMaterialFromSyllabusId(List<Long> requestMaterialIds, Long syllabusId) {
         if (requestMaterialIds != null && !requestMaterialIds.isEmpty()) {
             for (Long materialId : requestMaterialIds) {
                 Material material = materialRepository.findById(materialId);
@@ -223,7 +223,7 @@ public class SyllabusServiceImpl implements ISyllabusService {
             }
         }
     }
-    private void loadListUnitFromListUnitIds(List<Long> unitIds, Long syllabusId) {
+    public void loadListUnitFromListUnitIds(List<Long> unitIds, Long syllabusId) {
         if (unitIds != null && !unitIds.isEmpty()) {
             Syllabus syllabus = syllabusRepository.findOneById(syllabusId);
             if (syllabus != null) {

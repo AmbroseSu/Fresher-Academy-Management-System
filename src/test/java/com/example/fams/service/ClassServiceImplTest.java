@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -70,8 +71,55 @@ public class ClassServiceImplTest{
     when(classRepository.findAllByStatusIsTrue(pageable)).thenReturn(entities);
     when(classRepository.countAllByStatusIsTrue()).thenReturn(2L);
     when(genericConverter.toDTO(any(FamsClass.class), eq(ClassDTO.class)))
-        .thenReturn(new ClassDTO());
+            .thenReturn(new ClassDTO());
     ResponseEntity<?> response = classService.findAllByStatusTrue(page, limit);
+    ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assert responseDTO != null;
+    assertEquals(2, ((List<?>) responseDTO.getContent()).size());
+  }
+
+  @Test
+  void findAll_EmptyResult() {
+    // Arrange
+    int page = 1;
+    int limit = 10;
+    Pageable pageable = PageRequest.of(page - 1, limit);
+
+    // * Tạo mock data thay thế database
+    List<FamsClass> entities = new ArrayList<>();
+
+    // * Mock các method trong service ( nghĩa là khi chạy các hàm này th return ra giá trị mock data )
+    when(classRepository.findAllBy(pageable)).thenReturn(entities);
+    when(classRepository.countAllByStatusIsTrue()).thenReturn(0L);
+
+    // * Test hàm trong service
+    ResponseEntity<?> response = classService.findAll(page, limit);
+    ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+
+    // * Kiểm tra kết quả trả về
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assert responseDTO != null;
+    assertEquals(0, ((List<?>) responseDTO.getContent()).size());
+    verify(classRepository, times(1)).findAllBy(pageable);
+    verify(classRepository, times(1)).countAllByStatusIsTrue();
+  }
+
+  @Test
+  void findAll_Success(){
+    int page = 1;
+    int limit = 10;
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    List<FamsClass> entities = new ArrayList<>();
+    entities.add(new FamsClass());
+    entities.add(new FamsClass());
+
+    when(classRepository.findAllBy(pageable)).thenReturn(entities);
+    when(classRepository.countAllByStatusIsTrue()).thenReturn(2L);
+    when(genericConverter.toDTO(any(FamsClass.class), eq(ClassDTO.class)))
+        .thenReturn(new ClassDTO());
+    ResponseEntity<?> response = classService.findAll(page, limit);
     ResponseDTO responseDTO = (ResponseDTO) response.getBody();
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -146,6 +194,70 @@ public class ClassServiceImplTest{
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertEquals("Class not found", responseDTO.getDetails().get(0));
   }
+
+  @Test
+  void searchSortFilterADMIN_shouldReturnFilteredAndSortedClasses() {
+    // Arrange
+    ClassDTO classDTO = new ClassDTO();
+    classDTO.setCode("CS101");
+    classDTO.setName("Introduction to Computer Science");
+    String sortById = "name";
+    int page = 1;
+    int limit = 10;
+
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    List<FamsClass> entities = new ArrayList<>();
+    // Add sample FamsClass objects to the entities list
+
+    when(classRepository.searchSortFilterADMIN(classDTO.getCode(), classDTO.getName(), sortById, pageable))
+            .thenReturn(entities);
+    when(classRepository.countSearchSortFilter(classDTO.getCode(), classDTO.getName()))
+            .thenReturn(20L);
+
+    // Act
+    ResponseEntity<?> responseEntity = classService.searchSortFilterADMIN(classDTO, sortById, page, limit);
+    ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
+  // Assert
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+    // Add more assertions based on the expected response
+
+    verify(classRepository, times(1)).searchSortFilterADMIN(classDTO.getCode(), classDTO.getName(), sortById, pageable);
+    verify(classRepository, times(1)).countSearchSortFilter(classDTO.getCode(), classDTO.getName());
+  }
+
+
+  @Test
+  void searchSortFilter_shouldReturnFilteredAndSortedClasses() {
+    // Arrange
+    ClassDTO classDTO = new ClassDTO();
+    classDTO.setCode("CS101");
+    classDTO.setName("Introduction to Computer Science");
+    String sortById = "name";
+    int page = 1;
+    int limit = 10;
+
+    Pageable pageable = PageRequest.of(page - 1, limit);
+    List<FamsClass> entities = new ArrayList<>();
+    // Add sample FamsClass objects to the entities list
+
+    when(classRepository.searchSortFilter(classDTO.getCode(), classDTO.getName(), pageable))
+            .thenReturn(entities);
+    when(classRepository.countSearchSortFilter(classDTO.getCode(), classDTO.getName()))
+            .thenReturn(20L);
+
+    // Act
+    ResponseEntity<?> responseEntity = classService.searchSortFilter(classDTO, page, limit);
+    ResponseDTO responseDTO = (ResponseDTO) responseEntity.getBody();
+    // Assert
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals("Fetched successfully", responseDTO.getDetails().get(0));
+    // Add more assertions based on the expected response
+
+    verify(classRepository, times(1)).searchSortFilter(classDTO.getCode(), classDTO.getName(), pageable);
+    verify(classRepository, times(1)).countSearchSortFilter(classDTO.getCode(), classDTO.getName());
+  }
+
 
   @Test
   void testCreateNewClass_returnSuccess() {
@@ -327,6 +439,61 @@ public class ClassServiceImplTest{
   }
 
   @Test
+  void changeStatusClassCalendar_shouldChangeStatusSuccessfully() {
+    // Arrange
+    Long classId = 1L;
+    FamsClass famsClass = new FamsClass();
+    famsClass.setId(classId);
+    famsClass.setStatus(true);
+
+    List<CalendarClass> calendarClasses = new ArrayList<>();
+    CalendarClass calendarClass1 = new CalendarClass();
+    calendarClass1.setStatus(true);
+    calendarClasses.add(calendarClass1);
+    CalendarClass calendarClass2 = new CalendarClass();
+    calendarClass2.setStatus(false);
+    calendarClasses.add(calendarClass2);
+
+    when(classRepository.findById(classId)).thenReturn(famsClass);
+    when(calendarRepository.findByFamsClassId(classId)).thenReturn(calendarClasses);
+
+    // Act
+    ResponseEntity<?> response = classService.changeStatusClassCalendar(classId);
+    ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Status changed successfully", responseDTO.getDetails().get(0));
+
+    verify(classRepository, times(1)).findById(classId);
+    verify(calendarRepository, times(1)).findByFamsClassId(classId);
+    verify(calendarRepository, times(2)).save(any(CalendarClass.class));
+    verify(classRepository, times(1)).save(famsClass);
+  }
+
+  @Test
+  void changeStatusClassCalendar_shouldReturnErrorWhenClassNotFound() {
+    // Arrange
+    Long classId = 1L;
+
+    when(classRepository.findById(classId)).thenReturn(null);
+
+    // Act
+    ResponseEntity<?> response = classService.changeStatusClassCalendar(classId);
+    ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Class not found", responseDTO.getDetails().get(0));
+    assertEquals("Cannot change status of non-existing Class", responseDTO.getMessage());
+
+    verify(classRepository, times(1)).findById(classId);
+    verify(calendarRepository, never()).findByFamsClassId(anyLong());
+    verify(calendarRepository, never()).save(any(CalendarClass.class));
+    verify(classRepository, never()).save(any(FamsClass.class));
+  }
+
+
+  @Test
   void testSearchBetweenStartDateAndEndDate_Success() {
     // Arrange
     Long dayStartWeek = 1733961600L;
@@ -462,6 +629,48 @@ public class ClassServiceImplTest{
     assertTrue(responseDTO.getDetails().get(0).startsWith("Amount of slot per week required:"));
     assertEquals("Amount of slot per week required: 2", responseDTO.getDetails().get(0));
   }
+
+  @Test
+  void save_withCalendar_existingLocationAndTimeFrame() {
+    // Arrange
+    ClassDTO classDTO = new ClassDTO();
+    classDTO.setName("Test Class");
+    classDTO.setStartDate(1711904400L);
+    classDTO.setEndDate(1714237200L);
+    classDTO.setStartTime(LocalTime.of(8, 0));
+    classDTO.setEndTime(LocalTime.of(10, 0));
+    classDTO.setDuration(32D);
+    classDTO.setAdminIds(List.of(1L, 2L));
+    classDTO.setTrainerIds(List.of(3L, 4L));
+    classDTO.setTrainingProgramId(1L);
+    classDTO.setLocation("Classroom A");
+
+    FamsClass existingClass = new FamsClass();
+    existingClass.setName("Existing Class");
+    existingClass.setLocation("Classroom A");
+    existingClass.setStartTime(LocalTime.of(8, 0));
+    existingClass.setEndTime(LocalTime.of(10, 0));
+
+    List<FamsClass> allClasses = new ArrayList<>();
+    allClasses.add(existingClass);
+
+    when(classRepository.findAll()).thenReturn(allClasses);
+    when(userRepository.existsById(anyLong())).thenReturn(true);
+    when(trainingProgramRepository.existsById(anyLong())).thenReturn(true);
+
+    // Act
+    ResponseEntity<?> response = classService.save_withCalendar(classDTO, new ArrayList<>());
+    ResponseDTO responseDTO = (ResponseDTO) response.getBody();
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals("This Class has existed location and time frame", responseDTO.getDetails().get(0));
+    assertEquals("Create failed", responseDTO.getMessage());
+
+    verify(classRepository, times(1)).findAll();
+    verify(classRepository, never()).save(any(FamsClass.class));
+    verify(calendarRepository, never()).save(any(CalendarClass.class));
+  }
+
 
   @Test
   void testSaveWithCalendar_Exception() {

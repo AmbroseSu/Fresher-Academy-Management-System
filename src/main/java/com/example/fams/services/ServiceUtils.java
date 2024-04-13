@@ -71,7 +71,7 @@ public class ServiceUtils {
 
     public static void validateLearningObjectiveIds(List<Long> learningObjectiveIds, LearningObjectiveRepository learningObjectiveRepository) {
         for (Long learningObjectiveId : learningObjectiveIds) {
-            if (learningObjectiveRepository.findById(learningObjectiveId) == null) {
+            if (!learningObjectiveRepository.existsById(learningObjectiveId)) {
                 errors.add("LearningObjective with id " + learningObjectiveId + " does not exist");
             }
         }
@@ -90,7 +90,7 @@ public class ServiceUtils {
 
     public static void validateUnitIds(List<Long> unitIds, UnitRepository unitRepository) {
         for (Long unitId : unitIds) {
-            if (unitRepository.findById(unitId) == null) {
+            if (!unitRepository.existsById(String.valueOf(unitId))) {
                 errors.add("Unit with id " + unitId + " does not exist");
             }
         }
@@ -113,7 +113,7 @@ public class ServiceUtils {
 
     public static void validateMaterialIds(List<Long> materialIds, MaterialRepository materialRepository) {
         for (Long materialId : materialIds) {
-            if (materialRepository.findById(materialId) == null) {
+            if (!materialRepository.existsById(String.valueOf(materialId))) {
                 errors.add("Material with id " + materialId + " does not exist");
             }
         }
