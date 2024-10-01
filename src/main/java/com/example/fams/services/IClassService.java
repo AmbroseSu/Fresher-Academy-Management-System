@@ -9,8 +9,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface IClassService extends IGenericService<ClassDTO>{
   ResponseEntity<?> searchSortFilter(ClassDTO classDTO,
-      int page, int limit);
-
+      int page, int limi
   ResponseEntity<?> searchSortFilterADMIN(ClassDTO classDTO,
       String sortById,
       int page, int limit);

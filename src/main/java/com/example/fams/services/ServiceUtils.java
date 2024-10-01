@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.beans.BeanUtils;
 
 public class ServiceUtils {
     public static List<String> errors = new ArrayList<>();
